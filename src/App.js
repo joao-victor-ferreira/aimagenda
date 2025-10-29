@@ -1,8 +1,9 @@
 import React from 'react'
-import Inicio from './pages/Inicio'
+
+import Rotas from './rotas/Rotas'
 
 export default function App() {
   return (
-    <Inicio />
+    <Rotas />
   )
 }
