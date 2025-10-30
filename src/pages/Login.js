@@ -15,7 +15,7 @@ export default function Login() {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-    navigate('"/dashboard"');
+    navigate('/dashboard');
     }, 1500);
   };
 

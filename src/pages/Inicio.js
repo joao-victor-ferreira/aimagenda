@@ -92,6 +92,7 @@ const AimLandingPage = () => {
 
   return (
     <div className="landing-container">
+
       {/* Header */}
       <header className={`header ${scrolled ? 'header-scrolled' : ''}`}>
         <nav className="nav-container">
@@ -143,38 +144,85 @@ const AimLandingPage = () => {
             </p>
           </div>
 
-          {/* Dashboard Mockup */}
-          <div className="dashboard-mockup animate-float">
-            <div className="mockup-window">
-              <div className="mockup-header">
-                <div className="mockup-dots">
-                  <span></span>
-                  <span></span>
-                  <span></span>
+          {/* WhatsApp Chat */}
+          <div className="whatsapp-mockup">
+            <div className="whatsapp-container">
+              <div className="whatsapp-header">
+                <div className="back-arrow">‹</div>
+                <div className="contact-avatar">👤</div>
+                <div className="contact-info">
+                  <div className="contact-name">Maria Silva</div>
+                  <div className="contact-status">online</div>
                 </div>
-                <div className="mockup-title">AIM Dashboard</div>
+                <div className="header-icons">
+                  <span>📹</span>
+                  <span>📞</span>
+                  <span>⋮</span>
+                </div>
               </div>
-              <div className="mockup-content">
-                <div className="metric-card">
-                  <div className="metric-icon">📅</div>
-                  <div className="metric-info">
-                    <div className="metric-value">127</div>
-                    <div className="metric-label">Agendamentos</div>
+
+              <div className="whatsapp-chat">
+                <div className="chat-date">
+                  <span className="date-badge">HOJE</span>
+                </div>
+
+                <div className="message received">
+                  <div className="message-bubble">
+                    <div className="message-text">Olá! Gostaria de agendar um horário para amanhã de manhã</div>
+                    <div className="message-meta">
+                      <span className="message-time">10:23</span>
+                    </div>
                   </div>
                 </div>
-                <div className="metric-card">
-                  <div className="metric-icon">🤖</div>
-                  <div className="metric-info">
-                    <div className="metric-value">98%</div>
-                    <div className="metric-label">Automação</div>
+
+                <div className="message sent">
+                  <div className="message-bubble">
+                    <div className="message-text">Olá! Claro, tenho horários disponíveis amanhã pela manhã. Prefere às 09:00, 10:30 ou 11:00?</div>
+                    <div className="message-meta">
+                      <span className="message-time">10:23</span>
+                      <span className="message-status">✓✓</span>
+                    </div>
                   </div>
                 </div>
-                <div className="metric-card">
-                  <div className="metric-icon">⚡</div>
-                  <div className="metric-info">
-                    <div className="metric-value">2.5h</div>
-                    <div className="metric-label">Economizadas</div>
+
+                <div className="message received">
+                  <div className="message-bubble">
+                    <div className="message-text">10:30 está perfeito!</div>
+                    <div className="message-meta">
+                      <span className="message-time">10:24</span>
+                    </div>
                   </div>
+                </div>
+
+                <div className="message sent">
+                  <div className="message-bubble">
+                    <div className="message-text">✅ Agendado! Confirmei seu horário para amanhã às 10:30. Você receberá um lembrete 1 hora antes. Até lá!</div>
+                    <div className="message-meta">
+                      <span className="message-time">10:24</span>
+                      <span className="message-status">✓✓</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="typing-indicator-container">
+                  <div className="typing-bubble">
+                    <div className="typing-dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="whatsapp-input">
+                <div className="input-icons">
+                  <span>😊</span>
+                  <span>📎</span>
+                </div>
+                <input type="text" className="message-input" placeholder="Mensagem" readOnly />
+                <div className="send-button">
+                  <span>🎤</span>
                 </div>
               </div>
             </div>
@@ -256,7 +304,7 @@ const AimLandingPage = () => {
               <p>Via WhatsApp, site ou e-mail</p>
             </div>
 
-            <div className="timeline-connector"></div>
+            <div className="timeline-connector">→</div>
 
             <div className="timeline-step">
               <div className="step-number">2</div>
@@ -265,7 +313,7 @@ const AimLandingPage = () => {
               <p>Automaticamente, entendendo o contexto</p>
             </div>
 
-            <div className="timeline-connector"></div>
+            <div className="timeline-connector">→</div>
 
             <div className="timeline-step">
               <div className="step-number">3</div>
