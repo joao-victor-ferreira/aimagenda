@@ -397,7 +397,7 @@ export default function Registrar() {
         {/* Logo e Título */}
         <div style={styles.logoSection}>
           <div style={styles.logoIcon}>
-            <Calendar style={{ width: '2.5rem', height: '2.5rem', color: 'white' }} />
+            <img src={require('../assets/logo.png')} style={{ width: '4.5rem', height: '4.5rem', color: 'white' }} />
           </div>
           <h1 style={styles.title}>AIM Agenda</h1>
           <p style={styles.subtitle}>Crie sua conta e comece a organizar seus compromissos</p>
@@ -725,7 +725,7 @@ export default function Registrar() {
           <div style={styles.loginLink}>
             <p style={styles.loginText}>
               Já tem uma conta?{' '}
-              <button style={styles.link}>
+              <button onClick={() => navigate('/login')} style={styles.link}>
                 Fazer login
               </button>
             </p>

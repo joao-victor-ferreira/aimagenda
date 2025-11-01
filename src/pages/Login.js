@@ -251,7 +251,7 @@ export default function Login() {
         {/* Logo e Título */}
         <div style={styles.logoSection}>
           <div style={styles.logoIcon}>
-            <Calendar style={{ width: '2.5rem', height: '2.5rem', color: 'white' }} />
+            <img src={require('../assets/logo.png')} style={{ width: '4.5rem', height: '4.5rem'}} />
           </div>
           <h1 style={styles.title}>AIM Agenda</h1>
           <p style={styles.subtitle}>Gerencie seus compromissos com inteligência</p>
@@ -387,7 +387,7 @@ export default function Login() {
           <div style={styles.signup}>
             <p style={styles.signupText}>
               Não tem uma conta?{' '}
-              <button style={styles.signupLink}>
+              <button onClick={() => navigate('/registrar')} style={styles.signupLink}>
                 Cadastre-se gratuitamente
               </button>
             </p>

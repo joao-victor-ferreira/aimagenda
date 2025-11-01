@@ -1,37 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Brain,
-  Save,
-  RotateCcw,
-  Sparkles,
-  MessageSquare,
-  Clock,
-  Bell,
-  Globe,
-  Volume2,
-  Shield,
-  Zap,
-  AlertCircle,
-  CheckCircle,
-  Settings,
-  Info,
-  Eye,
-  Edit3,
-  Calendar,
-  User,
-  Mail,
-  Phone
+  Brain, Save, RotateCcw, Sparkles, MessageSquare, Clock, Bell, Globe,
+  Volume2, Shield, Zap, AlertCircle, CheckCircle, Eye, Calendar, User,
+  Mail, Info
 } from 'lucide-react';
 
 export default function AIConfiguracao() {
+  const [isMobile, setIsMobile] = useState(false);
   const [config, setConfig] = useState({
-    // Identidade
     name: 'AIM Assistant',
     language: 'pt-BR',
     tone: 'professional',
     personality: 'helpful',
-    
-    // Regras
     workingHours: {
       enabled: true,
       start: '09:00',
@@ -41,8 +21,6 @@ export default function AIConfiguracao() {
     autoResponse: true,
     confirmationRequired: true,
     maxResponseTime: 30,
-    
-    // Notificações
     notifications: {
       newAppointment: true,
       cancellation: true,
@@ -50,8 +28,6 @@ export default function AIConfiguracao() {
       aiResponse: false,
       dailySummary: true
     },
-    
-    // Respostas Padrão
     templates: {
       greeting: 'Olá! Sou o assistente do AIM. Como posso ajudar com seu agendamento?',
       confirmation: 'Seu agendamento foi confirmado para {data} às {hora}. Te enviarei um lembrete antes.',
@@ -64,74 +40,72 @@ export default function AIConfiguracao() {
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const handleSave = () => {
-    // Save logic here
     setUnsavedChanges(false);
     alert('Configurações salvas com sucesso!');
   };
 
   const handleReset = () => {
-   
+    
   };
 
   const handleChange = (section, field, value) => {
     setConfig(prev => ({
       ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
+      [section]: { ...prev[section], [field]: value }
     }));
     setUnsavedChanges(true);
   };
 
   const handleSimpleChange = (field, value) => {
-    setConfig(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setConfig(prev => ({ ...prev, [field]: value }));
     setUnsavedChanges(true);
   };
 
   const tabs = [
-    { id: 'identity', label: 'Identidade da IA', icon: Brain },
-    { id: 'rules', label: 'Regras & Horários', icon: Clock },
+    { id: 'identity', label: 'Identidade', icon: Brain },
+    { id: 'rules', label: 'Regras', icon: Clock },
     { id: 'notifications', label: 'Notificações', icon: Bell },
-    { id: 'templates', label: 'Respostas Padrão', icon: MessageSquare }
+    { id: 'templates', label: 'Respostas', icon: MessageSquare }
   ];
 
   return (
     <div style={styles.container}>
-      {/* Header */}
+      <style>{mediaQueries}</style>
+      
       <div style={styles.header}>
-        <div>
+        <div style={{width: '100%'}}>
           <div style={styles.headerBadge}>
             <Brain size={16} />
             <span>Configurações da IA</span>
           </div>
           <h1 style={styles.title}>Configure sua Assistente</h1>
-          <p style={styles.subtitle}>
-            Personalize o jeito que sua IA conversa com seus clientes.
-          </p>
+          <p style={styles.subtitle}>Personalize o jeito que sua IA conversa</p>
         </div>
-        <div style={styles.headerActions}>
-          <button style={styles.btnPreview} onClick={() => setShowPreview(true)}>
-            <Eye size={18} />
-            Pré-visualizar
-          </button>
-        </div>
+        {!isMobile && (
+          <div style={styles.headerActions}>
+            <button style={styles.btnPreview} onClick={() => setShowPreview(true)}>
+              <Eye size={18} />
+              Pré-visualizar
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Status Banner */}
       <div style={styles.statusBanner}>
         <div style={styles.statusIcon}>
-          <Sparkles size={24} />
+          <Sparkles size={isMobile ? 20 : 24} />
         </div>
         <div style={styles.statusContent}>
-          <h3 style={styles.statusTitle}>IA Ativa e Funcionando</h3>
-          <p style={styles.statusText}>
-            Sua IA está respondendo automaticamente com base nas configurações abaixo.
-          </p>
+          <h3 style={styles.statusTitle}>IA Ativa</h3>
+          <p style={styles.statusText}>Respondendo automaticamente</p>
         </div>
         <div style={styles.statusIndicator}>
           <div style={styles.pulse}></div>
@@ -139,9 +113,7 @@ export default function AIConfiguracao() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div style={styles.content}>
-        {/* Tabs */}
         <div style={styles.tabs}>
           {tabs.map(tab => {
             const Icon = tab.icon;
@@ -150,35 +122,28 @@ export default function AIConfiguracao() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                style={{
-                  ...styles.tab,
-                  ...(isActive ? styles.tabActive : {})
-                }}
+                style={{...styles.tab, ...(isActive ? styles.tabActive : {})}}
+                className="tab-button"
               >
-                <Icon size={20} />
-                {tab.label}
+                <Icon size={18} />
+                <span className="tab-label">{tab.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Tab Content */}
         <div style={styles.tabContent}>
-          {/* Identity Tab */}
           {activeTab === 'identity' && (
             <div style={styles.section}>
               <div style={styles.sectionHeader}>
                 <Brain size={24} color="#3b82f6" />
                 <div>
                   <h2 style={styles.sectionTitle}>Identidade da IA</h2>
-                  <p style={styles.sectionDescription}>
-                    Defina como sua IA se apresenta e interage com os clientes
-                  </p>
+                  <p style={styles.sectionDescription}>Defina como sua IA se apresenta</p>
                 </div>
               </div>
 
               <div style={styles.formGrid}>
-                {/* Nome */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>
                     <User size={16} />
@@ -191,10 +156,9 @@ export default function AIConfiguracao() {
                     style={styles.input}
                     placeholder="Ex: AIM Assistant"
                   />
-                  <span style={styles.hint}>Como a IA se apresentará nas conversas</span>
+                  <span style={styles.hint}>Como a IA se apresentará</span>
                 </div>
 
-                {/* Idioma */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>
                     <Globe size={16} />
@@ -209,10 +173,9 @@ export default function AIConfiguracao() {
                     <option value="en-US">English (US)</option>
                     <option value="es-ES">Español</option>
                   </select>
-                  <span style={styles.hint}>Idioma das respostas automáticas</span>
+                  <span style={styles.hint}>Idioma das respostas</span>
                 </div>
 
-                {/* Tom de Voz */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>
                     <Volume2 size={16} />
@@ -222,7 +185,7 @@ export default function AIConfiguracao() {
                     {[
                       { value: 'professional', label: 'Profissional', desc: 'Formal e cortês' },
                       { value: 'friendly', label: 'Amigável', desc: 'Casual e próximo' },
-                      { value: 'formal', label: 'Formal', desc: 'Corporativo e sério' }
+                      { value: 'formal', label: 'Formal', desc: 'Corporativo' }
                     ].map(option => (
                       <label key={option.value} style={styles.radioCard}>
                         <input
@@ -242,7 +205,6 @@ export default function AIConfiguracao() {
                   </div>
                 </div>
 
-                {/* Personalidade */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>
                     <Sparkles size={16} />
@@ -250,8 +212,8 @@ export default function AIConfiguracao() {
                   </label>
                   <div style={styles.radioGroup}>
                     {[
-                      { value: 'helpful', label: 'Prestativo', desc: 'Foca em resolver problemas' },
-                      { value: 'concise', label: 'Direto', desc: 'Respostas curtas e objetivas' },
+                      { value: 'helpful', label: 'Prestativo', desc: 'Foca em resolver' },
+                      { value: 'concise', label: 'Direto', desc: 'Respostas curtas' },
                       { value: 'detailed', label: 'Detalhista', desc: 'Explicações completas' }
                     ].map(option => (
                       <label key={option.value} style={styles.radioCard}>
@@ -275,21 +237,17 @@ export default function AIConfiguracao() {
             </div>
           )}
 
-          {/* Rules Tab */}
           {activeTab === 'rules' && (
             <div style={styles.section}>
               <div style={styles.sectionHeader}>
                 <Clock size={24} color="#10b981" />
                 <div>
                   <h2 style={styles.sectionTitle}>Regras & Horários</h2>
-                  <p style={styles.sectionDescription}>
-                    Configure quando e como a IA deve responder
-                  </p>
+                  <p style={styles.sectionDescription}>Configure quando a IA deve responder</p>
                 </div>
               </div>
 
               <div style={styles.formGrid}>
-                {/* Horário de Funcionamento */}
                 <div style={styles.formGroupFull}>
                   <div style={styles.toggleContainer}>
                     <label style={styles.label}>
@@ -342,7 +300,6 @@ export default function AIConfiguracao() {
                   )}
                 </div>
 
-                {/* Resposta Automática */}
                 <div style={styles.formGroupFull}>
                   <div style={styles.toggleContainer}>
                     <div>
@@ -350,9 +307,7 @@ export default function AIConfiguracao() {
                         <Zap size={16} />
                         Resposta Automática
                       </label>
-                      <span style={styles.hint}>
-                        IA responde automaticamente mensagens recebidas
-                      </span>
+                      <span style={styles.hint}>IA responde automaticamente mensagens</span>
                     </div>
                     <label style={styles.switch}>
                       <input
@@ -365,7 +320,6 @@ export default function AIConfiguracao() {
                   </div>
                 </div>
 
-                {/* Confirmação Obrigatória */}
                 <div style={styles.formGroupFull}>
                   <div style={styles.toggleContainer}>
                     <div>
@@ -373,9 +327,7 @@ export default function AIConfiguracao() {
                         <Shield size={16} />
                         Confirmação Obrigatória
                       </label>
-                      <span style={styles.hint}>
-                        Exige confirmação do cliente antes de agendar
-                      </span>
+                      <span style={styles.hint}>Exige confirmação antes de agendar</span>
                     </div>
                     <label style={styles.switch}>
                       <input
@@ -388,7 +340,6 @@ export default function AIConfiguracao() {
                   </div>
                 </div>
 
-                {/* Tempo Máximo de Resposta */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>
                     <Clock size={16} />
@@ -399,74 +350,56 @@ export default function AIConfiguracao() {
                       type="number"
                       value={config.maxResponseTime}
                       onChange={(e) => handleSimpleChange('maxResponseTime', e.target.value)}
-                      style={{...styles.input, width: '120px'}}
+                      style={{...styles.input, width: '100px'}}
                       min="1"
                       max="120"
                     />
                     <span style={styles.unit}>segundos</span>
                   </div>
-                  <span style={styles.hint}>Tempo que a IA espera antes de responder</span>
+                  <span style={styles.hint}>Tempo de espera antes de responder</span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Notifications Tab */}
           {activeTab === 'notifications' && (
             <div style={styles.section}>
               <div style={styles.sectionHeader}>
                 <Bell size={24} color="#f59e0b" />
                 <div>
                   <h2 style={styles.sectionTitle}>Notificações</h2>
-                  <p style={styles.sectionDescription}>
-                    Escolha quando você quer receber alertas
-                  </p>
+                  <p style={styles.sectionDescription}>Escolha quando receber alertas</p>
                 </div>
               </div>
 
               <div style={styles.notificationsList}>
                 {[
                   { 
-                    key: 'newAppointment', 
-                    icon: Calendar, 
-                    label: 'Novo Agendamento',
-                    description: 'Notificar quando um novo agendamento for criado',
-                    color: '#3b82f6'
+                    key: 'newAppointment', icon: Calendar, label: 'Novo Agendamento',
+                    description: 'Notificar quando um novo agendamento for criado', color: '#3b82f6'
                   },
                   { 
-                    key: 'cancellation', 
-                    icon: AlertCircle, 
-                    label: 'Cancelamentos',
-                    description: 'Alertar quando um agendamento for cancelado',
-                    color: '#ef4444'
+                    key: 'cancellation', icon: AlertCircle, label: 'Cancelamentos',
+                    description: 'Alertar quando um agendamento for cancelado', color: '#ef4444'
                   },
                   { 
-                    key: 'reminder', 
-                    icon: Clock, 
-                    label: 'Lembretes',
-                    description: 'Receber lembretes de agendamentos próximos',
-                    color: '#f59e0b'
+                    key: 'reminder', icon: Clock, label: 'Lembretes',
+                    description: 'Receber lembretes de agendamentos', color: '#f59e0b'
                   },
                   { 
-                    key: 'aiResponse', 
-                    icon: Brain, 
-                    label: 'Respostas da IA',
-                    description: 'Notificar cada vez que a IA responder um cliente',
-                    color: '#8b5cf6'
+                    key: 'aiResponse', icon: Brain, label: 'Respostas da IA',
+                    description: 'Notificar cada resposta da IA', color: '#8b5cf6'
                   },
                   { 
-                    key: 'dailySummary', 
-                    icon: Mail, 
-                    label: 'Resumo Diário',
-                    description: 'Receber email com resumo das atividades do dia',
-                    color: '#10b981'
+                    key: 'dailySummary', icon: Mail, label: 'Resumo Diário',
+                    description: 'Email com resumo das atividades', color: '#10b981'
                   }
                 ].map(notification => {
                   const Icon = notification.icon;
                   return (
                     <div key={notification.key} style={styles.notificationItem}>
                       <div style={{...styles.notificationIcon, background: `${notification.color}15`, color: notification.color}}>
-                        <Icon size={24} />
+                        <Icon size={isMobile ? 20 : 24} />
                       </div>
                       <div style={styles.notificationContent}>
                         <h4 style={styles.notificationLabel}>{notification.label}</h4>
@@ -487,48 +420,33 @@ export default function AIConfiguracao() {
             </div>
           )}
 
-          {/* Templates Tab */}
           {activeTab === 'templates' && (
             <div style={styles.section}>
               <div style={styles.sectionHeader}>
                 <MessageSquare size={24} color="#8b5cf6" />
                 <div>
                   <h2 style={styles.sectionTitle}>Respostas Padrão</h2>
-                  <p style={styles.sectionDescription}>
-                    Personalize as mensagens automáticas da IA
-                  </p>
+                  <p style={styles.sectionDescription}>Personalize as mensagens automáticas</p>
                 </div>
               </div>
 
               <div style={styles.templatesGrid}>
                 {[
                   { 
-                    key: 'greeting', 
-                    label: 'Saudação Inicial',
-                    description: 'Primeira mensagem enviada ao cliente',
-                    icon: MessageSquare,
-                    placeholder: 'Olá! Como posso ajudar?'
+                    key: 'greeting', label: 'Saudação Inicial',
+                    description: 'Primeira mensagem enviada', icon: MessageSquare
                   },
                   { 
-                    key: 'confirmation', 
-                    label: 'Confirmação de Agendamento',
-                    description: 'Mensagem após agendar com sucesso',
-                    icon: CheckCircle,
-                    placeholder: 'Agendamento confirmado!'
+                    key: 'confirmation', label: 'Confirmação',
+                    description: 'Após agendar com sucesso', icon: CheckCircle
                   },
                   { 
-                    key: 'cancellation', 
-                    label: 'Cancelamento',
-                    description: 'Resposta ao cancelar um agendamento',
-                    icon: AlertCircle,
-                    placeholder: 'Agendamento cancelado'
+                    key: 'cancellation', label: 'Cancelamento',
+                    description: 'Ao cancelar um agendamento', icon: AlertCircle
                   },
                   { 
-                    key: 'unavailable', 
-                    label: 'Horário Indisponível',
-                    description: 'Quando o horário solicitado não está disponível',
-                    icon: Clock,
-                    placeholder: 'Esse horário não está disponível'
+                    key: 'unavailable', label: 'Indisponível',
+                    description: 'Horário não disponível', icon: Clock
                   }
                 ].map(template => {
                   const Icon = template.icon;
@@ -547,7 +465,6 @@ export default function AIConfiguracao() {
                         value={config.templates[template.key]}
                         onChange={(e) => handleChange('templates', template.key, e.target.value)}
                         style={styles.textarea}
-                        placeholder={template.placeholder}
                         rows={3}
                       />
                       <div style={styles.templateFooter}>
@@ -565,32 +482,30 @@ export default function AIConfiguracao() {
         </div>
       </div>
 
-      {/* Footer Actions */}
       <div style={styles.footer}>
-        {unsavedChanges && (
+        {unsavedChanges && !isMobile && (
           <div style={styles.unsavedBanner}>
             <AlertCircle size={18} />
-            <span>Você tem alterações não salvas</span>
+            <span>Alterações não salvas</span>
           </div>
         )}
         <div style={styles.footerActions}>
           <button style={styles.btnReset} onClick={handleReset}>
             <RotateCcw size={18} />
-            Resetar
+            {!isMobile && 'Resetar'}
           </button>
           <button style={styles.btnSave} onClick={handleSave}>
             <Save size={18} />
-            Salvar Alterações
+            Salvar
           </button>
         </div>
       </div>
 
-      {/* Preview Modal */}
       {showPreview && (
         <div style={styles.modalOverlay} onClick={() => setShowPreview(false)}>
           <div style={styles.previewModal} onClick={(e) => e.stopPropagation()}>
             <div style={styles.previewHeader}>
-              <h3 style={styles.previewTitle}>Pré-visualização da IA</h3>
+              <h3 style={styles.previewTitle}>Pré-visualização</h3>
               <button style={styles.btnClose} onClick={() => setShowPreview(false)}>×</button>
             </div>
             <div style={styles.previewBody}>
@@ -599,14 +514,10 @@ export default function AIConfiguracao() {
                   <div style={styles.chatAvatar}>
                     <Brain size={20} />
                   </div>
-                  <div style={styles.chatBubble}>
-                    {config.templates.greeting}
-                  </div>
+                  <div style={styles.chatBubble}>{config.templates.greeting}</div>
                 </div>
                 <div style={styles.chatMessageUser}>
-                  <div style={styles.chatBubbleUser}>
-                    Gostaria de agendar para amanhã às 14h
-                  </div>
+                  <div style={styles.chatBubbleUser}>Gostaria de agendar para amanhã às 14h</div>
                 </div>
                 <div style={styles.chatMessage}>
                   <div style={styles.chatAvatar}>
@@ -627,17 +538,19 @@ export default function AIConfiguracao() {
 
 const styles = {
   container: {
-    padding: '2rem',
+    padding: '1rem',
     background: '#fafafa',
     minHeight: '100vh',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    paddingBottom: '120px'
+    paddingBottom: '100px'
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: '2rem'
+    marginBottom: '1.5rem',
+    flexWrap: 'wrap',
+    gap: '1rem'
   },
   headerBadge: {
     display: 'inline-flex',
@@ -649,16 +562,16 @@ const styles = {
     borderRadius: '9999px',
     fontSize: '0.875rem',
     fontWeight: '600',
-    marginBottom: '1rem'
+    marginBottom: '0.75rem'
   },
   title: {
-    fontSize: '2.5rem',
+    fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
     fontWeight: '700',
     color: '#1f2937',
     marginBottom: '0.5rem'
   },
   subtitle: {
-    fontSize: '1.125rem',
+    fontSize: 'clamp(0.875rem, 3vw, 1.125rem)',
     color: '#6b7280',
     lineHeight: '1.6'
   },
@@ -683,16 +596,16 @@ const styles = {
   statusBanner: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1.5rem',
+    gap: '1rem',
     background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-    padding: '2rem',
-    borderRadius: '16px',
-    marginBottom: '2rem',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    marginBottom: '1.5rem',
     color: 'white'
   },
   statusIcon: {
-    width: '64px',
-    height: '64px',
+    width: '48px',
+    height: '48px',
     background: 'rgba(255, 255, 255, 0.2)',
     borderRadius: '12px',
     display: 'flex',
@@ -704,12 +617,12 @@ const styles = {
     flex: 1
   },
   statusTitle: {
-    fontSize: '1.5rem',
+    fontSize: 'clamp(1rem, 4vw, 1.5rem)',
     fontWeight: '700',
-    margin: '0 0 0.5rem 0'
+    margin: '0 0 0.25rem 0'
   },
   statusText: {
-    fontSize: '1rem',
+    fontSize: 'clamp(0.75rem, 3vw, 1rem)',
     opacity: 0.95,
     margin: 0
   },
@@ -732,21 +645,22 @@ const styles = {
   },
   content: {
     background: 'white',
-    borderRadius: '16px',
+    borderRadius: '12px',
     border: '1px solid #e5e7eb',
     overflow: 'hidden'
   },
   tabs: {
     display: 'flex',
     borderBottom: '1px solid #e5e7eb',
-    padding: '0 2rem',
-    background: '#fafafa'
+    padding: '0 0.5rem',
+    background: '#fafafa',
+    overflowX: 'auto'
   },
   tab: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '1rem 1.5rem',
+    padding: '1rem',
     background: 'transparent',
     border: 'none',
     borderBottom: '2px solid transparent',
@@ -754,29 +668,30 @@ const styles = {
     transition: 'all 0.2s',
     fontSize: '0.875rem',
     fontWeight: '600',
-    color: '#6b7280'
+    color: '#6b7280',
+    whiteSpace: 'nowrap'
   },
   tabActive: {
     color: '#3b82f6',
     borderBottomColor: '#3b82f6'
   },
   tabContent: {
-    padding: '2rem'
+    padding: '1.5rem'
   },
   section: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '2rem'
+    gap: '1.5rem'
   },
   sectionHeader: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: '1rem',
-    paddingBottom: '1.5rem',
+    paddingBottom: '1rem',
     borderBottom: '1px solid #e5e7eb'
   },
   sectionTitle: {
-    fontSize: '1.5rem',
+    fontSize: 'clamp(1.125rem, 4vw, 1.5rem)',
     fontWeight: '700',
     color: '#1f2937',
     margin: '0 0 0.25rem 0'
@@ -789,7 +704,7 @@ const styles = {
   formGrid: {
     display: 'grid',
     gridTemplateColumns: '1fr',
-    gap: '2rem'
+    gap: '1.5rem'
   },
   formGroup: {
     display: 'flex',
@@ -820,7 +735,9 @@ const styles = {
     fontSize: '0.875rem',
     outline: 'none',
     transition: 'all 0.2s',
-    fontFamily: 'inherit'
+    fontFamily: 'inherit',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   select: {
     padding: '0.75rem 1rem',
@@ -831,7 +748,9 @@ const styles = {
     transition: 'all 0.2s',
     fontFamily: 'inherit',
     cursor: 'pointer',
-    background: 'white'
+    background: 'white',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   textarea: {
     padding: '0.75rem 1rem',
@@ -842,7 +761,9 @@ const styles = {
     transition: 'all 0.2s',
     fontFamily: 'inherit',
     resize: 'vertical',
-    minHeight: '80px'
+    minHeight: '80px',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   hint: {
     fontSize: '0.75rem',
@@ -866,7 +787,8 @@ const styles = {
   radio: {
     width: '18px',
     height: '18px',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    flexShrink: 0
   },
   radioLabel: {
     fontSize: '0.875rem',
@@ -883,13 +805,16 @@ const styles = {
     alignItems: 'center',
     padding: '1rem',
     background: '#f9fafb',
-    borderRadius: '8px'
+    borderRadius: '8px',
+    gap: '1rem',
+    flexWrap: 'wrap'
   },
   switch: {
     position: 'relative',
     display: 'inline-block',
     width: '48px',
-    height: '24px'
+    height: '24px',
+    flexShrink: 0
   },
   slider: {
     position: 'absolute',
@@ -904,7 +829,7 @@ const styles = {
   },
   hoursGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
     gap: '1rem',
     marginTop: '1rem',
     padding: '1rem',
@@ -930,14 +855,15 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '1rem',
-    padding: '1.5rem',
+    padding: '1.25rem',
     border: '1px solid #e5e7eb',
     borderRadius: '12px',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    flexWrap: 'wrap'
   },
   notificationIcon: {
-    width: '56px',
-    height: '56px',
+    width: '48px',
+    height: '48px',
     borderRadius: '12px',
     display: 'flex',
     alignItems: 'center',
@@ -945,7 +871,8 @@ const styles = {
     flexShrink: 0
   },
   notificationContent: {
-    flex: 1
+    flex: 1,
+    minWidth: '200px'
   },
   notificationLabel: {
     fontSize: '0.95rem',
@@ -960,7 +887,7 @@ const styles = {
   },
   templatesGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
     gap: '1.5rem'
   },
   templateCard: {
@@ -1001,7 +928,8 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    marginTop: '0.75rem'
+    marginTop: '0.75rem',
+    flexWrap: 'wrap'
   },
   templateHint: {
     fontSize: '0.75rem',
@@ -1014,12 +942,14 @@ const styles = {
     right: 0,
     background: 'white',
     borderTop: '1px solid #e5e7eb',
-    padding: '1.5rem 2rem',
+    padding: '1rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     zIndex: 100,
-    boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1)'
+    boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1)',
+    flexWrap: 'wrap',
+    gap: '0.75rem'
   },
   unsavedBanner: {
     display: 'flex',
@@ -1035,7 +965,8 @@ const styles = {
   footerActions: {
     display: 'flex',
     gap: '0.75rem',
-    marginLeft: 'auto'
+    marginLeft: 'auto',
+    flexWrap: 'wrap'
   },
   btnReset: {
     display: 'flex',
@@ -1055,7 +986,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '0.75rem 2rem',
+    padding: '0.75rem 1.5rem',
     background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
     color: 'white',
     border: 'none',
@@ -1074,26 +1005,27 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
-    backdropFilter: 'blur(4px)'
+    backdropFilter: 'blur(4px)',
+    padding: '1rem'
   },
   previewModal: {
     background: 'white',
     borderRadius: '16px',
     maxWidth: '600px',
-    width: '90%',
-    maxHeight: '80vh',
+    width: '100%',
+    maxHeight: '90vh',
     overflow: 'hidden',
     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
   },
   previewHeader: {
-    padding: '1.5rem 2rem',
+    padding: '1.5rem',
     borderBottom: '1px solid #e5e7eb',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center'
   },
   previewTitle: {
-    fontSize: '1.25rem',
+    fontSize: 'clamp(1rem, 4vw, 1.25rem)',
     fontWeight: '700',
     color: '#1f2937',
     margin: 0
@@ -1110,10 +1042,11 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    flexShrink: 0
   },
   previewBody: {
-    padding: '2rem'
+    padding: '1.5rem'
   },
   chatPreview: {
     display: 'flex',
@@ -1151,8 +1084,9 @@ const styles = {
     borderTopLeftRadius: '4px',
     fontSize: '0.875rem',
     color: '#1f2937',
-    maxWidth: '70%',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+    maxWidth: '80%',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+    wordWrap: 'break-word'
   },
   chatBubbleUser: {
     padding: '0.75rem 1rem',
@@ -1161,13 +1095,12 @@ const styles = {
     borderRadius: '12px',
     borderTopRightRadius: '4px',
     fontSize: '0.875rem',
-    maxWidth: '70%'
+    maxWidth: '80%',
+    wordWrap: 'break-word'
   }
 };
 
-// Add CSS for toggle switch
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
+const mediaQueries = `
   input[type="checkbox"] {
     opacity: 0;
     width: 0;
@@ -1202,5 +1135,19 @@ styleSheet.textContent = `
       opacity: 0.5;
     }
   }
+
+  @media (max-width: 768px) {
+    .tab-button {
+      padding: 0.75rem 1rem !important;
+      font-size: 0.8rem !important;
+    }
+    
+    .tab-label {
+      display: none;
+    }
+    
+    .tab-button svg {
+      margin: 0 !important;
+    }
+  }
 `;
-document.head.appendChild(styleSheet);

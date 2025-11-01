@@ -92,17 +92,7 @@ const Contatos = () => {
               <p>Indaiatuba, São Paulo - Brasil</p>
             </div>
 
-            <div className="info-card">
-              <div className="info-icon">🌐</div>
-              <h3>Redes Sociais</h3>
-              <p>Acompanhe nossas novidades</p>
-              <div className="social-links">
-                <a href="#" className="social-btn">📘</a>
-                <a href="#" className="social-btn">📸</a>
-                <a href="#" className="social-btn">💼</a>
-                <a href="#" className="social-btn">🐦</a>
-              </div>
-            </div>
+           
           </div>
 
           {/* Form Section */}

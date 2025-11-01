@@ -27,8 +27,10 @@ import Insights from './Insights';
 import Equipe from './Equipe';
 import Cliente from './Cliente';
 import MainContent from './MainContent';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -783,7 +785,7 @@ export default function Dashboard() {
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="logo">
-            <Brain size={24} color="white" />
+            <img src={require('../assets/logo.png')} alt="AIM Agenda" style={{width: '40px', height: '40px', borderRadius: 10}} />
           </div>
           <span className="logo-text">AIM Agenda</span>
         </div>
@@ -806,7 +808,7 @@ export default function Dashboard() {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="settings-btn">
+          <button onClick={() => navigate('/configuracao')} className="settings-btn">
             <Settings size={20} />
             <span>Configurações</span>
           </button>
@@ -918,6 +920,7 @@ export default function Dashboard() {
                     onClick={() => {
                       setUserMenuOpen(false);
                       setLogoutModalOpen(true);
+                      navigate('/login')
                     }}
                   >
                     <LogOut size={16} /> Sair

@@ -1,215 +1,144 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Calendar,
-  Clock,
-  Plus,
-  Filter,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  Save,
-  Edit,
-  Trash2,
-  Eye,
-  User,
-  Phone,
-  Mail,
-  MessageSquare,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Sparkles,
-  Download,
-  RefreshCw
+  Calendar, Clock, Plus, Filter, Search, ChevronLeft, ChevronRight, X, Save,
+  Edit, Trash2, Eye, User, Phone, Mail, MessageSquare, CheckCircle, XCircle,
+  AlertCircle, Sparkles, Download, RefreshCw
 } from 'lucide-react';
 
 export default function Agenda() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState('week'); // 'week' or 'list'
+  const [viewMode, setViewMode] = useState('list');
   const [showNewModal, setShowNewModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [isMobile, setIsMobile] = useState(false);
   
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const [newAppointment, setNewAppointment] = useState({
-    client: '',
-    service: '',
-    date: '',
-    time: '',
-    notes: ''
+    client: '', service: '', date: '', time: '', notes: ''
   });
 
-  // Mock data
   const appointments = [
     {
       id: 1,
       client: { name: 'João Silva', email: 'joao@email.com', phone: '+55 11 98765-4321' },
-      service: 'Consulta',
-      date: '2025-01-30',
-      time: '09:00',
-      duration: 60,
-      status: 'confirmed',
-      notes: 'Primeiro atendimento',
-      createdBy: 'IA'
+      service: 'Consulta', date: '2025-01-30', time: '09:00', duration: 60,
+      status: 'confirmed', notes: 'Primeiro atendimento', createdBy: 'IA'
     },
     {
       id: 2,
       client: { name: 'Maria Santos', email: 'maria@email.com', phone: '+55 11 98765-1234' },
-      service: 'Reunião de Follow-up',
-      date: '2025-01-30',
-      time: '10:30',
-      duration: 30,
-      status: 'confirmed',
-      notes: '',
-      createdBy: 'Manual'
+      service: 'Reunião de Follow-up', date: '2025-01-30', time: '10:30', duration: 30,
+      status: 'confirmed', notes: '', createdBy: 'Manual'
     },
     {
       id: 3,
       client: { name: 'Pedro Costa', email: 'pedro@email.com', phone: '+55 11 98765-5678' },
-      service: 'Avaliação',
-      date: '2025-01-30',
-      time: '14:00',
-      duration: 45,
-      status: 'pending',
-      notes: 'Aguardando confirmação',
-      createdBy: 'IA'
-    },
-    {
-      id: 4,
-      client: { name: 'Ana Oliveira', email: 'ana@email.com', phone: '+55 11 98765-9012' },
-      service: 'Consulta',
-      date: '2025-01-30',
-      time: '16:00',
-      duration: 60,
-      status: 'confirmed',
-      notes: '',
-      createdBy: 'Manual'
-    },
-    {
-      id: 5,
-      client: { name: 'Carlos Ferreira', email: 'carlos@email.com', phone: '+55 11 98765-3456' },
-      service: 'Reunião',
-      date: '2025-01-31',
-      time: '11:00',
-      duration: 30,
-      status: 'cancelled',
-      notes: 'Cliente solicitou cancelamento',
-      createdBy: 'IA'
+      service: 'Avaliação', date: '2025-01-30', time: '14:00', duration: 45,
+      status: 'pending', notes: 'Aguardando confirmação', createdBy: 'IA'
     }
   ];
 
-  const clients = [
-    'João Silva',
-    'Maria Santos',
-    'Pedro Costa',
-    'Ana Oliveira',
-    'Carlos Ferreira',
-    'Juliana Rocha'
-  ];
-
-  const services = [
-    'Consulta',
-    'Reunião',
-    'Avaliação',
-    'Follow-up',
-    'Workshop',
-    'Treinamento'
-  ];
+  const clients = ['João Silva', 'Maria Santos', 'Pedro Costa', 'Ana Oliveira'];
+  const services = ['Consulta', 'Reunião', 'Avaliação', 'Follow-up'];
 
   const getStatusConfig = (status) => {
-    switch(status) {
-      case 'confirmed':
-        return { label: 'Confirmado', color: '#10b981', bg: '#d1fae5', icon: CheckCircle };
-      case 'pending':
-        return { label: 'Pendente', color: '#f59e0b', bg: '#fef3c7', icon: AlertCircle };
-      case 'cancelled':
-        return { label: 'Cancelado', color: '#ef4444', bg: '#fee2e2', icon: XCircle };
-      default:
-        return { label: 'Desconhecido', color: '#6b7280', bg: '#f3f4f6', icon: AlertCircle };
-    }
-  };
-
-  const getWeekDays = () => {
-    const start = new Date(currentDate);
-    start.setDate(start.getDate() - start.getDay());
-    
-    return Array.from({ length: 7 }, (_, i) => {
-      const date = new Date(start);
-      date.setDate(start.getDate() + i);
-      return date;
-    });
-  };
-
-  const timeSlots = Array.from({ length: 12 }, (_, i) => {
-    const hour = 8 + i;
-    return `${hour.toString().padStart(2, '0')}:00`;
-  });
-
-  const getAppointmentsForDate = (date) => {
-    const dateStr = date.toISOString().split('T')[0];
-    return appointments.filter(apt => apt.date === dateStr);
-  };
-
-  const handleAISuggestion = () => {
-    // AI suggestion logic
-    const nextAvailable = {
-      date: '2025-02-01',
-      time: '09:00'
+    const configs = {
+      confirmed: { label: 'Confirmado', color: '#10b981', bg: '#d1fae5', icon: CheckCircle },
+      pending: { label: 'Pendente', color: '#f59e0b', bg: '#fef3c7', icon: AlertCircle },
+      cancelled: { label: 'Cancelado', color: '#ef4444', bg: '#fee2e2', icon: XCircle }
     };
-    setNewAppointment(prev => ({
-      ...prev,
-      date: nextAvailable.date,
-      time: nextAvailable.time
-    }));
+    return configs[status] || configs.pending;
   };
 
   const filteredAppointments = appointments.filter(apt => {
     const matchesSearch = 
       apt.client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       apt.service.toLowerCase().includes(searchTerm.toLowerCase());
-    
     const matchesFilter = filterStatus === 'all' || apt.status === filterStatus;
-    
     return matchesSearch && matchesFilter;
   });
 
   const stats = [
-    { label: 'Hoje', value: appointments.filter(a => a.date === new Date().toISOString().split('T')[0]).length, color: '#3b82f6' },
-    { label: 'Confirmados', value: appointments.filter(a => a.status === 'confirmed').length, color: '#10b981' },
-    { label: 'Pendentes', value: appointments.filter(a => a.status === 'pending').length, color: '#f59e0b' },
-    { label: 'Esta Semana', value: appointments.length, color: '#8b5cf6' }
+    { label: 'Hoje', value: 3, color: '#3b82f6' },
+    { label: 'Confirmados', value: 2, color: '#10b981' },
+    { label: 'Pendentes', value: 1, color: '#f59e0b' },
+    { label: 'Semana', value: appointments.length, color: '#8b5cf6' }
   ];
+
+  const AppointmentCard = ({ apt }) => {
+    const statusConfig = getStatusConfig(apt.status);
+    const StatusIcon = statusConfig.icon;
+    
+    return (
+      <div style={styles.appointmentCard} onClick={() => { setSelectedAppointment(apt); setShowDetailModal(true); }}>
+        <div style={styles.cardTop}>
+          <div style={styles.clientCell}>
+            <div style={styles.clientAvatar}>{apt.client.name.charAt(0)}</div>
+            <div>
+              <div style={styles.clientName}>{apt.client.name}</div>
+              <div style={styles.clientEmail}>{apt.service}</div>
+            </div>
+          </div>
+          <div style={{...styles.statusBadge, background: statusConfig.bg, color: statusConfig.color}}>
+            <StatusIcon size={14} />
+            {statusConfig.label}
+          </div>
+        </div>
+        <div style={styles.cardDetails}>
+          <div style={styles.detailRow}>
+            <Calendar size={14} color="#6b7280" />
+            <span>{new Date(apt.date).toLocaleDateString('pt-BR')}</span>
+          </div>
+          <div style={styles.detailRow}>
+            <Clock size={14} color="#6b7280" />
+            <span>{apt.time}</span>
+          </div>
+          <div style={styles.detailRow}>
+            {apt.createdBy === 'IA' ? <Sparkles size={14} color="#8b5cf6" /> : <User size={14} color="#6b7280" />}
+            <span>{apt.createdBy}</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div style={styles.container}>
-      {/* Header */}
+      <style>{mediaQueries}</style>
+
       <div style={styles.header}>
-        <div>
+        <div style={{width: '100%'}}>
           <div style={styles.headerBadge}>
             <Calendar size={16} />
             <span>Agendamentos</span>
           </div>
-          <h1 style={styles.title}>Gerenciar Agendamentos</h1>
-          <p style={styles.subtitle}>
-            Visualize e controle todos os seus compromissos
-          </p>
+          <h1 style={styles.title}>Agendamentos</h1>
+          <p style={styles.subtitle}>Visualize e controle seus compromissos</p>
         </div>
         <div style={styles.headerActions}>
-          <button style={styles.btnSecondary}>
-            <Download size={18} />
-            Exportar
-          </button>
+          {!isMobile && (
+            <button style={styles.btnSecondary}>
+              <Download size={18} />
+              Exportar
+            </button>
+          )}
           <button style={styles.btnPrimary} onClick={() => setShowNewModal(true)}>
             <Plus size={18} />
-            Novo Agendamento
+            {!isMobile && 'Novo'}
           </button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div style={styles.statsGrid}>
+      <div style={styles.statsGrid} className="stats-grid">
         {stats.map((stat, index) => (
           <div key={index} style={styles.statCard}>
             <div style={{...styles.statDot, background: stat.color}}></div>
@@ -221,154 +150,47 @@ export default function Agenda() {
         ))}
       </div>
 
-      {/* Toolbar */}
-      <div style={styles.toolbar}>
-        <div style={styles.toolbarLeft}>
-          <div style={styles.searchContainer}>
-            <Search size={18} style={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Buscar por cliente ou serviço..."
-              style={styles.searchInput}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div style={styles.filterButtons}>
-            <button
-              style={{...styles.filterBtn, ...(filterStatus === 'all' ? styles.filterBtnActive : {})}}
-              onClick={() => setFilterStatus('all')}
-            >
-              Todos
-            </button>
-            <button
-              style={{...styles.filterBtn, ...(filterStatus === 'confirmed' ? styles.filterBtnActive : {})}}
-              onClick={() => setFilterStatus('confirmed')}
-            >
-              <CheckCircle size={16} />
-              Confirmados
-            </button>
-            <button
-              style={{...styles.filterBtn, ...(filterStatus === 'pending' ? styles.filterBtnActive : {})}}
-              onClick={() => setFilterStatus('pending')}
-            >
-              <AlertCircle size={16} />
-              Pendentes
-            </button>
-            <button
-              style={{...styles.filterBtn, ...(filterStatus === 'cancelled' ? styles.filterBtnActive : {})}}
-              onClick={() => setFilterStatus('cancelled')}
-            >
-              <XCircle size={16} />
-              Cancelados
-            </button>
-          </div>
+      <div style={styles.toolbar} className="toolbar">
+        <div style={styles.searchContainer}>
+          <Search size={18} style={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder={isMobile ? "Buscar..." : "Buscar por cliente ou serviço..."}
+            style={styles.searchInput}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
-        <div style={styles.viewToggle}>
+        <div style={styles.filterButtons} className="filter-buttons">
           <button
-            style={{...styles.viewBtn, ...(viewMode === 'week' ? styles.viewBtnActive : {})}}
-            onClick={() => setViewMode('week')}
+            style={{...styles.filterBtn, ...(filterStatus === 'all' ? styles.filterBtnActive : {})}}
+            onClick={() => setFilterStatus('all')}
           >
-            <Calendar size={16} />
-            Semana
+            Todos
           </button>
           <button
-            style={{...styles.viewBtn, ...(viewMode === 'list' ? styles.viewBtnActive : {})}}
-            onClick={() => setViewMode('list')}
+            style={{...styles.filterBtn, ...(filterStatus === 'confirmed' ? styles.filterBtnActive : {})}}
+            onClick={() => setFilterStatus('confirmed')}
           >
-            Lista
+            <CheckCircle size={16} />
+            {!isMobile && 'Confirmados'}
+          </button>
+          <button
+            style={{...styles.filterBtn, ...(filterStatus === 'pending' ? styles.filterBtnActive : {})}}
+            onClick={() => setFilterStatus('pending')}
+          >
+            <AlertCircle size={16} />
+            {!isMobile && 'Pendentes'}
           </button>
         </div>
       </div>
 
-      {/* Calendar View */}
-      {viewMode === 'week' && (
-        <div style={styles.calendarContainer}>
-          <div style={styles.calendarHeader}>
-            <button style={styles.navBtn}>
-              <ChevronLeft size={20} />
-            </button>
-            <h2 style={styles.calendarTitle}>
-              {currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-            </h2>
-            <button style={styles.navBtn}>
-              <ChevronRight size={20} />
-            </button>
-            <button style={styles.todayBtn}>
-              <RefreshCw size={16} />
-              Hoje
-            </button>
-          </div>
-
-          <div style={styles.calendar}>
-            {/* Week Header */}
-            <div style={styles.weekHeader}>
-              <div style={styles.timeColumn}></div>
-              {getWeekDays().map((date, index) => {
-                const isToday = date.toDateString() === new Date().toDateString();
-                return (
-                  <div key={index} style={styles.dayHeader}>
-                    <div style={styles.dayName}>
-                      {date.toLocaleDateString('pt-BR', { weekday: 'short' })}
-                    </div>
-                    <div style={{
-                      ...styles.dayNumber,
-                      ...(isToday ? styles.dayNumberToday : {})
-                    }}>
-                      {date.getDate()}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Time Grid */}
-            <div style={styles.timeGrid}>
-              {timeSlots.map((time, timeIndex) => (
-                <div key={timeIndex} style={styles.timeRow}>
-                  <div style={styles.timeLabel}>{time}</div>
-                  {getWeekDays().map((date, dayIndex) => {
-                    const dayAppointments = getAppointmentsForDate(date).filter(
-                      apt => apt.time === time
-                    );
-                    
-                    return (
-                      <div key={dayIndex} style={styles.timeSlot}>
-                        {dayAppointments.map(apt => {
-                          const statusConfig = getStatusConfig(apt.status);
-                          return (
-                            <div
-                              key={apt.id}
-                              style={{
-                                ...styles.appointmentBlock,
-                                background: statusConfig.bg,
-                                borderLeft: `3px solid ${statusConfig.color}`
-                              }}
-                              onClick={() => {
-                                setSelectedAppointment(apt);
-                                setShowDetailModal(true);
-                              }}
-                            >
-                              <div style={styles.appointmentTime}>{apt.time}</div>
-                              <div style={styles.appointmentClient}>{apt.client.name}</div>
-                              <div style={styles.appointmentService}>{apt.service}</div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
+      {isMobile ? (
+        <div style={styles.cardsGrid}>
+          {filteredAppointments.map((apt) => <AppointmentCard key={apt.id} apt={apt} />)}
         </div>
-      )}
-
-      {/* List View */}
-      {viewMode === 'list' && (
+      ) : (
         <div style={styles.listContainer}>
           <table style={styles.table}>
             <thead>
@@ -386,14 +208,11 @@ export default function Agenda() {
               {filteredAppointments.map((apt) => {
                 const statusConfig = getStatusConfig(apt.status);
                 const StatusIcon = statusConfig.icon;
-                
                 return (
                   <tr key={apt.id} style={styles.tableRow}>
                     <td style={styles.td}>
                       <div style={styles.clientCell}>
-                        <div style={styles.clientAvatar}>
-                          {apt.client.name.charAt(0)}
-                        </div>
+                        <div style={styles.clientAvatar}>{apt.client.name.charAt(0)}</div>
                         <div>
                           <div style={styles.clientName}>{apt.client.name}</div>
                           <div style={styles.clientEmail}>{apt.client.email}</div>
@@ -401,9 +220,7 @@ export default function Agenda() {
                       </div>
                     </td>
                     <td style={styles.td}>{apt.service}</td>
-                    <td style={styles.td}>
-                      {new Date(apt.date).toLocaleDateString('pt-BR')}
-                    </td>
+                    <td style={styles.td}>{new Date(apt.date).toLocaleDateString('pt-BR')}</td>
                     <td style={styles.td}>
                       <div style={styles.timeCell}>
                         <Clock size={14} />
@@ -411,11 +228,7 @@ export default function Agenda() {
                       </div>
                     </td>
                     <td style={styles.td}>
-                      <div style={{
-                        ...styles.statusBadge,
-                        background: statusConfig.bg,
-                        color: statusConfig.color
-                      }}>
+                      <div style={{...styles.statusBadge, background: statusConfig.bg, color: statusConfig.color}}>
                         <StatusIcon size={14} />
                         {statusConfig.label}
                       </div>
@@ -428,13 +241,7 @@ export default function Agenda() {
                     </td>
                     <td style={styles.td}>
                       <div style={styles.actionButtons}>
-                        <button
-                          style={styles.actionBtn}
-                          onClick={() => {
-                            setSelectedAppointment(apt);
-                            setShowDetailModal(true);
-                          }}
-                        >
+                        <button style={styles.actionBtn} onClick={() => { setSelectedAppointment(apt); setShowDetailModal(true); }}>
                           <Eye size={16} />
                         </button>
                         <button style={styles.actionBtn}>
@@ -453,7 +260,6 @@ export default function Agenda() {
         </div>
       )}
 
-      {/* New Appointment Modal */}
       {showNewModal && (
         <div style={styles.modalOverlay} onClick={() => setShowNewModal(false)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -483,9 +289,7 @@ export default function Agenda() {
                     onChange={(e) => setNewAppointment({...newAppointment, client: e.target.value})}
                   />
                   <datalist id="clients-list">
-                    {clients.map((client, idx) => (
-                      <option key={idx} value={client} />
-                    ))}
+                    {clients.map((client, idx) => <option key={idx} value={client} />)}
                   </datalist>
                 </div>
 
@@ -500,9 +304,7 @@ export default function Agenda() {
                     onChange={(e) => setNewAppointment({...newAppointment, service: e.target.value})}
                   >
                     <option value="">Selecione...</option>
-                    {services.map((service, idx) => (
-                      <option key={idx} value={service}>{service}</option>
-                    ))}
+                    {services.map((service, idx) => <option key={idx} value={service}>{service}</option>)}
                   </select>
                 </div>
 
@@ -536,7 +338,7 @@ export default function Agenda() {
                   <label style={styles.label}>Observações</label>
                   <textarea
                     style={styles.textarea}
-                    placeholder="Adicione observações sobre o agendamento..."
+                    placeholder="Adicione observações..."
                     value={newAppointment.notes}
                     onChange={(e) => setNewAppointment({...newAppointment, notes: e.target.value})}
                     rows={3}
@@ -544,18 +346,17 @@ export default function Agenda() {
                 </div>
               </div>
 
-              {/* AI Suggestion */}
               <div style={styles.aiSuggestion}>
                 <Sparkles size={20} color="#8b5cf6" />
                 <div style={{flex: 1}}>
                   <h4 style={styles.aiSuggestionTitle}>Sugestão da IA</h4>
                   <p style={styles.aiSuggestionText}>
-                    Deixe a IA encontrar o melhor horário disponível automaticamente
+                    Deixe a IA encontrar o melhor horário
                   </p>
                 </div>
-                <button style={styles.aiButton} onClick={handleAISuggestion}>
+                <button style={styles.aiButton}>
                   <Sparkles size={16} />
-                  Gerar Sugestão
+                  Sugerir
                 </button>
               </div>
             </div>
@@ -566,21 +367,20 @@ export default function Agenda() {
               </button>
               <button style={styles.btnSave}>
                 <Save size={18} />
-                Criar Agendamento
+                Criar
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Detail Modal */}
       {showDetailModal && selectedAppointment && (
         <div style={styles.modalOverlay} onClick={() => setShowDetailModal(false)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <div style={styles.modalTitleContainer}>
                 <Eye size={24} color="#3b82f6" />
-                <h2 style={styles.modalTitle}>Detalhes do Agendamento</h2>
+                <h2 style={styles.modalTitle}>Detalhes</h2>
               </div>
               <button style={styles.btnClose} onClick={() => setShowDetailModal(false)}>
                 <X size={24} />
@@ -590,7 +390,7 @@ export default function Agenda() {
             <div style={styles.modalBody}>
               <div style={styles.detailGrid}>
                 <div style={styles.detailSection}>
-                  <h3 style={styles.detailSectionTitle}>Informações do Cliente</h3>
+                  <h3 style={styles.detailSectionTitle}>Cliente</h3>
                   <div style={styles.detailList}>
                     <div style={styles.detailItem}>
                       <User size={18} color="#6b7280" />
@@ -617,7 +417,7 @@ export default function Agenda() {
                 </div>
 
                 <div style={styles.detailSection}>
-                  <h3 style={styles.detailSectionTitle}>Detalhes do Agendamento</h3>
+                  <h3 style={styles.detailSectionTitle}>Agendamento</h3>
                   <div style={styles.detailList}>
                     <div style={styles.detailItem}>
                       <MessageSquare size={18} color="#6b7280" />
@@ -631,12 +431,7 @@ export default function Agenda() {
                       <div>
                         <div style={styles.detailLabel}>Data</div>
                         <div style={styles.detailValue}>
-                          {new Date(selectedAppointment.date).toLocaleDateString('pt-BR', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
+                          {new Date(selectedAppointment.date).toLocaleDateString('pt-BR')}
                         </div>
                       </div>
                     </div>
@@ -663,11 +458,7 @@ export default function Agenda() {
                   const statusConfig = getStatusConfig(selectedAppointment.status);
                   const StatusIcon = statusConfig.icon;
                   return (
-                    <div style={{
-                      ...styles.statusBadgeLarge,
-                      background: statusConfig.bg,
-                      color: statusConfig.color
-                    }}>
+                    <div style={{...styles.statusBadgeLarge, background: statusConfig.bg, color: statusConfig.color}}>
                       <StatusIcon size={20} />
                       {statusConfig.label}
                     </div>
@@ -685,12 +476,12 @@ export default function Agenda() {
             <div style={styles.modalFooter}>
               <button style={styles.btnCancel}>
                 <Trash2 size={18} />
-                Cancelar Agendamento
+                Cancelar
               </button>
-              <div style={{display: 'flex', gap: '0.75rem'}}>
+              <div style={{display: 'flex', gap: '0.75rem', flexWrap: 'wrap'}}>
                 <button style={styles.btnSecondary}>
                   <MessageSquare size={18} />
-                  Enviar Mensagem
+                  {!isMobile && 'Mensagem'}
                 </button>
                 <button style={styles.btnSave}>
                   <Edit size={18} />
@@ -705,9 +496,27 @@ export default function Agenda() {
   );
 }
 
+const mediaQueries = `
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .toolbar {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+    
+    .filter-buttons {
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+    }
+  }
+`;
+
 const styles = {
   container: {
-    padding: '2rem',
+    padding: '1rem',
     background: '#fafafa',
     minHeight: '100vh',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
@@ -716,7 +525,9 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: '2rem'
+    marginBottom: '1.5rem',
+    flexWrap: 'wrap',
+    gap: '1rem'
   },
   headerBadge: {
     display: 'inline-flex',
@@ -728,27 +539,27 @@ const styles = {
     borderRadius: '9999px',
     fontSize: '0.875rem',
     fontWeight: '600',
-    marginBottom: '1rem'
+    marginBottom: '0.75rem'
   },
   title: {
-    fontSize: '2.5rem',
+    fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
     fontWeight: '700',
     color: '#1f2937',
     marginBottom: '0.5rem'
   },
   subtitle: {
-    fontSize: '1.125rem',
+    fontSize: 'clamp(0.875rem, 3vw, 1.125rem)',
     color: '#6b7280'
   },
   headerActions: {
     display: 'flex',
-    gap: '0.75rem'
+    gap: '0.5rem'
   },
   btnPrimary: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '0.75rem 1.5rem',
+    padding: '0.75rem 1.25rem',
     background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
     color: 'white',
     border: 'none',
@@ -756,13 +567,14 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
   },
   btnSecondary: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '0.75rem 1.5rem',
+    padding: '0.75rem 1.25rem',
     background: 'white',
     color: '#374151',
     border: '1px solid #e5e7eb',
@@ -775,15 +587,15 @@ const styles = {
   statsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '1.5rem',
-    marginBottom: '2rem'
+    gap: '1rem',
+    marginBottom: '1.5rem'
   },
   statCard: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
+    gap: '0.75rem',
     background: 'white',
-    padding: '1.5rem',
+    padding: '1rem',
     borderRadius: '12px',
     border: '1px solid #e5e7eb'
   },
@@ -794,12 +606,12 @@ const styles = {
     flexShrink: 0
   },
   statLabel: {
-    fontSize: '0.875rem',
+    fontSize: '0.75rem',
     color: '#6b7280',
     margin: '0 0 0.25rem 0'
   },
   statValue: {
-    fontSize: '1.75rem',
+    fontSize: '1.5rem',
     fontWeight: '700',
     color: '#1f2937',
     margin: 0
@@ -808,32 +620,25 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '2rem',
+    marginBottom: '1.5rem',
     background: 'white',
     padding: '1rem',
     borderRadius: '12px',
     border: '1px solid #e5e7eb',
-    gap: '1rem',
-    flexWrap: 'wrap'
-  },
-  toolbarLeft: {
-    display: 'flex',
-    gap: '1rem',
-    flex: 1,
-    flexWrap: 'wrap'
+    gap: '1rem'
   },
   searchContainer: {
     position: 'relative',
     flex: 1,
-    minWidth: '300px',
-    maxWidth: '400px'
+    minWidth: '200px'
   },
   searchIcon: {
     position: 'absolute',
     left: '1rem',
     top: '50%',
     transform: 'translateY(-50%)',
-    color: '#9ca3af'
+    color: '#9ca3af',
+    pointerEvents: 'none'
   },
   searchInput: {
     width: '100%',
@@ -841,11 +646,13 @@ const styles = {
     border: '1px solid #e5e7eb',
     borderRadius: '8px',
     fontSize: '0.875rem',
-    outline: 'none'
+    outline: 'none',
+    boxSizing: 'border-box'
   },
   filterButtons: {
     display: 'flex',
-    gap: '0.5rem'
+    gap: '0.5rem',
+    flexWrap: 'wrap'
   },
   filterBtn: {
     display: 'flex',
@@ -859,7 +666,8 @@ const styles = {
     fontWeight: '500',
     color: '#6b7280',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
   },
   filterBtnActive: {
     background: 'linear-gradient(135deg, #eff6ff, #f3e8ff)',
@@ -867,177 +675,48 @@ const styles = {
     borderColor: '#3b82f6',
     fontWeight: '600'
   },
-  viewToggle: {
-    display: 'flex',
-    gap: '0.5rem',
-    background: '#f9fafb',
-    padding: '0.25rem',
-    borderRadius: '8px'
+  cardsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: '1rem'
   },
-  viewBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.5rem 1rem',
-    background: 'transparent',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    color: '#6b7280',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  },
-  viewBtnActive: {
-    background: 'white',
-    color: '#3b82f6',
-    fontWeight: '600',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-  },
-  calendarContainer: {
+  appointmentCard: {
     background: 'white',
     borderRadius: '12px',
     border: '1px solid #e5e7eb',
-    overflow: 'hidden'
-  },
-  calendarHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '1.5rem',
-    borderBottom: '1px solid #e5e7eb'
-  },
-  navBtn: {
-    width: '36px',
-    height: '36px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'transparent',
-    border: '1px solid #e5e7eb',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    color: '#6b7280'
-  },
-  calendarTitle: {
-    fontSize: '1.25rem',
-    fontWeight: '700',
-    color: '#1f2937',
-    margin: 0,
-    textTransform: 'capitalize',
-    flex: 1
-  },
-  todayBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.5rem 1rem',
-    background: '#f9fafb',
-    border: '1px solid #e5e7eb',
-    borderRadius: '8px',
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    color: '#374151',
+    padding: '1.25rem',
     cursor: 'pointer',
     transition: 'all 0.2s'
   },
-  calendar: {
-    overflowX: 'auto'
-  },
-  weekHeader: {
-    display: 'grid',
-    gridTemplateColumns: '80px repeat(7, 1fr)',
-    borderBottom: '1px solid #e5e7eb',
-    background: '#fafafa'
-  },
-  timeColumn: {
-    width: '80px'
-  },
-  dayHeader: {
-    padding: '1rem',
-    textAlign: 'center',
-    borderLeft: '1px solid #e5e7eb'
-  },
-  dayName: {
-    fontSize: '0.75rem',
-    color: '#6b7280',
-    textTransform: 'uppercase',
-    fontWeight: '600',
-    marginBottom: '0.5rem'
-  },
-  dayNumber: {
-    fontSize: '1.25rem',
-    fontWeight: '700',
-    color: '#374151'
-  },
-  dayNumberToday: {
-    color: '#3b82f6',
-    background: '#eff6ff',
-    width: '36px',
-    height: '36px',
-    borderRadius: '50%',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: '0 auto'
-  },
-  timeGrid: {
+  cardTop: {
     display: 'flex',
-    flexDirection: 'column'
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '1rem',
+    gap: '1rem'
   },
-  timeRow: {
-    display: 'grid',
-    gridTemplateColumns: '80px repeat(7, 1fr)',
-    minHeight: '80px',
-    borderBottom: '1px solid #f3f4f6'
+  cardDetails: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
   },
-  timeLabel: {
-    padding: '0.5rem',
-    fontSize: '0.75rem',
-    color: '#6b7280',
-    fontWeight: '500',
-    textAlign: 'right',
-    paddingRight: '1rem'
-  },
-  timeSlot: {
-    padding: '0.5rem',
-    borderLeft: '1px solid #f3f4f6',
-    position: 'relative',
-    cursor: 'pointer',
-    transition: 'background 0.2s'
-  },
-  appointmentBlock: {
-    padding: '0.5rem',
-    borderRadius: '6px',
-    marginBottom: '0.25rem',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    fontSize: '0.75rem'
-  },
-  appointmentTime: {
-    fontWeight: '700',
-    marginBottom: '0.25rem',
-    color: '#1f2937'
-  },
-  appointmentClient: {
-    fontWeight: '600',
-    marginBottom: '0.25rem',
-    color: '#374151'
-  },
-  appointmentService: {
-    color: '#6b7280',
-    fontSize: '0.7rem'
+  detailRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.875rem',
+    color: '#6b7280'
   },
   listContainer: {
     background: 'white',
     borderRadius: '12px',
     border: '1px solid #e5e7eb',
-    overflow: 'hidden'
+    overflowX: 'auto'
   },
   table: {
     width: '100%',
-    borderCollapse: 'collapse'
+    borderCollapse: 'collapse',
+    minWidth: '1000px'
   },
   tableHeader: {
     background: '#fafafa',
@@ -1100,7 +779,8 @@ const styles = {
     padding: '0.375rem 0.75rem',
     borderRadius: '9999px',
     fontSize: '0.75rem',
-    fontWeight: '600'
+    fontWeight: '600',
+    whiteSpace: 'nowrap'
   },
   originBadge: {
     display: 'inline-flex',
@@ -1133,13 +813,14 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
-    backdropFilter: 'blur(4px)'
+    backdropFilter: 'blur(4px)',
+    padding: '1rem'
   },
   modal: {
     background: 'white',
     borderRadius: '16px',
     maxWidth: '700px',
-    width: '90%',
+    width: '100%',
     maxHeight: '90vh',
     overflow: 'hidden',
     display: 'flex',
@@ -1147,7 +828,7 @@ const styles = {
     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
   },
   modalHeader: {
-    padding: '2rem',
+    padding: '1.5rem',
     borderBottom: '1px solid #e5e7eb',
     display: 'flex',
     justifyContent: 'space-between',
@@ -1156,10 +837,10 @@ const styles = {
   modalTitleContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem'
+    gap: '0.75rem'
   },
   modalTitle: {
-    fontSize: '1.5rem',
+    fontSize: 'clamp(1.125rem, 4vw, 1.5rem)',
     fontWeight: '700',
     color: '#1f2937',
     margin: 0
@@ -1176,18 +857,19 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    flexShrink: 0
   },
   modalBody: {
-    padding: '2rem',
+    padding: '1.5rem',
     overflowY: 'auto',
     flex: 1
   },
   formGrid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     gap: '1.5rem',
-    marginBottom: '2rem'
+    marginBottom: '1.5rem'
   },
   formGroup: {
     display: 'flex',
@@ -1209,7 +891,9 @@ const styles = {
     fontSize: '0.875rem',
     outline: 'none',
     transition: 'all 0.2s',
-    fontFamily: 'inherit'
+    fontFamily: 'inherit',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   select: {
     padding: '0.75rem 1rem',
@@ -1220,7 +904,9 @@ const styles = {
     transition: 'all 0.2s',
     fontFamily: 'inherit',
     cursor: 'pointer',
-    background: 'white'
+    background: 'white',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   textarea: {
     padding: '0.75rem 1rem',
@@ -1230,16 +916,19 @@ const styles = {
     outline: 'none',
     transition: 'all 0.2s',
     fontFamily: 'inherit',
-    resize: 'vertical'
+    resize: 'vertical',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   aiSuggestion: {
     display: 'flex',
     alignItems: 'center',
     gap: '1rem',
-    padding: '1.5rem',
+    padding: '1.25rem',
     background: 'linear-gradient(135deg, #f3e8ff, #eff6ff)',
     borderRadius: '12px',
-    border: '1px solid #e9d5ff'
+    border: '1px solid #e9d5ff',
+    flexWrap: 'wrap'
   },
   aiSuggestionTitle: {
     fontSize: '1rem',
@@ -1256,7 +945,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '0.75rem 1.5rem',
+    padding: '0.75rem 1.25rem',
     background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
     color: 'white',
     border: 'none',
@@ -1268,17 +957,19 @@ const styles = {
     whiteSpace: 'nowrap'
   },
   modalFooter: {
-    padding: '1.5rem 2rem',
+    padding: '1rem 1.5rem',
     borderTop: '1px solid #e5e7eb',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    gap: '0.75rem',
+    flexWrap: 'wrap'
   },
   btnCancel: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '0.75rem 1.5rem',
+    padding: '0.75rem 1.25rem',
     background: 'transparent',
     color: '#6b7280',
     border: '1px solid #e5e7eb',
@@ -1292,7 +983,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '0.75rem 1.5rem',
+    padding: '0.75rem 1.25rem',
     background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
     color: 'white',
     border: 'none',
@@ -1304,12 +995,12 @@ const styles = {
   },
   detailGrid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '2rem',
-    marginBottom: '2rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '1.5rem',
+    marginBottom: '1.5rem'
   },
   detailSection: {
-    padding: '1.5rem',
+    padding: '1.25rem',
     background: '#f9fafb',
     borderRadius: '12px'
   },
@@ -1337,10 +1028,11 @@ const styles = {
   detailValue: {
     fontSize: '0.875rem',
     color: '#1f2937',
-    fontWeight: '500'
+    fontWeight: '500',
+    wordBreak: 'break-word'
   },
   notesSection: {
-    padding: '1.5rem',
+    padding: '1.25rem',
     background: '#fef3c7',
     borderRadius: '12px',
     marginBottom: '1.5rem'
@@ -1360,7 +1052,8 @@ const styles = {
   statusSection: {
     display: 'flex',
     gap: '1rem',
-    alignItems: 'center'
+    alignItems: 'center',
+    flexWrap: 'wrap'
   },
   statusBadgeLarge: {
     display: 'inline-flex',
