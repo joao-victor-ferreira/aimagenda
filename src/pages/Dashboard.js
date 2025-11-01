@@ -16,7 +16,8 @@ import {
   CheckCircle,
   AlertCircle,
   Clock,
-  UserPlus
+  UserPlus,
+  Menu
 } from 'lucide-react';
 
 import Integracao from './Integracao';
@@ -25,11 +26,10 @@ import Agenda from './Agenda';
 import Insights from './Insights';
 import Equipe from './Equipe';
 import Cliente from './Cliente';
-import { useNavigate } from 'react-router-dom';
 import MainContent from './MainContent';
 
 export default function Dashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -97,113 +97,716 @@ export default function Dashboard() {
   const handleLogout = () => {
     console.log('Saindo do sistema...');
     setLogoutModalOpen(false);
-    // Aqui você colocaria a lógica de logout real
   };
 
- // 🔹 Conteúdo dinâmico de acordo com o menu selecionado
+  const handleMenuClick = (menuId) => {
+    setActiveMenu(menuId);
+    setSidebarOpen(false); // Fecha sidebar no mobile após clicar
+  };
+
   const renderContent = () => {
     switch (activeMenu) {
       case 'clients':
-        return (
-        <Cliente />
-        );
-
+        return <Cliente />;
       case 'appointments':
-        return (
-          <Agenda />
-        );
-
+        return <Agenda />;
       case 'integrations':
-        return (
-          <Integracao />
-        );
-
+        return <Integracao />;
       case 'ai':
-        return (
-        <AIConfiguracao />
-        );
-
+        return <AIConfiguracao />;
       case 'insights':
-        return (
-          <Insights />  
-        );
-
+        return <Insights />;
       case 'team':
-        return (
-          <Equipe />
-        );
-
+        return <Equipe />;
       default:
-        // 🔹 Página inicial (Dashboard)
-        return (
-        <MainContent />
-        );
+        return <MainContent />;
     }
   };
 
-
-
   return (
-    <div style={styles.container}>
+    <div className="dashboard-container">
+      <style>{`
+        .dashboard-container {
+          display: flex;
+          min-height: 100vh;
+          background: #fafafa;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* Overlay para mobile */
+        .sidebar-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 998;
+        }
+
+        .sidebar-overlay.active {
+          display: block;
+        }
+
+        /* Sidebar */
+        .sidebar {
+          width: 260px;
+          background: white;
+          border-right: 1px solid #e5e7eb;
+          display: flex;
+          flex-direction: column;
+          position: fixed;
+          height: 100vh;
+          z-index: 999;
+          transition: transform 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+          .sidebar {
+            transform: translateX(-100%);
+          }
+
+          .sidebar.open {
+            transform: translateX(0);
+          }
+        }
+
+        .sidebar-header {
+          padding: 1.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          border-bottom: 1px solid #f3f4f6;
+        }
+
+        .logo {
+          width: 40px;
+          height: 40px;
+          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .logo-text {
+          font-size: 1.25rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .menu-list {
+          padding: 1rem;
+          flex: 1;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .menu-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 1rem 2rem;
+          background: transparent;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          color: #6b7280;
+          font-size: 0.875rem;
+          font-weight: 500;
+          width: 100%;
+          transition: all 0.3s ease;
+          text-align: left;
+        }
+
+        .menu-item:hover {
+          background: #f9fafb;
+          transform: translateX(4px);
+          color: #374151;
+        }
+
+        .menu-item.active {
+          background: linear-gradient(135deg, #eff6ff, #f3e8ff);
+          color: #3b82f6;
+          font-weight: 600;
+        }
+
+        .sidebar-footer {
+          padding: 1rem;
+          border-top: 1px solid #f3f4f6;
+        }
+
+        .settings-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem 1rem;
+          background: transparent;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          cursor: pointer;
+          color: #6b7280;
+          font-size: 0.875rem;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          width: 100%;
+        }
+
+        .settings-btn:hover {
+          background: linear-gradient(135deg, #eff6ff, #f3e8ff);
+          border-color: #3b82f6;
+          color: #3b82f6;
+          transform: scale(1.02);
+        }
+
+        /* Main Content */
+        .main-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          margin-left: 0;
+        }
+
+        @media (min-width: 769px) {
+          .main-content {
+            margin-left: 260px;
+          }
+        }
+
+        /* Header */
+        .header {
+          background: white;
+          border-bottom: 1px solid #e5e7eb;
+          padding: 1rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+          .header {
+            padding: 1.5rem 2rem;
+          }
+        }
+
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .menu-toggle {
+          padding: 0.5rem;
+          background: transparent;
+          border: none;
+          color: #6b7280;
+          cursor: pointer;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        @media (min-width: 769px) {
+          .menu-toggle {
+            display: none;
+          }
+        }
+
+        .header-info {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .header-title {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #1f2937;
+          margin: 0;
+        }
+
+        @media (min-width: 768px) {
+          .header-title {
+            font-size: 1.5rem;
+          }
+        }
+
+        .header-subtitle {
+          font-size: 0.8rem;
+          color: #6b7280;
+          margin: 0;
+          display: none;
+        }
+
+        @media (min-width: 768px) {
+          .header-subtitle {
+            display: block;
+            font-size: 0.875rem;
+          }
+        }
+
+        .header-right {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+          .header-right {
+            gap: 1rem;
+          }
+        }
+
+        .search-container {
+          position: relative;
+          display: none;
+        }
+
+        @media (min-width: 768px) {
+          .search-container {
+            display: block;
+          }
+        }
+
+        .search-icon {
+          position: absolute;
+          left: 0.75rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #9ca3af;
+        }
+
+        .search-input {
+          padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          fontSize: 0.875rem;
+          width: 250px;
+        }
+
+        .icon-button {
+          padding: 0.5rem;
+          background: transparent;
+          border: none;
+          border-radius: 8px;
+          color: #6b7280;
+          position: relative;
+          cursor: pointer;
+          transition: background 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .icon-button:hover {
+          background: #f3f4f6;
+        }
+
+        .notification-badge {
+          position: absolute;
+          top: 0.25rem;
+          right: 0.25rem;
+          min-width: 18px;
+          height: 18px;
+          background: #ef4444;
+          border-radius: 50%;
+          color: white;
+          font-size: 0.65rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid white;
+        }
+
+        /* Notifications Panel */
+        .notifications-panel {
+          position: absolute;
+          right: 0;
+          top: 120%;
+          width: 90vw;
+          max-width: 380px;
+          max-height: 500px;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+          border: 1px solid #e5e7eb;
+          animation: slideDown 0.3s ease;
+          z-index: 1000;
+        }
+
+        .notifications-panel-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 1.25rem;
+          border-bottom: 1px solid #f3f4f6;
+        }
+
+        .notifications-panel-title {
+          font-size: 1rem;
+          font-weight: 700;
+          color: #1f2937;
+          margin: 0;
+        }
+
+        .close-notifications-btn {
+          padding: 0.25rem;
+          background: transparent;
+          border: none;
+          color: #9ca3af;
+          cursor: pointer;
+          border-radius: 4px;
+          transition: all 0.2s;
+        }
+
+        .notifications-list {
+          max-height: 360px;
+          overflow-y: auto;
+        }
+
+        .notification-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+          padding: 1rem 1.25rem;
+          border-bottom: 1px solid #f9fafb;
+          cursor: pointer;
+          transition: background 0.2s;
+          position: relative;
+        }
+
+        .notification-item:hover {
+          background: #f9fafb;
+        }
+
+        .notification-item.unread {
+          background: #f9fafb;
+        }
+
+        .notification-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .notification-content {
+          flex: 1;
+        }
+
+        .notification-title {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #1f2937;
+          margin: 0 0 0.25rem 0;
+        }
+
+        .notification-message {
+          font-size: 0.8rem;
+          color: #6b7280;
+          margin: 0 0 0.25rem 0;
+          line-height: 1.4;
+        }
+
+        .notification-time {
+          font-size: 0.75rem;
+          color: #9ca3af;
+        }
+
+        .unread-dot {
+          width: 8px;
+          height: 8px;
+          background: #3b82f6;
+          border-radius: 50%;
+          flex-shrink: 0;
+          margin-top: 0.5rem;
+        }
+
+        .notifications-panel-footer {
+          padding: 0.75rem 1.25rem;
+          border-top: 1px solid #f3f4f6;
+        }
+
+        .view-all-notifications-btn {
+          width: 100%;
+          padding: 0.5rem;
+          background: transparent;
+          border: none;
+          color: #3b82f6;
+          font-size: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          border-radius: 6px;
+          transition: background 0.2s;
+        }
+
+        .view-all-notifications-btn:hover {
+          background: #f3f4f6;
+        }
+
+        /* User Menu */
+        .user-menu {
+          position: relative;
+        }
+
+        .user-button {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+        }
+
+        @media (min-width: 768px) {
+          .user-button {
+            gap: 0.75rem;
+          }
+        }
+
+        .user-avatar {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 600;
+          font-size: 0.875rem;
+        }
+
+        .user-info {
+          display: none;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        @media (min-width: 768px) {
+          .user-info {
+            display: flex;
+          }
+        }
+
+        .user-name {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        .user-role {
+          font-size: 0.75rem;
+          color: #6b7280;
+        }
+
+        .user-dropdown {
+          position: absolute;
+          right: 0;
+          top: 110%;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+          width: 180px;
+          z-index: 10;
+        }
+
+        .dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem 1rem;
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          color: #374151;
+          font-size: 0.875rem;
+          width: 100%;
+          text-align: left;
+          transition: background 0.2s;
+        }
+
+        .dropdown-item:hover {
+          background: #f9fafb;
+        }
+
+        .dropdown-item.logout {
+          color: #ef4444;
+        }
+
+        /* Modal */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0,0,0,0.5);
+          z-index: 9998;
+          animation: fadeIn 0.3s ease;
+        }
+
+        .logout-modal {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: white;
+          border-radius: 16px;
+          padding: 2rem;
+          width: 90%;
+          max-width: 400px;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          z-index: 9999;
+          animation: modalSlideUp 0.3s ease;
+          text-align: center;
+        }
+
+        .logout-modal-icon {
+          width: 64px;
+          height: 64px;
+          margin: 0 auto 1rem;
+          background: #fee2e2;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .logout-modal-title {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #1f2937;
+          margin: 0 0 0.5rem 0;
+        }
+
+        .logout-modal-message {
+          font-size: 0.95rem;
+          color: #6b7280;
+          margin: 0 0 1.5rem 0;
+          line-height: 1.5;
+        }
+
+        .logout-modal-actions {
+          display: flex;
+          gap: 0.75rem;
+        }
+
+        .logout-cancel-btn {
+          flex: 1;
+          padding: 0.75rem;
+          background: #f3f4f6;
+          border: none;
+          border-radius: 8px;
+          color: #374151;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .logout-cancel-btn:hover {
+          background: #e5e7eb;
+        }
+
+        .logout-confirm-btn {
+          flex: 1;
+          padding: 0.75rem;
+          background: #ef4444;
+          border: none;
+          border-radius: 8px;
+          color: white;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .logout-confirm-btn:hover {
+          background: #dc2626;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes modalSlideUp {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -40%);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+          }
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+
+      {/* Overlay */}
+      <div 
+        className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
       {/* Sidebar */}
-      <aside style={styles.sidebar}>
-        <div style={styles.sidebarHeader}>
-          <div style={styles.logo}>
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="logo">
             <Brain size={24} color="white" />
           </div>
-          <span style={styles.logoText}>AIM Agenda</span>
+          <span className="logo-text">AIM Agenda</span>
         </div>
 
-        <nav style={styles.menuList}>
+        <nav className="menu-list">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeMenu === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveMenu(item.id)}
-                style={{
-                  ...styles.menuItem,
-                  ...(isActive ? styles.menuItemActive : {})
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = '#f9fafb';
-                    e.currentTarget.style.transform = 'translateX(4px)';
-                    e.currentTarget.style.color = '#374151';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                    e.currentTarget.style.color = '#6b7280';
-                  }
-                }}
+                onClick={() => handleMenuClick(item.id)}
+                className={`menu-item ${isActive ? 'active' : ''}`}
               >
                 <Icon size={20} />
-                <span style={styles.menuLabel}>{item.label}</span>
+                <span>{item.label}</span>
               </button>
             );
           })}
         </nav>
 
-        <div style={styles.sidebarFooter}>
-          <button 
-            style={styles.settingsBtn}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #eff6ff, #f3e8ff)';
-              e.currentTarget.style.borderColor = '#3b82f6';
-              e.currentTarget.style.color = '#3b82f6';
-              e.currentTarget.style.transform = 'scale(1.02)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.borderColor = '#e5e7eb';
-              e.currentTarget.style.color = '#6b7280';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
+        <div className="sidebar-footer">
+          <button className="settings-btn">
             <Settings size={20} />
             <span>Configurações</span>
           </button>
@@ -211,77 +814,82 @@ export default function Dashboard() {
       </aside>
 
       {/* Main Content */}
-      <main style={styles.mainContent}>
+      <main className="main-content">
         {/* Header */}
-        <header style={styles.header}>
-          <div>
-            <h1 style={styles.headerTitle}>Painel</h1>
-            <p style={styles.headerSubtitle}>Bem-vindo de volta, João Silva</p>
+        <header className="header">
+          <div className="header-left">
+            <button 
+              className="menu-toggle"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              <Menu size={24} />
+            </button>
+
+            <div className="header-info">
+              <h1 className="header-title">Painel</h1>
+              <p className="header-subtitle">Bem-vindo de volta, João Silva</p>
+            </div>
           </div>
 
-          <div style={styles.headerRight}>
-            <div style={styles.searchContainer}>
-              <Search size={18} style={styles.searchIcon} />
-              <input type="text" placeholder="Buscar..." style={styles.searchInput} />
+          <div className="header-right">
+            <div className="search-container">
+              <Search size={18} className="search-icon" />
+              <input type="text" placeholder="Buscar..." className="search-input" />
             </div>
 
-            {/* Botão de Notificações */}
+            {/* Notificações */}
             <div style={{position: 'relative'}}>
               <button 
-                style={styles.iconButton}
+                className="icon-button"
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
-                  <span style={styles.notificationBadge}>{unreadCount}</span>
+                  <span className="notification-badge">{unreadCount}</span>
                 )}
               </button>
 
-              {/* Dropdown de Notificações */}
               {notificationsOpen && (
-                <div style={styles.notificationsPanel}>
-                  <div style={styles.notificationsPanelHeader}>
-                    <h3 style={styles.notificationsPanelTitle}>Notificações</h3>
+                <div className="notifications-panel">
+                  <div className="notifications-panel-header">
+                    <h3 className="notifications-panel-title">Notificações</h3>
                     <button 
-                      style={styles.closeNotificationsBtn}
+                      className="close-notifications-btn"
                       onClick={() => setNotificationsOpen(false)}
                     >
                       <X size={18} />
                     </button>
                   </div>
 
-                  <div style={styles.notificationsList}>
+                  <div className="notifications-list">
                     {notifications.map((notification) => {
                       const NotifIcon = notification.icon;
                       return (
                         <div 
                           key={notification.id} 
-                          style={{
-                            ...styles.notificationItem,
-                            ...(notification.unread ? styles.notificationItemUnread : {})
-                          }}
+                          className={`notification-item ${notification.unread ? 'unread' : ''}`}
                         >
-                          <div style={{
-                            ...styles.notificationIcon,
-                            background: notification.bg
-                          }}>
+                          <div 
+                            className="notification-icon"
+                            style={{background: notification.bg}}
+                          >
                             <NotifIcon size={18} color={notification.color} />
                           </div>
-                          <div style={styles.notificationContent}>
-                            <p style={styles.notificationTitle}>{notification.title}</p>
-                            <p style={styles.notificationMessage}>{notification.message}</p>
-                            <span style={styles.notificationTime}>{notification.time}</span>
+                          <div className="notification-content">
+                            <p className="notification-title">{notification.title}</p>
+                            <p className="notification-message">{notification.message}</p>
+                            <span className="notification-time">{notification.time}</span>
                           </div>
                           {notification.unread && (
-                            <div style={styles.unreadDot}></div>
+                            <div className="unread-dot"></div>
                           )}
                         </div>
                       );
                     })}
                   </div>
 
-                  <div style={styles.notificationsPanelFooter}>
-                    <button style={styles.viewAllNotificationsBtn}>
+                  <div className="notifications-panel-footer">
+                    <button className="view-all-notifications-btn">
                       Ver todas as notificações
                     </button>
                   </div>
@@ -289,23 +897,24 @@ export default function Dashboard() {
               )}
             </div>
 
-            <div style={styles.userMenu}>
-              <button style={styles.userButton} onClick={() => setUserMenuOpen(!userMenuOpen)}>
-                <div style={styles.userAvatar}>JS</div>
-                <div style={styles.userInfo}>
-                  <span style={styles.userName}>João Silva</span>
-                  <span style={styles.userRole}>Admin</span>
+            {/* User Menu */}
+            <div className="user-menu">
+              <button className="user-button" onClick={() => setUserMenuOpen(!userMenuOpen)}>
+                <div className="user-avatar">JS</div>
+                <div className="user-info">
+                  <span className="user-name">João Silva</span>
+                  <span className="user-role">Admin</span>
                 </div>
                 <ChevronDown size={16} />
               </button>
 
               {userMenuOpen && (
-                <div style={styles.userDropdown}>
-                  <button style={styles.dropdownItem}>
+                <div className="user-dropdown">
+                  <button className="dropdown-item">
                     <Settings size={16} /> Configurações
                   </button>
                   <button 
-                    style={{...styles.dropdownItem, color: '#ef4444'}}
+                    className="dropdown-item logout"
                     onClick={() => {
                       setUserMenuOpen(false);
                       setLogoutModalOpen(true);
@@ -327,26 +936,26 @@ export default function Dashboard() {
       {logoutModalOpen && (
         <>
           <div 
-            style={styles.modalOverlay}
+            className="modal-overlay"
             onClick={() => setLogoutModalOpen(false)}
           />
-          <div style={styles.logoutModal}>
-            <div style={styles.logoutModalIcon}>
+          <div className="logout-modal">
+            <div className="logout-modal-icon">
               <LogOut size={32} color="#ef4444" />
             </div>
-            <h2 style={styles.logoutModalTitle}>Confirmar Saída</h2>
-            <p style={styles.logoutModalMessage}>
+            <h2 className="logout-modal-title">Confirmar Saída</h2>
+            <p className="logout-modal-message">
               Tem certeza que deseja sair do sistema?
             </p>
-            <div style={styles.logoutModalActions}>
+            <div className="logout-modal-actions">
               <button 
-                style={styles.logoutCancelBtn}
+                className="logout-cancel-btn"
                 onClick={() => setLogoutModalOpen(false)}
               >
                 Cancelar
               </button>
               <button 
-                style={styles.logoutConfirmBtn}
+                className="logout-confirm-btn"
                 onClick={handleLogout}
               >
                 Sim, Sair
@@ -358,305 +967,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-const styles = {
-  container: { display: 'flex', minHeight: '100vh', background: '#fafafa', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
-  contentWrapper: { padding: '2rem' },
-  sidebar: { width: '260px', background: 'white', borderRight: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh', zIndex: 100 },
-  sidebarHeader: { padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid #f3f4f6' },
-  logo: { width: '40px', height: '40px', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  logoText: {
-    fontSize: '1.25rem',
-    fontWeight: '700',
-    background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text'
-  },
-  menuList: { padding: '1rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' },
-  menuItem: { 
-    display: 'flex', 
-    alignItems: 'center', 
-    gap: '0.75rem', 
-    padding: '1rem 2rem', 
-    background: 'transparent', 
-    border: 'none', 
-    borderRadius: '8px', 
-    cursor: 'pointer', 
-    color: '#6b7280', 
-    fontSize: '0.875rem', 
-    fontWeight: '500', 
-    width: '100%',
-    transition: 'all 0.3s ease',
-    transform: 'translateX(0)'
-  },
-  menuItemActive: { background: 'linear-gradient(135deg, #eff6ff, #f3e8ff)', color: '#3b82f6', fontWeight: '600' },
-  menuLabel: { flex: 1, textAlign: 'left' },
-  sidebarFooter: { padding: '1rem', borderTop: '1px solid #f3f4f6' },
-  settingsBtn: { 
-    display: 'flex', 
-    alignItems: 'center', 
-    gap: '0.75rem', 
-    padding: '0.75rem 1rem', 
-    background: 'transparent', 
-    border: '1px solid #e5e7eb', 
-    borderRadius: '8px', 
-    cursor: 'pointer', 
-    color: '#6b7280', 
-    fontSize: '0.875rem', 
-    fontWeight: '500',
-    transition: 'all 0.3s ease',
-    width: '100%'
-  },
-  mainContent: { flex: 1, marginLeft: '260px', display: 'flex', flexDirection: 'column' },
-  header: { background: 'white', borderBottom: '1px solid #e5e7eb', padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 50 },
-  headerTitle: { fontSize: '1.5rem', fontWeight: '700', color: '#1f2937', margin: 0 },
-  headerSubtitle: { fontSize: '0.875rem', color: '#6b7280', margin: 0 },
-  headerRight: { display: 'flex', alignItems: 'center', gap: '1rem' },
-  searchContainer: { position: 'relative' },
-  searchIcon: { position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' },
-  searchInput: { padding: '0.5rem 0.75rem 0.5rem 2.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '0.875rem', width: '250px' },
-  iconButton: { padding: '0.5rem', background: 'transparent', border: 'none', borderRadius: '8px', color: '#6b7280', position: 'relative', cursor: 'pointer', transition: 'background 0.2s' },
-  notificationBadge: { 
-    position: 'absolute', 
-    top: '0.25rem', 
-    right: '0.25rem', 
-    minWidth: '18px',
-    height: '18px',
-    background: '#ef4444', 
-    borderRadius: '50%',
-    color: 'white',
-    fontSize: '0.65rem',
-    fontWeight: '700',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: '2px solid white'
-  },
-  notificationsPanel: {
-    position: 'absolute',
-    right: 0,
-    top: '120%',
-    width: '380px',
-    maxHeight: '500px',
-    background: 'white',
-    borderRadius: '12px',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-    border: '1px solid #e5e7eb',
-    animation: 'slideDown 0.3s ease',
-    zIndex: 1000
-  },
-  notificationsPanelHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '1rem 1.25rem',
-    borderBottom: '1px solid #f3f4f6'
-  },
-  notificationsPanelTitle: {
-    fontSize: '1rem',
-    fontWeight: '700',
-    color: '#1f2937',
-    margin: 0
-  },
-  closeNotificationsBtn: {
-    padding: '0.25rem',
-    background: 'transparent',
-    border: 'none',
-    color: '#9ca3af',
-    cursor: 'pointer',
-    borderRadius: '4px',
-    transition: 'all 0.2s'
-  },
-  notificationsList: {
-    maxHeight: '360px',
-    overflowY: 'auto'
-  },
-  notificationItem: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '1rem',
-    padding: '1rem 1.25rem',
-    borderBottom: '1px solid #f9fafb',
-    cursor: 'pointer',
-    transition: 'background 0.2s',
-    position: 'relative'
-  },
-  notificationItemUnread: {
-    background: '#f9fafb'
-  },
-  notificationIcon: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0
-  },
-  notificationContent: {
-    flex: 1
-  },
-  notificationTitle: {
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    color: '#1f2937',
-    margin: '0 0 0.25rem 0'
-  },
-  notificationMessage: {
-    fontSize: '0.8rem',
-    color: '#6b7280',
-    margin: '0 0 0.25rem 0',
-    lineHeight: '1.4'
-  },
-  notificationTime: {
-    fontSize: '0.75rem',
-    color: '#9ca3af'
-  },
-  unreadDot: {
-    width: '8px',
-    height: '8px',
-    background: '#3b82f6',
-    borderRadius: '50%',
-    flexShrink: 0,
-    marginTop: '0.5rem'
-  },
-  notificationsPanelFooter: {
-    padding: '0.75rem 1.25rem',
-    borderTop: '1px solid #f3f4f6'
-  },
-  viewAllNotificationsBtn: {
-    width: '100%',
-    padding: '0.5rem',
-    background: 'transparent',
-    border: 'none',
-    color: '#3b82f6',
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    borderRadius: '6px',
-    transition: 'background 0.2s'
-  },
-  userMenu: { position: 'relative' },
-  userButton: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', background: 'transparent', border: 'none', cursor: 'pointer' },
-  userAvatar: { width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '600' },
-  userInfo: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start' },
-  userName: { fontSize: '0.875rem', fontWeight: '600', color: '#1f2937' },
-  userRole: { fontSize: '0.75rem', color: '#6b7280' },
-  userDropdown: { position: 'absolute', right: 0, top: '110%', background: 'white', border: '1px solid #e5e7eb', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', width: '180px', zIndex: 10 },
-  dropdownItem: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', border: 'none', background: 'transparent', cursor: 'pointer', color: '#374151', fontSize: '0.875rem', width: '100%', textAlign: 'left', transition: 'background 0.2s' },
-  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' },
-  statCard: { background: 'white', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
-  statHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' },
-  statIcon: { padding: '0.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  statChange: { display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem', fontWeight: '600' },
-  statTitle: { color: '#6b7280', fontSize: '0.875rem', margin: 0 },
-  statValue: { fontSize: '1.75rem', fontWeight: '700', marginTop: '0.25rem', color: '#111827' },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0,0,0,0.5)',
-    zIndex: 9998,
-    animation: 'fadeIn 0.3s ease'
-  },
-  logoutModal: {
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    background: 'white',
-    borderRadius: '16px',
-    padding: '2rem',
-    width: '90%',
-    maxWidth: '400px',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-    zIndex: 9999,
-    animation: 'modalSlideUp 0.3s ease',
-    textAlign: 'center'
-  },
-  logoutModalIcon: {
-    width: '64px',
-    height: '64px',
-    margin: '0 auto 1rem',
-    background: '#fee2e2',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  logoutModalTitle: {
-    fontSize: '1.5rem',
-    fontWeight: '700',
-    color: '#1f2937',
-    margin: '0 0 0.5rem 0'
-  },
-  logoutModalMessage: {
-    fontSize: '0.95rem',
-    color: '#6b7280',
-    margin: '0 0 1.5rem 0',
-    lineHeight: '1.5'
-  },
-  logoutModalActions: {
-    display: 'flex',
-    gap: '0.75rem'
-  },
-  logoutCancelBtn: {
-    flex: 1,
-    padding: '0.75rem',
-    background: '#f3f4f6',
-    border: 'none',
-    borderRadius: '8px',
-    color: '#374151',
-    fontSize: '0.95rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  },
-  logoutConfirmBtn: {
-    flex: 1,
-    padding: '0.75rem',
-    background: '#ef4444',
-    border: 'none',
-    borderRadius: '8px',
-    color: 'white',
-    fontSize: '0.95rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  }
-};
-
-// Adiciona as animações CSS
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes modalSlideUp {
-    from {
-      opacity: 0;
-      transform: translate(-50%, -40%);
-    }
-    to {
-      opacity: 1;
-      transform: translate(-50%, -50%);
-    }
-  }
-  
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-`;
-document.head.appendChild(styleSheet);

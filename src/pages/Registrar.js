@@ -46,62 +46,59 @@ export default function Registrar() {
     }, 1500);
   };
 
-  const plans = [
-    {
-      id: 'free',
-      name: 'Free',
-      price: 'R$ 0',
-      period: '/mês',
-      icon: Sparkles,
-      color: '#6b7280',
-      gradient: 'linear-gradient(135deg, #6b7280, #9ca3af)',
-      features: [
-        'Até 50 agendamentos/mês',
-        'Calendário básico',
-        '1 usuário',
-        'Notificações por email',
-        'Suporte por email'
-      ]
-    },
-    {
-      id: 'premium',
-      name: 'Premium',
-      price: 'R$ 49,90',
-      period: '/mês',
-      icon: Zap,
-      color: '#3b82f6',
-      gradient: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-      popular: true,
-      features: [
-        'Agendamentos ilimitados',
-        'Calendário avançado',
-        'Até 5 usuários',
-        'Notificações SMS + Email',
-        'Lembretes automáticos',
-        'Relatórios básicos',
-        'Suporte prioritário'
-      ]
-    },
-    {
-      id: 'ultimate',
-      name: 'Ultimate',
-      price: 'R$ 99,90',
-      period: '/mês',
-      icon: Crown,
-      color: '#9333ea',
-      gradient: 'linear-gradient(135deg, #9333ea, #ec4899)',
-      features: [
-        'Tudo do Premium +',
-        'Usuários ilimitados',
-        'IA para agendamento inteligente',
-        'API integração',
-        'WhatsApp Business integrado',
-        'Relatórios avançados',
-        'Customização completa',
-        'Suporte 24/7 dedicado'
-      ]
-    }
-  ];
+ const plans = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    price: 'R$ 149',
+    period: '/mês',
+    icon: Sparkles,
+    color: '#6b7280',
+    gradient: 'linear-gradient(135deg, #6b7280, #9ca3af)',
+    features: [
+      '200 mensagens IA/mês',
+      '1 usuário',
+      'Todas as integrações',
+      'Relatórios avançados',
+      'Suporte por e-mail'
+    ]
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    price: 'R$ 299',
+    period: '/mês',
+    icon: Zap,
+    color: '#3b82f6',
+    gradient: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+    popular: true,
+    features: [
+      '500 mensagens IA/mês',
+      '3 usuários',
+      'Todas as integrações',
+      'Relatórios avançados',
+      'Suporte padrão'
+    ],
+    badge: 'Mais Popular'
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    price: 'R$ 499',
+    period: '/mês',
+    icon: Crown,
+    color: '#9333ea',
+    gradient: 'linear-gradient(135deg, #9333ea, #ec4899)',
+    features: [
+      '1000 mensagens IA/mês',
+      '10 usuários',
+      'Todas as integrações',
+      'Relatórios avançados',
+      'Suporte prioritário'
+    ]
+  }
+];
+
 
   const styles = {
     container: {
@@ -324,7 +321,8 @@ export default function Registrar() {
       gap: '0.5rem',
       marginBottom: '0.75rem',
       fontSize: '0.875rem',
-      color: '#4b5563'
+      color: '#4b5563',
+      marginTop: '20px'
     },
     checkIcon: {
       minWidth: '1rem',

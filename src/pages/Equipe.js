@@ -1,25 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Users,
-  UserPlus,
-  Mail,
-  Shield,
-  Edit,
-  Trash2,
-  MoreVertical,
-  Check,
-  X,
-  Clock,
-  Search,
-  Filter,
-  Crown,
-  Eye,
-  Settings,
-  LogOut,
-  Send,
-  Copy,
-  AlertCircle,
-  CheckCircle
+  Users, UserPlus, Mail, Shield, Edit, Trash2, Check, X, Clock, Search,
+  Crown, Eye, Settings, Send, AlertCircle, CheckCircle
 } from 'lucide-react';
 
 export default function Equipe() {
@@ -29,162 +11,166 @@ export default function Equipe() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const [inviteData, setInviteData] = useState({
-    email: '',
-    name: '',
-    role: 'viewer'
+    email: '', name: '', role: 'viewer'
   });
 
   const [members, setMembers] = useState([
     {
-      id: 1,
-      name: 'João Silva',
-      email: 'joao@empresa.com',
-      role: 'admin',
-      status: 'online',
-      avatar: 'JS',
-      joinedAt: '2024-01-15',
-      lastActive: 'Agora',
+      id: 1, name: 'João Silva', email: 'joao@empresa.com', role: 'admin',
+      status: 'online', avatar: 'JS', joinedAt: '2024-01-15', lastActive: 'Agora',
       permissions: ['read', 'edit', 'admin']
     },
     {
-      id: 2,
-      name: 'Maria Santos',
-      email: 'maria@empresa.com',
-      role: 'editor',
-      status: 'online',
-      avatar: 'MS',
-      joinedAt: '2024-02-10',
-      lastActive: '5 min atrás',
+      id: 2, name: 'Maria Santos', email: 'maria@empresa.com', role: 'editor',
+      status: 'online', avatar: 'MS', joinedAt: '2024-02-10', lastActive: '5 min atrás',
       permissions: ['read', 'edit']
     },
     {
-      id: 3,
-      name: 'Pedro Costa',
-      email: 'pedro@empresa.com',
-      role: 'viewer',
-      status: 'offline',
-      avatar: 'PC',
-      joinedAt: '2024-03-05',
-      lastActive: '2 horas atrás',
+      id: 3, name: 'Pedro Costa', email: 'pedro@empresa.com', role: 'viewer',
+      status: 'offline', avatar: 'PC', joinedAt: '2024-03-05', lastActive: '2 horas atrás',
       permissions: ['read']
     },
     {
-      id: 4,
-      name: 'Ana Oliveira',
-      email: 'ana@empresa.com',
-      role: 'editor',
-      status: 'online',
-      avatar: 'AO',
-      joinedAt: '2024-03-20',
-      lastActive: 'Agora',
+      id: 4, name: 'Ana Oliveira', email: 'ana@empresa.com', role: 'editor',
+      status: 'online', avatar: 'AO', joinedAt: '2024-03-20', lastActive: 'Agora',
       permissions: ['read', 'edit']
     },
     {
-      id: 5,
-      name: 'Carlos Ferreira',
-      email: 'carlos@empresa.com',
-      role: 'viewer',
-      status: 'offline',
-      avatar: 'CF',
-      joinedAt: '2024-04-01',
-      lastActive: '1 dia atrás',
+      id: 5, name: 'Carlos Ferreira', email: 'carlos@empresa.com', role: 'viewer',
+      status: 'offline', avatar: 'CF', joinedAt: '2024-04-01', lastActive: '1 dia atrás',
       permissions: ['read']
     }
   ]);
 
   const roles = [
     {
-      id: 'admin',
-      name: 'Administrador',
-      icon: Crown,
-      color: '#8b5cf6',
-      description: 'Acesso total ao sistema',
-      permissions: ['read', 'edit', 'admin']
+      id: 'admin', name: 'Administrador', icon: Crown, color: '#8b5cf6',
+      description: 'Acesso total ao sistema', permissions: ['read', 'edit', 'admin']
     },
     {
-      id: 'editor',
-      name: 'Editor',
-      icon: Edit,
-      color: '#3b82f6',
-      description: 'Pode criar e editar conteúdo',
-      permissions: ['read', 'edit']
+      id: 'editor', name: 'Editor', icon: Edit, color: '#3b82f6',
+      description: 'Pode criar e editar conteúdo', permissions: ['read', 'edit']
     },
     {
-      id: 'viewer',
-      name: 'Visualizador',
-      icon: Eye,
-      color: '#6b7280',
-      description: 'Apenas visualização',
-      permissions: ['read']
+      id: 'viewer', name: 'Visualizador', icon: Eye, color: '#6b7280',
+      description: 'Apenas visualização', permissions: ['read']
     }
   ];
 
-  const getRoleConfig = (roleId) => {
-    return roles.find(r => r.id === roleId) || roles[2];
-  };
-
-  const getStatusColor = (status) => {
-    return status === 'online' ? '#10b981' : '#6b7280';
-  };
+  const getRoleConfig = (roleId) => roles.find(r => r.id === roleId) || roles[2];
+  const getStatusColor = (status) => status === 'online' ? '#10b981' : '#6b7280';
 
   const filteredMembers = members.filter(member => {
     const matchesSearch = 
       member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
     const matchesRole = filterRole === 'all' || member.role === filterRole;
     const matchesStatus = filterStatus === 'all' || member.status === filterStatus;
-    
     return matchesSearch && matchesRole && matchesStatus;
   });
 
   const stats = [
-    { label: 'Total de Membros', value: members.length, color: '#3b82f6' },
-    { label: 'Online Agora', value: members.filter(m => m.status === 'online').length, color: '#10b981' },
-    { label: 'Administradores', value: members.filter(m => m.role === 'admin').length, color: '#8b5cf6' },
-    { label: 'Convites Pendentes', value: 2, color: '#f59e0b' }
+    { label: 'Total', value: members.length, color: '#3b82f6' },
+    { label: 'Online', value: members.filter(m => m.status === 'online').length, color: '#10b981' },
+    { label: 'Admins', value: members.filter(m => m.role === 'admin').length, color: '#8b5cf6' },
+    { label: 'Convites', value: 2, color: '#f59e0b' }
   ];
 
   const handleInvite = () => {
-    // Send invite logic
     console.log('Sending invite:', inviteData);
     setShowInviteModal(false);
     setInviteData({ email: '', name: '', role: 'viewer' });
   };
 
   const handleDeleteMember = (memberId) => {
+ 
+  };
+
+  const MemberCard = ({ member }) => {
+    const roleConfig = getRoleConfig(member.role);
+    const RoleIcon = roleConfig.icon;
     
+    return (
+      <div style={styles.memberCard}>
+        <div style={styles.cardHeader}>
+          <div style={styles.memberCell}>
+            <div style={styles.memberAvatarContainer}>
+              <div style={styles.memberAvatar}>{member.avatar}</div>
+              <div style={{...styles.statusDot, background: getStatusColor(member.status)}}></div>
+            </div>
+            <div>
+              <div style={styles.memberName}>{member.name}</div>
+              <div style={styles.memberJoined}>
+                {new Date(member.joinedAt).toLocaleDateString('pt-BR')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={styles.cardBody}>
+          <div style={styles.cardInfoRow}>
+            <Mail size={14} color="#6b7280" />
+            <span style={styles.cardInfoText}>{member.email}</span>
+          </div>
+          <div style={styles.cardInfoRow}>
+            <Clock size={14} color="#6b7280" />
+            <span style={styles.cardInfoText}>{member.lastActive}</span>
+          </div>
+        </div>
+
+        <div style={styles.cardFooter}>
+          <div style={{...styles.roleBadge, background: `${roleConfig.color}15`, color: roleConfig.color}}>
+            <RoleIcon size={14} />
+            {roleConfig.name}
+          </div>
+          <div style={styles.cardActions}>
+            <button style={styles.cardActionBtn} onClick={() => { setSelectedMember(member); setShowEditModal(true); }}>
+              <Edit size={16} />
+            </button>
+            <button style={styles.cardActionBtn} onClick={() => handleDeleteMember(member.id)}>
+              <Trash2 size={16} color="#ef4444" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div style={styles.container}>
-      {/* Header */}
       <div style={styles.header}>
-        <div>
+        <div style={{width: '100%'}}>
           <div style={styles.headerBadge}>
             <Users size={16} />
             <span>Equipe</span>
           </div>
           <h1 style={styles.title}>Gestão de Equipe</h1>
-          <p style={styles.subtitle}>
-            Gerencie membros, permissões e controle de acesso
-          </p>
+          <p style={styles.subtitle}>Gerencie membros e permissões</p>
         </div>
         <div style={styles.headerActions}>
-          <button style={styles.btnSecondary}>
-            <Settings size={18} />
-            Configurações
-          </button>
+          {!isMobile && (
+            <button style={styles.btnSecondary}>
+              <Settings size={18} />
+              Configurações
+            </button>
+          )}
           <button style={styles.btnPrimary} onClick={() => setShowInviteModal(true)}>
             <UserPlus size={18} />
-            Adicionar Membro
+            {!isMobile && 'Adicionar'}
           </button>
         </div>
       </div>
 
-      {/* Stats */}
       <div style={styles.statsGrid}>
         {stats.map((stat, index) => (
           <div key={index} style={styles.statCard}>
@@ -197,48 +183,47 @@ export default function Equipe() {
         ))}
       </div>
 
-      {/* Roles Cards */}
-      <div style={styles.rolesSection}>
-        <h2 style={styles.sectionTitle}>Níveis de Permissão</h2>
-        <div style={styles.rolesGrid}>
-          {roles.map((role) => {
-            const Icon = role.icon;
-            const count = members.filter(m => m.role === role.id).length;
-            
-            return (
-              <div key={role.id} style={styles.roleCard}>
-                <div style={{...styles.roleIcon, background: `${role.color}15`, color: role.color}}>
-                  <Icon size={24} />
+      {!isMobile && (
+        <div style={styles.rolesSection}>
+          <h2 style={styles.sectionTitle}>Níveis de Permissão</h2>
+          <div style={styles.rolesGrid}>
+            {roles.map((role) => {
+              const Icon = role.icon;
+              const count = members.filter(m => m.role === role.id).length;
+              return (
+                <div key={role.id} style={styles.roleCard}>
+                  <div style={{...styles.roleIcon, background: `${role.color}15`, color: role.color}}>
+                    <Icon size={24} />
+                  </div>
+                  <h3 style={styles.roleName}>{role.name}</h3>
+                  <p style={styles.roleDescription}>{role.description}</p>
+                  <div style={styles.rolePermissions}>
+                    {role.permissions.map((perm, idx) => (
+                      <div key={idx} style={styles.permissionBadge}>
+                        <Check size={12} />
+                        {perm === 'read' && 'Leitura'}
+                        {perm === 'edit' && 'Edição'}
+                        {perm === 'admin' && 'Admin'}
+                      </div>
+                    ))}
+                  </div>
+                  <div style={styles.roleCount}>
+                    <Users size={16} />
+                    {count} {count === 1 ? 'membro' : 'membros'}
+                  </div>
                 </div>
-                <h3 style={styles.roleName}>{role.name}</h3>
-                <p style={styles.roleDescription}>{role.description}</p>
-                <div style={styles.rolePermissions}>
-                  {role.permissions.map((perm, idx) => (
-                    <div key={idx} style={styles.permissionBadge}>
-                      <Check size={12} />
-                      {perm === 'read' && 'Leitura'}
-                      {perm === 'edit' && 'Edição'}
-                      {perm === 'admin' && 'Admin'}
-                    </div>
-                  ))}
-                </div>
-                <div style={styles.roleCount}>
-                  <Users size={16} />
-                  {count} {count === 1 ? 'membro' : 'membros'}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Filters */}
       <div style={styles.toolbar}>
         <div style={styles.searchContainer}>
           <Search size={18} style={styles.searchIcon} />
           <input
             type="text"
-            placeholder="Buscar por nome ou email..."
+            placeholder={isMobile ? "Buscar..." : "Buscar por nome ou email..."}
             style={styles.searchInput}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -246,143 +231,115 @@ export default function Equipe() {
         </div>
 
         <div style={styles.filters}>
-          <select
-            style={styles.filterSelect}
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
-          >
-            <option value="all">Todos os cargos</option>
-            <option value="admin">Administradores</option>
+          <select style={styles.filterSelect} value={filterRole} onChange={(e) => setFilterRole(e.target.value)}>
+            <option value="all">Todos</option>
+            <option value="admin">Admins</option>
             <option value="editor">Editores</option>
             <option value="viewer">Visualizadores</option>
           </select>
 
-          <select
-            style={styles.filterSelect}
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="all">Todos os status</option>
+          <select style={styles.filterSelect} value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <option value="all">Status</option>
             <option value="online">Online</option>
             <option value="offline">Offline</option>
           </select>
         </div>
       </div>
 
-      {/* Members Table */}
-      <div style={styles.tableContainer}>
-        <table style={styles.table}>
-          <thead>
-            <tr style={styles.tableHeader}>
-              <th style={styles.th}>Membro</th>
-              <th style={styles.th}>Email</th>
-              <th style={styles.th}>Cargo</th>
-              <th style={styles.th}>Status</th>
-              <th style={styles.th}>Última Atividade</th>
-              <th style={styles.th}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredMembers.map((member) => {
-              const roleConfig = getRoleConfig(member.role);
-              const RoleIcon = roleConfig.icon;
-              
-              return (
-                <tr key={member.id} style={styles.tableRow}>
-                  <td style={styles.td}>
-                    <div style={styles.memberCell}>
-                      <div style={styles.memberAvatarContainer}>
-                        <div style={styles.memberAvatar}>{member.avatar}</div>
-                        <div 
-                          style={{
-                            ...styles.statusDot,
-                            background: getStatusColor(member.status)
-                          }}
-                        ></div>
-                      </div>
-                      <div>
-                        <div style={styles.memberName}>{member.name}</div>
-                        <div style={styles.memberJoined}>
-                          Entrou em {new Date(member.joinedAt).toLocaleDateString('pt-BR')}
+      {isMobile ? (
+        <div style={styles.cardsGrid}>
+          {filteredMembers.map((member) => <MemberCard key={member.id} member={member} />)}
+        </div>
+      ) : (
+        <div style={styles.tableContainer}>
+          <table style={styles.table}>
+            <thead>
+              <tr style={styles.tableHeader}>
+                <th style={styles.th}>Membro</th>
+                <th style={styles.th}>Email</th>
+                <th style={styles.th}>Cargo</th>
+                <th style={styles.th}>Status</th>
+                <th style={styles.th}>Última Atividade</th>
+                <th style={styles.th}>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredMembers.map((member) => {
+                const roleConfig = getRoleConfig(member.role);
+                const RoleIcon = roleConfig.icon;
+                return (
+                  <tr key={member.id} style={styles.tableRow}>
+                    <td style={styles.td}>
+                      <div style={styles.memberCell}>
+                        <div style={styles.memberAvatarContainer}>
+                          <div style={styles.memberAvatar}>{member.avatar}</div>
+                          <div style={{...styles.statusDot, background: getStatusColor(member.status)}}></div>
+                        </div>
+                        <div>
+                          <div style={styles.memberName}>{member.name}</div>
+                          <div style={styles.memberJoined}>
+                            Entrou em {new Date(member.joinedAt).toLocaleDateString('pt-BR')}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td style={styles.td}>
-                    <div style={styles.emailCell}>
-                      <Mail size={14} color="#6b7280" />
-                      {member.email}
-                    </div>
-                  </td>
-                  <td style={styles.td}>
-                    <div style={{
-                      ...styles.roleBadge,
-                      background: `${roleConfig.color}15`,
-                      color: roleConfig.color
-                    }}>
-                      <RoleIcon size={14} />
-                      {roleConfig.name}
-                    </div>
-                  </td>
-                  <td style={styles.td}>
-                    <div style={styles.statusBadge}>
-                      <div style={{
-                        ...styles.statusIndicator,
-                        background: getStatusColor(member.status)
-                      }}></div>
-                      {member.status === 'online' ? 'Online' : 'Offline'}
-                    </div>
-                  </td>
-                  <td style={styles.td}>
-                    <div style={styles.lastActiveCell}>
-                      <Clock size={14} color="#6b7280" />
-                      {member.lastActive}
-                    </div>
-                  </td>
-                  <td style={styles.td}>
-                    <div style={styles.actionButtons}>
-                      <button
-                        style={styles.actionBtn}
-                        onClick={() => {
-                          setSelectedMember(member);
-                          setShowEditModal(true);
-                        }}
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        style={styles.actionBtn}
-                        onClick={() => handleDeleteMember(member.id)}
-                      >
-                        <Trash2 size={16} color="#ef4444" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                    <td style={styles.td}>
+                      <div style={styles.emailCell}>
+                        <Mail size={14} color="#6b7280" />
+                        {member.email}
+                      </div>
+                    </td>
+                    <td style={styles.td}>
+                      <div style={{...styles.roleBadge, background: `${roleConfig.color}15`, color: roleConfig.color}}>
+                        <RoleIcon size={14} />
+                        {roleConfig.name}
+                      </div>
+                    </td>
+                    <td style={styles.td}>
+                      <div style={styles.statusBadge}>
+                        <div style={{...styles.statusIndicator, background: getStatusColor(member.status)}}></div>
+                        {member.status === 'online' ? 'Online' : 'Offline'}
+                      </div>
+                    </td>
+                    <td style={styles.td}>
+                      <div style={styles.lastActiveCell}>
+                        <Clock size={14} color="#6b7280" />
+                        {member.lastActive}
+                      </div>
+                    </td>
+                    <td style={styles.td}>
+                      <div style={styles.actionButtons}>
+                        <button style={styles.actionBtn} onClick={() => { setSelectedMember(member); setShowEditModal(true); }}>
+                          <Edit size={16} />
+                        </button>
+                        <button style={styles.actionBtn} onClick={() => handleDeleteMember(member.id)}>
+                          <Trash2 size={16} color="#ef4444" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-        {filteredMembers.length === 0 && (
-          <div style={styles.emptyState}>
-            <Users size={48} color="#d1d5db" />
-            <h3 style={styles.emptyTitle}>Nenhum membro encontrado</h3>
-            <p style={styles.emptyText}>
-              Tente ajustar os filtros ou adicionar novos membros
-            </p>
-          </div>
-        )}
-      </div>
+      {filteredMembers.length === 0 && (
+        <div style={styles.emptyState}>
+          <Users size={48} color="#d1d5db" />
+          <h3 style={styles.emptyTitle}>Nenhum membro encontrado</h3>
+          <p style={styles.emptyText}>Tente ajustar os filtros ou adicionar novos membros</p>
+        </div>
+      )}
 
-      {/* Invite Modal */}
       {showInviteModal && (
         <div style={styles.modalOverlay} onClick={() => setShowInviteModal(false)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <div style={styles.modalTitleContainer}>
                 <UserPlus size={24} color="#3b82f6" />
-                <h2 style={styles.modalTitle}>Adicionar Novo Membro</h2>
+                <h2 style={styles.modalTitle}>Adicionar Membro</h2>
               </div>
               <button style={styles.btnClose} onClick={() => setShowInviteModal(false)}>
                 <X size={24} />
@@ -416,9 +373,7 @@ export default function Equipe() {
                   value={inviteData.email}
                   onChange={(e) => setInviteData({...inviteData, email: e.target.value})}
                 />
-                <span style={styles.hint}>
-                  Um convite será enviado para este email
-                </span>
+                <span style={styles.hint}>Um convite será enviado para este email</span>
               </div>
 
               <div style={styles.formGroup}>
@@ -430,15 +385,8 @@ export default function Equipe() {
                   {roles.map((role) => {
                     const Icon = role.icon;
                     const isSelected = inviteData.role === role.id;
-                    
                     return (
-                      <label
-                        key={role.id}
-                        style={{
-                          ...styles.roleOption,
-                          ...(isSelected ? styles.roleOptionActive : {})
-                        }}
-                      >
+                      <label key={role.id} style={{...styles.roleOption, ...(isSelected ? styles.roleOptionActive : {})}}>
                         <input
                           type="radio"
                           name="role"
@@ -450,7 +398,7 @@ export default function Equipe() {
                         <div style={{...styles.roleOptionIcon, color: role.color}}>
                           <Icon size={20} />
                         </div>
-                        <div>
+                        <div style={{flex: 1}}>
                           <div style={styles.roleOptionName}>{role.name}</div>
                           <div style={styles.roleOptionDesc}>{role.description}</div>
                         </div>
@@ -462,9 +410,7 @@ export default function Equipe() {
 
               <div style={styles.inviteNote}>
                 <AlertCircle size={18} color="#3b82f6" />
-                <p>
-                  O membro receberá um email com instruções para criar a senha e acessar o sistema.
-                </p>
+                <p>O membro receberá um email com instruções para acessar o sistema.</p>
               </div>
             </div>
 
@@ -474,14 +420,13 @@ export default function Equipe() {
               </button>
               <button style={styles.btnSave} onClick={handleInvite}>
                 <Send size={18} />
-                Enviar Convite
+                Enviar
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Edit Modal */}
       {showEditModal && selectedMember && (
         <div style={styles.modalOverlay} onClick={() => setShowEditModal(false)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -549,10 +494,8 @@ export default function Equipe() {
 
               <div style={styles.dangerZone}>
                 <h4 style={styles.dangerTitle}>Zona de Perigo</h4>
-                <p style={styles.dangerText}>
-                  Ações irreversíveis que afetam permanentemente este membro
-                </p>
-                <button style={styles.btnDanger}>
+                <p style={styles.dangerText}>Ações irreversíveis que afetam permanentemente este membro</p>
+                <button style={styles.btnDanger} onClick={() => { setShowEditModal(false); handleDeleteMember(selectedMember.id); }}>
                   <Trash2 size={16} />
                   Remover Membro
                 </button>
@@ -565,7 +508,7 @@ export default function Equipe() {
               </button>
               <button style={styles.btnSave}>
                 <Check size={18} />
-                Salvar Alterações
+                Salvar
               </button>
             </div>
           </div>
@@ -577,7 +520,7 @@ export default function Equipe() {
 
 const styles = {
   container: {
-    padding: '2rem',
+    padding: '1rem',
     background: '#fafafa',
     minHeight: '100vh',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
@@ -586,7 +529,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: '2rem',
+    marginBottom: '1.5rem',
     flexWrap: 'wrap',
     gap: '1rem'
   },
@@ -600,27 +543,28 @@ const styles = {
     borderRadius: '9999px',
     fontSize: '0.875rem',
     fontWeight: '600',
-    marginBottom: '1rem'
+    marginBottom: '0.75rem'
   },
   title: {
-    fontSize: '2.5rem',
+    fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
     fontWeight: '700',
     color: '#1f2937',
     marginBottom: '0.5rem'
   },
   subtitle: {
-    fontSize: '1.125rem',
+    fontSize: 'clamp(0.875rem, 3vw, 1.125rem)',
     color: '#6b7280'
   },
   headerActions: {
     display: 'flex',
-    gap: '0.75rem'
+    gap: '0.5rem',
+    flexWrap: 'wrap'
   },
   btnPrimary: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '0.75rem 1.5rem',
+    padding: '0.75rem 1.25rem',
     background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
     color: 'white',
     border: 'none',
@@ -628,13 +572,14 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap'
   },
   btnSecondary: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
-    padding: '0.75rem 1.5rem',
+    padding: '0.75rem 1.25rem',
     background: 'white',
     color: '#374151',
     border: '1px solid #e5e7eb',
@@ -646,16 +591,16 @@ const styles = {
   },
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '1.5rem',
-    marginBottom: '2rem'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+    gap: '1rem',
+    marginBottom: '1.5rem'
   },
   statCard: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem',
+    gap: '0.75rem',
     background: 'white',
-    padding: '1.5rem',
+    padding: '1rem',
     borderRadius: '12px',
     border: '1px solid #e5e7eb'
   },
@@ -666,12 +611,12 @@ const styles = {
     flexShrink: 0
   },
   statLabel: {
-    fontSize: '0.875rem',
+    fontSize: '0.75rem',
     color: '#6b7280',
     margin: '0 0 0.25rem 0'
   },
   statValue: {
-    fontSize: '1.75rem',
+    fontSize: '1.5rem',
     fontWeight: '700',
     color: '#1f2937',
     margin: 0
@@ -687,7 +632,7 @@ const styles = {
   },
   rolesGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
     gap: '1.5rem'
   },
   roleCard: {
@@ -745,28 +690,25 @@ const styles = {
   },
   toolbar: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',
+    gap: '1rem',
     marginBottom: '1.5rem',
     background: 'white',
     padding: '1rem',
     borderRadius: '12px',
-    border: '1px solid #e5e7eb',
-    gap: '1rem',
-    flexWrap: 'wrap'
+    border: '1px solid #e5e7eb'
   },
   searchContainer: {
     position: 'relative',
-    flex: 1,
-    minWidth: '300px',
-    maxWidth: '500px'
+    width: '100%'
   },
   searchIcon: {
     position: 'absolute',
     left: '1rem',
     top: '50%',
     transform: 'translateY(-50%)',
-    color: '#9ca3af'
+    color: '#9ca3af',
+    pointerEvents: 'none'
   },
   searchInput: {
     width: '100%',
@@ -774,13 +716,17 @@ const styles = {
     border: '1px solid #e5e7eb',
     borderRadius: '8px',
     fontSize: '0.875rem',
-    outline: 'none'
+    outline: 'none',
+    boxSizing: 'border-box'
   },
   filters: {
     display: 'flex',
-    gap: '0.75rem'
+    gap: '0.75rem',
+    flexWrap: 'wrap'
   },
   filterSelect: {
+    flex: 1,
+    minWidth: '120px',
     padding: '0.75rem 1rem',
     border: '1px solid #e5e7eb',
     borderRadius: '8px',
@@ -789,15 +735,73 @@ const styles = {
     cursor: 'pointer',
     background: 'white'
   },
-  tableContainer: {
+  cardsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: '1rem'
+  },
+  memberCard: {
     background: 'white',
     borderRadius: '12px',
     border: '1px solid #e5e7eb',
     overflow: 'hidden'
   },
+  cardHeader: {
+    padding: '1rem',
+    borderBottom: '1px solid #f3f4f6'
+  },
+  cardBody: {
+    padding: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem'
+  },
+  cardInfoRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.875rem',
+    color: '#6b7280'
+  },
+  cardInfoText: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  },
+  cardFooter: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem',
+    background: '#f9fafb',
+    borderTop: '1px solid #f3f4f6'
+  },
+  cardActions: {
+    display: 'flex',
+    gap: '0.5rem'
+  },
+  cardActionBtn: {
+    padding: '0.5rem',
+    background: 'white',
+    border: '1px solid #e5e7eb',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    color: '#6b7280',
+    transition: 'all 0.2s',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  tableContainer: {
+    background: 'white',
+    borderRadius: '12px',
+    border: '1px solid #e5e7eb',
+    overflowX: 'auto'
+  },
   table: {
     width: '100%',
-    borderCollapse: 'collapse'
+    borderCollapse: 'collapse',
+    minWidth: '1000px'
   },
   tableHeader: {
     background: '#fafafa',
@@ -839,7 +843,8 @@ const styles = {
     justifyContent: 'center',
     color: 'white',
     fontWeight: '600',
-    fontSize: '1rem'
+    fontSize: '1rem',
+    flexShrink: 0
   },
   statusDot: {
     position: 'absolute',
@@ -872,7 +877,8 @@ const styles = {
     padding: '0.375rem 0.75rem',
     borderRadius: '9999px',
     fontSize: '0.75rem',
-    fontWeight: '600'
+    fontWeight: '600',
+    whiteSpace: 'nowrap'
   },
   statusBadge: {
     display: 'flex',
@@ -906,8 +912,11 @@ const styles = {
     transition: 'all 0.2s'
   },
   emptyState: {
-    padding: '4rem 2rem',
-    textAlign: 'center'
+    padding: '3rem 1rem',
+    textAlign: 'center',
+    background: 'white',
+    borderRadius: '12px',
+    border: '1px solid #e5e7eb'
   },
   emptyTitle: {
     fontSize: '1.125rem',
@@ -928,13 +937,14 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
-    backdropFilter: 'blur(4px)'
+    backdropFilter: 'blur(4px)',
+    padding: '1rem'
   },
   modal: {
     background: 'white',
     borderRadius: '16px',
     maxWidth: '600px',
-    width: '90%',
+    width: '100%',
     maxHeight: '90vh',
     overflow: 'hidden',
     display: 'flex',
@@ -942,7 +952,7 @@ const styles = {
     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
   },
   modalHeader: {
-    padding: '2rem',
+    padding: '1.5rem',
     borderBottom: '1px solid #e5e7eb',
     display: 'flex',
     justifyContent: 'space-between',
@@ -951,10 +961,10 @@ const styles = {
   modalTitleContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: '1rem'
+    gap: '0.75rem'
   },
   modalTitle: {
-    fontSize: '1.5rem',
+    fontSize: 'clamp(1.125rem, 4vw, 1.5rem)',
     fontWeight: '700',
     color: '#1f2937',
     margin: 0
@@ -965,16 +975,16 @@ const styles = {
     background: 'transparent',
     border: 'none',
     borderRadius: '8px',
-    fontSize: '1.5rem',
     color: '#6b7280',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    flexShrink: 0
   },
   modalBody: {
-    padding: '2rem',
+    padding: '1.5rem',
     overflowY: 'auto',
     flex: 1
   },
@@ -998,7 +1008,8 @@ const styles = {
     fontSize: '0.875rem',
     outline: 'none',
     transition: 'all 0.2s',
-    fontFamily: 'inherit'
+    fontFamily: 'inherit',
+    boxSizing: 'border-box'
   },
   select: {
     width: '100%',
@@ -1010,7 +1021,8 @@ const styles = {
     transition: 'all 0.2s',
     fontFamily: 'inherit',
     cursor: 'pointer',
-    background: 'white'
+    background: 'white',
+    boxSizing: 'border-box'
   },
   hint: {
     display: 'block',
@@ -1040,7 +1052,8 @@ const styles = {
   radioInput: {
     width: '18px',
     height: '18px',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    flexShrink: 0
   },
   roleOptionIcon: {
     width: '40px',
@@ -1049,7 +1062,8 @@ const styles = {
     borderRadius: '8px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    flexShrink: 0
   },
   roleOptionName: {
     fontSize: '0.95rem',
@@ -1069,14 +1083,16 @@ const styles = {
     borderRadius: '8px',
     fontSize: '0.875rem',
     color: '#1e40af',
-    marginTop: '1.5rem'
+    marginTop: '1.5rem',
+    alignItems: 'flex-start'
   },
   modalFooter: {
-    padding: '1.5rem 2rem',
+    padding: '1rem 1.5rem',
     borderTop: '1px solid #e5e7eb',
     display: 'flex',
     justifyContent: 'flex-end',
-    gap: '0.75rem'
+    gap: '0.75rem',
+    flexWrap: 'wrap'
   },
   btnCancel: {
     padding: '0.75rem 1.5rem',
@@ -1122,7 +1138,8 @@ const styles = {
     justifyContent: 'center',
     color: 'white',
     fontWeight: '600',
-    fontSize: '1.5rem'
+    fontSize: '1.5rem',
+    flexShrink: 0
   },
   memberDetailName: {
     fontSize: '1.25rem',

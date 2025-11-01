@@ -22,11 +22,10 @@ import {
 } from 'lucide-react';
 
 function MainContent() {
-      const [sidebarOpen, setSidebarOpen] = useState(true);
-      const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-
-const stats = [
+  const stats = [
     { title: 'Clientes Ativos', value: '284', change: '+12%', trend: 'up', icon: Users, color: '#3b82f6', bgColor: '#eff6ff' },
     { title: 'Agendamentos Hoje', value: '12', change: '+8%', trend: 'up', icon: Calendar, color: '#10b981', bgColor: '#d1fae5' },
     { title: 'Mensagens IA', value: '156', change: '+24%', trend: 'up', icon: MessageSquare, color: '#8b5cf6', bgColor: '#f3e8ff' },
@@ -49,203 +48,621 @@ const stats = [
   ];
 
   return (
-     <>
-            <div style={styles.statsGrid}>
-              {stats.map((stat, index) => {
-                const Icon = stat.icon;
-                const TrendIcon = stat.trend === 'up' ? ArrowUpRight : ArrowDownRight;
-                return (
-                  <div key={index} style={styles.statCard}>
-                    <div style={styles.statHeader}>
-                      <div style={{ ...styles.statIcon, background: stat.bgColor }}>
-                        <Icon size={24} color={stat.color} />
-                      </div>
-                      <div style={{ ...styles.statChange, color: stat.trend === 'up' ? '#10b981' : '#ef4444' }}>
-                        <TrendIcon size={16} /> {stat.change}
-                      </div>
-                    </div>
-                    <h3 style={styles.statTitle}>{stat.title}</h3>
-                    <p style={styles.statValue}>{stat.value}</p>
+    <div className="main-content-wrapper">
+      <style>{`
+        .main-content-wrapper {
+          padding: 1rem;
+          background: #fafafa;
+          min-height: 100vh;
+        }
+
+        @media (min-width: 768px) {
+          .main-content-wrapper {
+            padding: 2rem;
+          }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+
+        .stat-card {
+          background: white;
+          border-radius: 12px;
+          padding: 1.25rem;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          transition: all 0.3s;
+        }
+
+        @media (min-width: 768px) {
+          .stat-card {
+            padding: 1.5rem;
+          }
+        }
+
+        .stat-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+          padding: 0.5rem;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .stat-change {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+
+        @media (min-width: 768px) {
+          .stat-change {
+            font-size: 0.875rem;
+          }
+        }
+
+        .stat-title {
+          color: #6b7280;
+          font-size: 0.8rem;
+          margin: 0;
+          font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+          .stat-title {
+            font-size: 0.875rem;
+          }
+        }
+
+        .stat-value {
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin-top: 0.25rem;
+          color: #111827;
+        }
+
+        @media (min-width: 768px) {
+          .stat-value {
+            font-size: 1.75rem;
+          }
+        }
+
+        /* Content Grid */
+        .content-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+          .content-grid {
+            grid-template-columns: 2fr 1fr;
+          }
+        }
+
+        .card {
+          background: white;
+          border-radius: 12px;
+          padding: 1.25rem;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        @media (min-width: 768px) {
+          .card {
+            padding: 1.5rem;
+          }
+        }
+
+        .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .card-title-container {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .card-title {
+          font-size: 0.95rem;
+          font-weight: 600;
+          margin: 0;
+          color: #1f2937;
+        }
+
+        @media (min-width: 768px) {
+          .card-title {
+            font-size: 1rem;
+          }
+        }
+
+        .view-all-btn {
+          font-size: 0.8rem;
+          color: #3b82f6;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+          .view-all-btn {
+            font-size: 0.875rem;
+          }
+        }
+
+        .view-all-btn:hover {
+          text-decoration: underline;
+        }
+
+        /* Activity List */
+        .activity-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .activity-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #f3f4f6;
+        }
+
+        @media (min-width: 768px) {
+          .activity-item {
+            align-items: center;
+            gap: 1rem;
+          }
+        }
+
+        .activity-item:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+
+        .activity-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .activity-content {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .activity-title {
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #1f2937;
+          margin: 0 0 0.25rem 0;
+        }
+
+        @media (min-width: 768px) {
+          .activity-title {
+            font-size: 0.875rem;
+          }
+        }
+
+        .activity-description {
+          font-size: 0.75rem;
+          color: #6b7280;
+          margin: 0;
+          line-height: 1.4;
+        }
+
+        .activity-meta {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.5rem;
+          flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+          .activity-meta {
+            flex-direction: row;
+            align-items: center;
+          }
+        }
+
+        .activity-time {
+          font-size: 0.7rem;
+          color: #9ca3af;
+          white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+          .activity-time {
+            font-size: 0.75rem;
+          }
+        }
+
+        .activity-status {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+          .activity-status {
+            width: 10px;
+            height: 10px;
+          }
+        }
+
+        /* Sidebar Content */
+        .sidebar-content {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.75rem;
+        }
+
+        .quick-action-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+          background: #f9fafb;
+          border: 1px solid #f3f4f6;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .quick-action-btn:hover {
+          background: #f3f4f6;
+          border-color: #e5e7eb;
+          transform: translateY(-2px);
+        }
+
+        .quick-action-icon {
+          padding: 0.5rem;
+          border-radius: 8px;
+          margin-bottom: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .quick-action-label {
+          font-size: 0.7rem;
+          color: #374151;
+          font-weight: 500;
+          text-align: center;
+        }
+
+        @media (min-width: 768px) {
+          .quick-action-label {
+            font-size: 0.75rem;
+          }
+        }
+
+        /* AI Card */
+        .ai-card {
+          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+          color: white;
+          border-radius: 12px;
+          padding: 1.25rem;
+          position: relative;
+          overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+          .ai-card {
+            padding: 1.5rem;
+          }
+        }
+
+        .ai-header {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .ai-icon-container {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .ai-pulse {
+          position: absolute;
+          width: 45px;
+          height: 45px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.2);
+          animation: pulse 2s infinite;
+        }
+
+        @media (min-width: 768px) {
+          .ai-pulse {
+            width: 50px;
+            height: 50px;
+          }
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.1);
+            opacity: 0.7;
+          }
+        }
+
+        .ai-title {
+          font-weight: 700;
+          font-size: 1rem;
+          margin: 0;
+        }
+
+        @media (min-width: 768px) {
+          .ai-title {
+            font-size: 1.125rem;
+          }
+        }
+
+        .ai-subtitle {
+          font-size: 0.8rem;
+          opacity: 0.9;
+          margin: 0;
+        }
+
+        @media (min-width: 768px) {
+          .ai-subtitle {
+            font-size: 0.875rem;
+          }
+        }
+
+        .ai-stats {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+          .ai-stats {
+            gap: 1rem;
+          }
+        }
+
+        .ai-stat-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+
+        .ai-stat-label {
+          font-size: 0.7rem;
+          opacity: 0.8;
+          line-height: 1.2;
+        }
+
+        @media (min-width: 768px) {
+          .ai-stat-label {
+            font-size: 0.75rem;
+          }
+        }
+
+        .ai-stat-value {
+          font-weight: 700;
+          font-size: 0.95rem;
+          margin-top: 0.25rem;
+        }
+
+        @media (min-width: 768px) {
+          .ai-stat-value {
+            font-size: 1rem;
+          }
+        }
+
+        .ai-config-btn {
+          background: white;
+          color: #3b82f6;
+          border: none;
+          border-radius: 8px;
+          padding: 0.65rem 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          font-weight: 600;
+          cursor: pointer;
+          width: 100%;
+          transition: all 0.2s;
+          font-size: 0.85rem;
+        }
+
+        @media (min-width: 768px) {
+          .ai-config-btn {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+          }
+        }
+
+        .ai-config-btn:hover {
+          background: #f9fafb;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+      `}</style>
+
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        {stats.map((stat, index) => {
+          const Icon = stat.icon;
+          const TrendIcon = stat.trend === 'up' ? ArrowUpRight : ArrowDownRight;
+          return (
+            <div key={index} className="stat-card">
+              <div className="stat-header">
+                <div className="stat-icon" style={{ background: stat.bgColor }}>
+                  <Icon size={24} color={stat.color} />
+                </div>
+                <div className="stat-change" style={{ color: stat.trend === 'up' ? '#10b981' : '#ef4444' }}>
+                  <TrendIcon size={16} /> {stat.change}
+                </div>
+              </div>
+              <h3 className="stat-title">{stat.title}</h3>
+              <p className="stat-value">{stat.value}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Content Grid */}
+      <div className="content-grid">
+        {/* Atividades Recentes */}
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title-container">
+              <Activity size={20} />
+              <h2 className="card-title">Atividades Recentes</h2>
+            </div>
+            <button className="view-all-btn">Ver tudo</button>
+          </div>
+
+          <div className="activity-list">
+            {recentActivities.map((activity) => {
+              const Icon = activity.icon;
+              return (
+                <div key={activity.id} className="activity-item">
+                  <div className="activity-icon" style={{ background: `${activity.color}15`, color: activity.color }}>
+                    <Icon size={18} />
                   </div>
+                  <div className="activity-content">
+                    <h4 className="activity-title">{activity.title}</h4>
+                    <p className="activity-description">{activity.description}</p>
+                  </div>
+                  <div className="activity-meta">
+                    <span className="activity-time">{activity.time}</span>
+                    <span
+                      className="activity-status"
+                      style={{
+                        background:
+                          activity.status === 'success'
+                            ? '#10b981'
+                            : activity.status === 'pending'
+                            ? '#f59e0b'
+                            : '#3b82f6'
+                      }}
+                    ></span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Ações rápidas + IA */}
+        <div className="sidebar-content">
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">Ações Rápidas</h2>
+            </div>
+            <div className="quick-actions-grid">
+              {quickActions.map((action, index) => {
+                const Icon = action.icon;
+                return (
+                  <button key={index} className="quick-action-btn">
+                    <div className="quick-action-icon" style={{ background: `${action.color}15`, color: action.color }}>
+                      <Icon size={20} />
+                    </div>
+                    <span className="quick-action-label">{action.label}</span>
+                  </button>
                 );
               })}
             </div>
+          </div>
 
-            <div style={styles.contentGrid}>
-              {/* Atividades Recentes */}
-              <div style={styles.card}>
-                <div style={styles.cardHeader}>
-                  <div style={styles.cardTitleContainer}>
-                    <Activity size={20} />
-                    <h2 style={styles.cardTitle}>Atividades Recentes</h2>
-                  </div>
-                  <button style={styles.viewAllBtn}>Ver tudo</button>
-                </div>
-
-                <div style={styles.activityList}>
-                  {recentActivities.map((activity) => {
-                    const Icon = activity.icon;
-                    return (
-                      <div key={activity.id} style={styles.activityItem}>
-                        <div style={{ ...styles.activityIcon, background: `${activity.color}15`, color: activity.color }}>
-                          <Icon size={18} />
-                        </div>
-                        <div style={styles.activityContent}>
-                          <h4 style={styles.activityTitle}>{activity.title}</h4>
-                          <p style={styles.activityDescription}>{activity.description}</p>
-                        </div>
-                        <div style={styles.activityMeta}>
-                          <span style={styles.activityTime}>{activity.time}</span>
-                          <span
-                            style={{
-                              ...styles.activityStatus,
-                              background:
-                                activity.status === 'success'
-                                  ? '#10b981'
-                                  : activity.status === 'pending'
-                                  ? '#f59e0b'
-                                  : '#3b82f6'
-                            }}
-                          ></span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+          <div className="ai-card">
+            <div className="ai-header">
+              <div className="ai-icon-container">
+                <Brain size={28} color="white" />
+                <span className="ai-pulse"></span>
               </div>
-
-              {/* Ações rápidas + IA */}
-              <div style={styles.sidebarContent}>
-                <div style={styles.card}>
-                  <div style={styles.cardHeader}>
-                    <h2 style={styles.cardTitle}>Ações Rápidas</h2>
-                  </div>
-                  <div style={styles.quickActionsGrid}>
-                    {quickActions.map((action, index) => {
-                      const Icon = action.icon;
-                      return (
-                        <button key={index} style={styles.quickActionBtn}>
-                          <div style={{ ...styles.quickActionIcon, background: `${action.color}15`, color: action.color }}>
-                            <Icon size={20} />
-                          </div>
-                          <span style={styles.quickActionLabel}>{action.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div style={styles.aiCard}>
-                  <div style={styles.aiHeader}>
-                    <div style={styles.aiIconContainer}>
-                      <Brain size={32} color="white" />
-                      <span style={styles.aiPulse}></span>
-                    </div>
-                    <div>
-                      <h3 style={styles.aiTitle}>IA Ativa</h3>
-                      <p style={styles.aiSubtitle}>Respondendo automaticamente</p>
-                    </div>
-                  </div>
-                  <div style={styles.aiStats}>
-                    <div style={styles.aiStatItem}>
-                      <span style={styles.aiStatLabel}>Respostas hoje</span>
-                      <span style={styles.aiStatValue}>156</span>
-                    </div>
-                    <div style={styles.aiStatItem}>
-                      <span style={styles.aiStatLabel}>Taxa de sucesso</span>
-                      <span style={styles.aiStatValue}>98%</span>
-                    </div>
-                    <div style={styles.aiStatItem}>
-                      <span style={styles.aiStatLabel}>Tempo médio</span>
-                      <span style={styles.aiStatValue}>2.3s</span>
-                    </div>
-                  </div>
-                  <button   style={styles.aiConfigBtn}>
-                    <Settings size={16} /> Configurar IA
-                  </button>
-                </div>
+              <div>
+                <h3 className="ai-title">IA Ativa</h3>
+                <p className="ai-subtitle">Respondendo automaticamente</p>
               </div>
             </div>
-          </>
-  )
+            <div className="ai-stats">
+              <div className="ai-stat-item">
+                <span className="ai-stat-label">Respostas hoje</span>
+                <span className="ai-stat-value">156</span>
+              </div>
+              <div className="ai-stat-item">
+                <span className="ai-stat-label">Taxa de sucesso</span>
+                <span className="ai-stat-value">98%</span>
+              </div>
+              <div className="ai-stat-item">
+                <span className="ai-stat-label">Tempo médio</span>
+                <span className="ai-stat-value">2.3s</span>
+              </div>
+            </div>
+            <button className="ai-config-btn">
+              <Settings size={16} /> Configurar IA
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
-const styles = {
-  container: { display: 'flex', minHeight: '100vh', background: '#fafafa', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
-  sectionTitle: { fontSize: '1.5rem', fontWeight: '700', color: '#1f2937' },
-  sectionText: { color: '#6b7280', marginTop: '0.5rem' },
-  sidebar: { width: '260px', background: 'white', borderRight: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh', zIndex: 100 },
-  sidebarHeader: { padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid #f3f4f6' },
-  logo: { width: '40px', height: '40px', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
- logoText: {
-    fontSize: '1.25rem',
-    fontWeight: '700',
-    background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text'
-  },
-  menuList: { padding: '1rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', },
-  menuItem: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 2rem', marginBottom: '0rem', background: 'transparent', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#6b7280', fontSize: '0.875rem', fontWeight: '500', width: '100%' },
-  menuItemActive: { background: 'linear-gradient(135deg, #eff6ff, #f3e8ff)', color: '#3b82f6', fontWeight: '600' },
-  menuLabel: { flex: 1, textAlign: 'left' },
-  sidebarFooter: { padding: '1rem', borderTop: '1px solid #f3f4f6' },
-  settingsBtn: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'transparent', border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', color: '#6b7280', fontSize: '0.875rem', fontWeight: '500' },
-  mainContent: { flex: 1, marginLeft: '260px', display: 'flex', flexDirection: 'column' },
-  header: { background: 'white', borderBottom: '1px solid #e5e7eb', padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0 },
-  headerTitle: { fontSize: '1.5rem', fontWeight: '700', color: '#1f2937', margin: 0 },
-  headerSubtitle: { fontSize: '0.875rem', color: '#6b7280', margin: 0 },
-  headerRight: { display: 'flex', alignItems: 'center', gap: '1rem' },
-  searchContainer: { position: 'relative' },
-  searchIcon: { position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' },
-  searchInput: { padding: '0.5rem 0.75rem 0.5rem 2.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '0.875rem', width: '250px' },
-  iconButton: { padding: '0.5rem', background: 'transparent', border: 'none', borderRadius: '8px', color: '#6b7280', position: 'relative' },
-  notificationDot: { position: 'absolute', top: '0.5rem', right: '0.5rem', width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%' },
-  userMenu: { position: 'relative' },
-  userButton: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', background: 'transparent', border: 'none', cursor: 'pointer' },
-  userAvatar: { width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '600' },
-  userInfo: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start' },
-  userName: { fontSize: '0.875rem', fontWeight: '600', color: '#1f2937' },
-  userRole: { fontSize: '0.75rem', color: '#6b7280' },
-  userDropdown: { position: 'absolute', right: 0, top: '110%', background: 'white', border: '1px solid #e5e7eb', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', width: '180px', zIndex: 10 },
-  dropdownItem: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', border: 'none', background: 'transparent', cursor: 'pointer', color: '#374151', fontSize: '0.875rem', width: '100%', textAlign: 'left' },
-  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', padding: '2rem' },
-  statCard: { background: 'white', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
-  statHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' },
-  statIcon: { padding: '0.5rem', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  statChange: { display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem', fontWeight: '600' },
-  statTitle: { color: '#6b7280', fontSize: '0.875rem', margin: 0 },
-  statValue: { fontSize: '1.75rem', fontWeight: '700', marginTop: '0.25rem', color: '#111827' },
-  contentGrid: { display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', padding: '0 2rem 2rem' },
-  card: { background: 'white', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
-  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' },
-  cardTitleContainer: { display: 'flex', alignItems: 'center', gap: '0.5rem' },
-  cardTitle: { fontSize: '1rem', fontWeight: '600', margin: 0 },
-  viewAllBtn: { fontSize: '0.875rem', color: '#3b82f6', background: 'transparent', border: 'none', cursor: 'pointer' },
-  activityList: { display: 'flex', flexDirection: 'column', gap: '1rem' },
-  activityItem: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f3f4f6', paddingBottom: '0.75rem' },
-  activityIcon: { width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  activityContent: { flex: 1, marginLeft: '1rem' },
-  activityTitle: { fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: 0 },
-  activityDescription: { fontSize: '0.75rem', color: '#6b7280', margin: 0 },
-  activityMeta: { display: 'flex', alignItems: 'center', gap: '0.5rem' },
-  activityTime: { fontSize: '0.75rem', color: '#9ca3af' },
-  activityStatus: { width: '10px', height: '10px', borderRadius: '50%' },
-  sidebarContent: { display: 'flex', flexDirection: 'column', gap: '1.5rem' },
-  quickActionsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' },
-  quickActionBtn: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: '#f9fafb', border: '1px solid #f3f4f6', borderRadius: '10px', cursor: 'pointer', transition: '0.2s' },
-  quickActionIcon: { padding: '0.5rem', borderRadius: '8px', marginBottom: '0.5rem' },
-  quickActionLabel: { fontSize: '0.75rem', color: '#374151', fontWeight: '500' },
-  aiCard: { background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', color: 'white', borderRadius: '12px', padding: '1.5rem', position: 'relative', overflow: 'hidden' },
-  aiHeader: { display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' },
-  aiIconContainer: { position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  aiPulse: { position: 'absolute', width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', animation: 'pulse 2s infinite' },
-  aiTitle: { fontWeight: '700', fontSize: '1.125rem', margin: 0 },
-  aiSubtitle: { fontSize: '0.875rem', opacity: 0.9, margin: 0 },
-  aiStats: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' },
-  aiStatItem: { display: 'flex', flexDirection: 'column', alignItems: 'center' },
-  aiStatLabel: { fontSize: '0.75rem', opacity: 0.8 },
-  aiStatValue: { fontWeight: '700', fontSize: '1rem' },
-  aiConfigBtn: { background: 'white', color: '#3b82f6', border: 'none', borderRadius: '8px', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', cursor: 'pointer', width: '100%', justifyContent: 'center' }
-};
 
-export default MainContent
+export default MainContent;

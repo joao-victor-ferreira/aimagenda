@@ -4,11 +4,8 @@ import Login from "../pages/Login";
 import Registrar from "../pages/Registrar";
 import Obrigado from "../pages/Obrigado";
 import Dashboard from "../pages/Dashboard";
-import Agenda from "../pages/Agenda";
-import Cliente from "../pages/Cliente";
-import Integracao from "../pages/Integracao";
-import AIConfiguracao from "../pages/AIConfiguracao";
 import Configuracao from "../pages/Configuracao";
+import Contatos from "../pages/Contatos";
 
 
 function Rotas() {
@@ -21,6 +18,7 @@ function Rotas() {
                    <Route path="/obrigado" element={<Obrigado />} />
                       <Route path="/dashboard" element={<Dashboard />} />
                        <Route path="/configuracao" element={<Configuracao />} />
+                        <Route path="/contatos" element={<Contatos />} />
                         
       </Routes>
     </Router>
