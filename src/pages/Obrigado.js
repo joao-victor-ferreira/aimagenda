@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Check, Sparkles, Zap, ArrowRight, Mail, Bell, Layout } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Obrigado() {
+  const navigate = useNavigate();
   const [showContent, setShowContent] = useState(false);
   const [showFeatures, setShowFeatures] = useState(false);
   const [buttonHover, setButtonHover] = useState(false);
@@ -336,6 +338,7 @@ export default function Obrigado() {
             <button
               onMouseEnter={() => setButtonHover(true)}
               onMouseLeave={() => setButtonHover(false)}
+              onClick={() => navigate('/login')}
               style={{
                 ...styles.button,
                 ...styles.buttonPrimary,

@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
-import { Calendar, Lock, User, Eye, EyeOff, Mail, Phone, Building, ArrowRight, ArrowLeft, Check, Zap, Crown, Sparkles } from 'lucide-react';
+import { 
+  Calendar, Lock, User, Eye, EyeOff, Mail, Phone, Building, 
+  ArrowRight, ArrowLeft, Check, Zap, Crown, Sparkles 
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-
 
 export default function Registrar() {
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('');
-   const navigate = useNavigate();
+  const [hoveredPlan, setHoveredPlan] = useState('');
+  const [buttonHover, setButtonHover] = useState(false);
+  const [focusedField, setFocusedField] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -18,87 +26,135 @@ export default function Registrar() {
     password: '',
     confirmPassword: ''
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [hoveredPlan, setHoveredPlan] = useState('');
-  const [buttonHover, setButtonHover] = useState(false);
-  const [focusedField, setFocusedField] = useState('');
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    setError('');
+  };
+
+  const validateStep1 = () => {
+    if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
+      setError('Preencha todos os campos obrigatórios.');
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres.');
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('As senhas não coincidem.');
+      return false;
+    }
+    return true;
   };
 
   const handleNext = () => {
     if (step === 1) {
-      setStep(2);
+      if (validateStep1()) setStep(2);
     } else {
-      navigate('/obrigado');
+      handleSubmit();
     }
   };
 
-  const handleSubmit = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      alert(`Cadastro realizado com sucesso!\nPlano selecionado: ${selectedPlan}`);
-    }, 1500);
-  };
-
- const plans = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    price: 'R$ 149',
-    period: '/mês',
-    icon: Sparkles,
-    color: '#6b7280',
-    gradient: 'linear-gradient(135deg, #6b7280, #9ca3af)',
-    features: [
-      '200 mensagens IA/mês',
-      '1 usuário',
-      'Todas as integrações',
-      'Relatórios avançados',
-      'Suporte por e-mail'
-    ]
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 'R$ 299',
-    period: '/mês',
-    icon: Zap,
-    color: '#3b82f6',
-    gradient: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-    popular: true,
-    features: [
-      '500 mensagens IA/mês',
-      '3 usuários',
-      'Todas as integrações',
-      'Relatórios avançados',
-      'Suporte padrão'
-    ],
-    badge: 'Mais Popular'
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    price: 'R$ 499',
-    period: '/mês',
-    icon: Crown,
-    color: '#9333ea',
-    gradient: 'linear-gradient(135deg, #9333ea, #ec4899)',
-    features: [
-      '1000 mensagens IA/mês',
-      '10 usuários',
-      'Todas as integrações',
-      'Relatórios avançados',
-      'Suporte prioritário'
-    ]
+  const handleSubmit = async () => {
+  if (!selectedPlan) {
+    setError('Selecione um plano para continuar.');
+    return;
   }
-];
 
+  setIsLoading(true);
+  setError('');
+
+  try {
+    const planoFormatado = selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1);
+
+    const response = await fetch('http://localhost:5000/auth/registrar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nomeCompleto: formData.name,
+        email: formData.email,
+        telefone: formData.phone,
+        empresa: formData.company || 'Sem Empresa',
+        senha: formData.password,
+        plano: planoFormatado
+      })
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (response.ok) {
+      console.log("✅ Usuário cadastrado:", data);
+      navigate('/obrigado');
+    } else {
+      console.error("❌ Erro no backend:", data);
+      setError(data.mensagem || 'Erro ao realizar cadastro.');
+    }
+  } catch (err) {
+    console.error("🚫 Erro de rede:", err);
+    setError('Erro de conexão com o servidor.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+  // --- PLANOS MANTIDOS IGUAIS ---
+  const plans = [
+    {
+      id: 'starter',
+      name: 'Starter',
+      price: 'R$ 149',
+      period: '/mês',
+      icon: Sparkles,
+      color: '#6b7280',
+      gradient: 'linear-gradient(135deg, #6b7280, #9ca3af)',
+      features: [
+        '200 mensagens IA/mês',
+        '1 usuário',
+        'Todas as integrações',
+        'Relatórios avançados',
+        'Suporte por e-mail'
+      ]
+    },
+    {
+      id: 'pro',
+      name: 'Pro',
+      price: 'R$ 299',
+      period: '/mês',
+      icon: Zap,
+      color: '#3b82f6',
+      gradient: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+      popular: true,
+      features: [
+        '500 mensagens IA/mês',
+        '3 usuários',
+        'Todas as integrações',
+        'Relatórios avançados',
+        'Suporte padrão'
+      ],
+      badge: 'Mais Popular'
+    },
+    {
+      id: 'premium',
+      name: 'Premium',
+      price: 'R$ 499',
+      period: '/mês',
+      icon: Crown,
+      color: '#9333ea',
+      gradient: 'linear-gradient(135deg, #9333ea, #ec4899)',
+      features: [
+        '1000 mensagens IA/mês',
+        '10 usuários',
+        'Todas as integrações',
+        'Relatórios avançados',
+        'Suporte prioritário'
+      ]
+    }
+  ];
 
   const styles = {
     container: {
@@ -632,14 +688,14 @@ export default function Registrar() {
               <div style={styles.plansGrid}>
                 {plans.map((plan) => {
                   const Icon = plan.icon;
-                  const isSelected = selectedPlan === plan.id;
-                  const isHovered = hoveredPlan === plan.id;
+                  const isSelected = selectedPlan === plan.name;
+                  const isHovered = hoveredPlan === plan.name;
                   
                   return (
                     <div
                       key={plan.id}
-                      onClick={() => setSelectedPlan(plan.id)}
-                      onMouseEnter={() => setHoveredPlan(plan.id)}
+                      onClick={() => setSelectedPlan(plan.name)}
+                      onMouseEnter={() => setHoveredPlan(plan.name)}
                       onMouseLeave={() => setHoveredPlan('')}
                       style={{
                         ...styles.planCard,

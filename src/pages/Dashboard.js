@@ -99,6 +99,7 @@ export default function Dashboard() {
   const handleLogout = () => {
     console.log('Saindo do sistema...');
     setLogoutModalOpen(false);
+    navigate('/login');
   };
 
   const handleMenuClick = (menuId) => {
@@ -920,7 +921,7 @@ export default function Dashboard() {
                     onClick={() => {
                       setUserMenuOpen(false);
                       setLogoutModalOpen(true);
-                      navigate('/login')
+                     
                     }}
                   >
                     <LogOut size={16} /> Sair
