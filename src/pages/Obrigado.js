@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Check, Sparkles, Zap, ArrowRight, Mail, Bell, Layout } from 'lucide-react';
+import { Calendar, Check, Sparkles, ArrowRight, Bell, Layout } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Obrigado() {
