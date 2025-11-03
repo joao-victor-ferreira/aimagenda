@@ -6,6 +6,7 @@ import Obrigado from "../pages/Obrigado";
 import Dashboard from "../pages/Dashboard";
 import Configuracao from "../pages/Configuracao";
 import Contatos from "../pages/Contatos";
+import Esqueceusenha from "../pages/Esqueceusenha";
 
 
 function Rotas() {
@@ -19,6 +20,7 @@ function Rotas() {
                       <Route path="/dashboard" element={<Dashboard />} />
                        <Route path="/configuracao" element={<Configuracao />} />
                         <Route path="/contatos" element={<Contatos />} />
+                          <Route path="/esqueceuasenha" element={<Esqueceusenha />} />
                         
       </Routes>
     </Router>

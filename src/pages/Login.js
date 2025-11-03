@@ -139,52 +139,52 @@ export default function Login() {
     setAlert(null);
   };
 
-  const handleSubmit = async () => {
-    // Validação simples
-    if (!formData.email || !formData.password) {
-      showAlert('error', 'Por favor, preencha o email e a senha para continuar.');
-      return;
+ const handleSubmit = async () => {
+  if (!formData.email || !formData.password) {
+    showAlert('error', 'Por favor, preencha o email e a senha para continuar.');
+    return;
+  }
+
+  if (!formData.email.includes('@')) {
+    showAlert('error', 'Por favor, insira um endereço de email válido.');
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const response = await fetch('http://localhost:5000/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: formData.email,
+        senha: formData.password
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.token) {
+      // ✅ Salva o token no localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('usuario', JSON.stringify(data.usuario));
+
+      showAlert('success', 'Login realizado com sucesso! Redirecionando...');
+      
+     console.log('Token armazenado:', data.token);
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+    } else {
+      showAlert('error', data.erro || 'Email ou senha incorretos.');
     }
+  } catch (err) {
+    showAlert('error', 'Erro ao conectar ao servidor. Tente novamente.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-    if (!formData.email.includes('@')) {
-      showAlert('error', 'Por favor, insira um endereço de email válido.');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch('http://localhost:5000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          senha: formData.password
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-        }
-        showAlert('success', 'Login realizado com sucesso! Redirecionando...');
-        setTimeout(() => {
-          navigate('/dashboard');
-          console.log('Navegando para dashboard...');
-        }, 1500);
-      } else {
-        showAlert('error', data.mensagem || 'Email ou senha incorretos. Verifique suas credenciais e tente novamente.');
-      }
-    } catch (err) {
-      showAlert('error', 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -417,7 +417,7 @@ export default function Login() {
           {/* Logo e Título */}
           <div style={styles.logoSection}>
             <div style={styles.logoIcon}>
-              <Calendar size={64} color="white" />
+              <img src={require('../assets/logo.png')} alt="AIM Agenda Logo" style={{ width: '4.5rem', height: '4.5rem' }} />
             </div>
             <h1 style={styles.title}>AIM Agenda</h1>
             <p style={styles.subtitle}>Gerencie seus compromissos com inteligência</p>
@@ -490,7 +490,7 @@ export default function Login() {
                   <input type="checkbox" style={styles.checkbox} />
                   <span style={styles.rememberText}>Lembrar-me</span>
                 </label>
-                <button style={styles.forgotLink}>Esqueci a senha</button>
+                <button onClick={() => navigate('/esqueceuasenha')} style={styles.forgotLink}>Esqueci a senha</button>
               </div>
 
               {/* Botão de Login */}

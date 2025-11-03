@@ -1,9 +1,161 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {  Lock, User, Eye, EyeOff, Mail, Phone, Building, 
   ArrowRight, ArrowLeft, Check, Zap, Crown, Sparkles, CreditCard, QrCode,
-  Calendar, Shield, AlertCircle
+  Calendar, Shield, AlertCircle, X, CheckCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+// Custom Alert Component
+const CustomAlert = ({ type = 'error', title, message, onClose }) => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+      setTimeout(onClose, 300);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const alertStyles = {
+    container: {
+      position: 'fixed',
+      top: '2rem',
+      right: '2rem',
+      zIndex: 9999,
+      minWidth: '320px',
+      maxWidth: '400px',
+      animation: isVisible ? 'slideIn 0.3s ease-out' : 'slideOut 0.3s ease-out',
+      opacity: isVisible ? 1 : 0,
+      transform: isVisible ? 'translateX(0)' : 'translateX(100%)'
+    },
+    alert: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: '0.75rem',
+      padding: '1rem 1.25rem',
+      borderRadius: '0.75rem',
+      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+      border: '1px solid',
+      background: type === 'error' ? '#fef2f2' : 
+                  type === 'success' ? '#f0fdf4' :
+                  type === 'warning' ? '#fefce8' : '#eff6ff',
+      borderColor: type === 'error' ? '#fecaca' : 
+                   type === 'success' ? '#bbf7d0' :
+                   type === 'warning' ? '#fde68a' : '#bfdbfe'
+    },
+    iconWrapper: {
+      flexShrink: 0,
+      width: '2.5rem',
+      height: '2.5rem',
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: type === 'error' ? '#fee2e2' : 
+                  type === 'success' ? '#dcfce7' :
+                  type === 'warning' ? '#fef3c7' : '#dbeafe'
+    },
+    content: {
+      flex: 1,
+      paddingTop: '0.25rem'
+    },
+    title: {
+      fontSize: '0.95rem',
+      fontWeight: '700',
+      color: type === 'error' ? '#991b1b' : 
+             type === 'success' ? '#166534' :
+             type === 'warning' ? '#92400e' : '#1e40af',
+      marginBottom: '0.25rem'
+    },
+    message: {
+      fontSize: '0.875rem',
+      color: type === 'error' ? '#7f1d1d' : 
+             type === 'success' ? '#14532d' :
+             type === 'warning' ? '#78350f' : '#1e3a8a',
+      lineHeight: '1.5'
+    },
+    closeButton: {
+      flexShrink: 0,
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: '0.25rem',
+      borderRadius: '0.375rem',
+      color: type === 'error' ? '#991b1b' : 
+             type === 'success' ? '#166534' :
+             type === 'warning' ? '#92400e' : '#1e40af',
+      transition: 'background 0.2s',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  };
+
+  return (
+    <div style={alertStyles.container}>
+      <style>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes slideOut {
+          from {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+        }
+        @media (max-width: 640px) {
+          .alert-container {
+            right: 1rem !important;
+            left: 1rem !important;
+            min-width: auto !important;
+          }
+        }
+      `}</style>
+      <div style={alertStyles.alert} className="alert-container">
+        <div style={alertStyles.iconWrapper}>
+          {type === 'error' && <AlertCircle size={24} color="#dc2626" />}
+          {type === 'success' && <CheckCircle size={24} color="#16a34a" />}
+          {type === 'warning' && <AlertCircle size={24} color="#f59e0b" />}
+          {type === 'info' && <AlertCircle size={24} color="#3b82f6" />}
+        </div>
+        <div style={alertStyles.content}>
+          <div style={alertStyles.title}>{title}</div>
+          <div style={alertStyles.message}>{message}</div>
+        </div>
+        <button
+          style={alertStyles.closeButton}
+          onClick={() => {
+            setIsVisible(false);
+            setTimeout(onClose, 300);
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = type === 'error' ? '#fee2e2' : 
+                                                type === 'success' ? '#dcfce7' :
+                                                type === 'warning' ? '#fef3c7' : '#dbeafe';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'none';
+          }}
+        >
+          <X size={20} />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default function Registrar() {
   const [step, setStep] = useState(1);
@@ -15,8 +167,16 @@ export default function Registrar() {
   const [focusedField, setFocusedField] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('credit_card'); // 'credit_card' ou 'pix'
+  const [paymentMethod, setPaymentMethod] = useState('credit_card');
   const [pixGenerated, setPixGenerated] = useState(false);
+  
+  // Estados para Custom Alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    type: 'error', // 'error', 'success', 'warning', 'info'
+    title: '',
+    message: ''
+  });
 
   const navigate = useNavigate();
 
@@ -36,6 +196,12 @@ export default function Registrar() {
     cardCVV: '',
     cpf: ''
   });
+
+  // Função para mostrar alertas customizados
+  const showCustomAlert = (type, title, message) => {
+    setAlertConfig({ type, title, message });
+    setShowAlert(true);
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -79,15 +245,15 @@ export default function Registrar() {
 
   const validateStep1 = () => {
     if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
-      setError('Preencha todos os campos obrigatórios.');
+      showCustomAlert('error', 'Campos Obrigatórios', 'Preencha todos os campos obrigatórios.');
       return false;
     }
     if (formData.password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres.');
+      showCustomAlert('error', 'Senha Inválida', 'A senha deve ter pelo menos 6 caracteres.');
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
-      setError('As senhas não coincidem.');
+      showCustomAlert('error', 'Senhas Diferentes', 'As senhas não coincidem. Verifique e tente novamente.');
       return false;
     }
     return true;
@@ -96,17 +262,17 @@ export default function Registrar() {
   const validateStep3 = () => {
     if (paymentMethod === 'credit_card') {
       if (!paymentData.cardNumber || !paymentData.cardName || !paymentData.cardExpiry || !paymentData.cardCVV || !paymentData.cpf) {
-        setError('Preencha todos os dados do cartão.');
+        showCustomAlert('error', 'Dados Incompletos', 'Preencha todos os dados do cartão.');
         return false;
       }
       const cardNumberClean = paymentData.cardNumber.replace(/\s/g, '');
       if (cardNumberClean.length < 13) {
-        setError('Número do cartão inválido.');
+        showCustomAlert('error', 'Cartão Inválido', 'Número do cartão inválido.');
         return false;
       }
     } else if (paymentMethod === 'pix') {
       if (!paymentData.cpf) {
-        setError('Informe seu CPF para gerar o PIX.');
+        showCustomAlert('error', 'CPF Necessário', 'Informe seu CPF para gerar o PIX.');
         return false;
       }
     }
@@ -118,7 +284,7 @@ export default function Registrar() {
       if (validateStep1()) setStep(2);
     } else if (step === 2) {
       if (!selectedPlan) {
-        setError('Selecione um plano para continuar.');
+        showCustomAlert('warning', 'Selecione um Plano', 'Escolha um plano para continuar.');
         return;
       }
       setStep(3);
@@ -129,10 +295,11 @@ export default function Registrar() {
 
   const handleGeneratePix = () => {
     if (!paymentData.cpf) {
-      setError('Informe seu CPF para gerar o PIX.');
+      showCustomAlert('error', 'CPF Necessário', 'Informe seu CPF para gerar o PIX.');
       return;
     }
     setPixGenerated(true);
+    showCustomAlert('success', 'PIX Gerado!', 'QR Code gerado com sucesso. Escaneie ou copie o código.');
   };
 
   const handleSubmit = async () => {
@@ -170,15 +337,13 @@ export default function Registrar() {
       const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
-        console.log("✅ Cadastro e pagamento realizados:", data);
-        navigate('/obrigado');
+        showCustomAlert('success', 'Cadastro Realizado!', 'Sua conta foi criada com sucesso. Redirecionando...');
+        setTimeout(() => navigate('/obrigado'), 2000);
       } else {
-        console.error("❌ Erro no backend:", data);
-        setError(data.mensagem || 'Erro ao processar pagamento.');
+        showCustomAlert('error', 'Erro no Cadastro', data.mensagem || 'Erro ao processar pagamento. Tente novamente.');
       }
     } catch (err) {
-      console.error("🚫 Erro de rede:", err);
-      setError('Erro de conexão com o servidor.');
+      showCustomAlert('error', 'Erro de Conexão', 'Não foi possível conectar ao servidor. Verifique sua internet.');
     } finally {
       setIsLoading(false);
     }
@@ -837,7 +1002,7 @@ export default function Registrar() {
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText('00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-42661417400052040000530398654041.005802BR5925AIM AGENDA LTDA6009SAO PAULO62070503***6304ABCD');
-                          alert('Código PIX copiado!');
+                          showCustomAlert('success', 'Código Copiado!', 'O código PIX foi copiado para sua área de transferência.');
                         }}
                         style={{
                           ...styles.button,
@@ -902,6 +1067,16 @@ export default function Registrar() {
           <p>© 2025 AIM Agenda. Todos os direitos reservados.</p>
         </div>
       </div>
+
+      {/* Custom Alert Modal */}
+      {showAlert && (
+        <CustomAlert
+          type={alertConfig.type}
+          title={alertConfig.title}
+          message={alertConfig.message}
+          onClose={() => setShowAlert(false)}
+        />
+      )}
     </div>
   );
 }

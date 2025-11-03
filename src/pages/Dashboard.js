@@ -27,7 +27,8 @@ import Insights from './Insights';
 import Equipe from './Equipe';
 import Cliente from './Cliente';
 import MainContent from './MainContent';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import useAuth from '../config/useAuth';
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -36,6 +37,11 @@ export default function Dashboard() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const { user, loading } = useAuth();
+
+
+  console.log('Usuário autenticado:', user);
+
 
   const menuItems = [
     { id: 'dashboard', icon: Home, label: 'Início' },
