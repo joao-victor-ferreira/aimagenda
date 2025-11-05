@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { 
   Brain, Save, RotateCcw, Sparkles, MessageSquare, Clock, Bell, Globe,
   Volume2, Shield, Zap, AlertCircle, CheckCircle, Eye, Calendar, User,
-  Mail, Info
+  Mail, Info, Loader
 } from 'lucide-react';
 
 export default function AIConfiguracao() {
   const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [config, setConfig] = useState({
     name: 'AIM Assistant',
     language: 'pt-BR',
@@ -40,6 +42,11 @@ export default function AIConfiguracao() {
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
+ 
+  const API_URL = "http://localhost:5000/api/iaconfig";
+  const getToken = () => localStorage.getItem("token");
+
+ 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -47,15 +54,100 @@ export default function AIConfiguracao() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const handleSave = () => {
-    setUnsavedChanges(false);
-    alert('Configurações salvas com sucesso!');
+  
+  useEffect(() => {
+    const carregarConfiguracao = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(API_URL, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+          },
+        });
+
+        if (res.ok) {
+          const dados = await res.json();
+          setConfig(dados);
+          console.log("✅ Configuração carregada:", dados);
+        } else {
+          console.warn("⚠️ Nenhuma configuração encontrada, usando padrão");
+        }
+      } catch (erro) {
+        console.error("❌ Erro ao carregar configuração:", erro);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarConfiguracao();
+  }, []);
+
+  
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(API_URL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(config),
+      });
+
+      if (!res.ok) throw new Error("Erro ao salvar configuração");
+      
+      const dados = await res.json();
+      setConfig(dados);
+      setUnsavedChanges(false);
+      
+      // Feedback visual
+      alert('✅ Configurações salvas com sucesso!');
+      console.log("✅ Configuração salva:", dados);
+    } catch (erro) {
+      console.error("❌ Erro ao salvar:", erro);
+      alert('❌ Erro ao salvar configurações. Verifique sua conexão e tente novamente.');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleReset = () => {
+  // ============================================================
+  // 🔹 DELETE → Resetar configuração para padrão
+  // ============================================================
+  const handleReset = async () => {
     
+
+    setSaving(true);
+    try {
+      const res = await fetch(API_URL, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao resetar configuração");
+      
+      const dados = await res.json();
+      setConfig(dados);
+      setUnsavedChanges(false);
+      
+      
+      alert('✅ Configurações resetadas com sucesso!');
+      console.log("✅ Configuração resetada:", dados);
+    } catch (erro) {
+      console.error("❌ Erro ao resetar:", erro);
+      alert('❌ Erro ao resetar configurações. Verifique sua conexão e tente novamente.');
+    } finally {
+      setSaving(false);
+    }
   };
 
+  
   const handleChange = (section, field, value) => {
     setConfig(prev => ({
       ...prev,
@@ -76,6 +168,16 @@ export default function AIConfiguracao() {
     { id: 'templates', label: 'Respostas', icon: MessageSquare }
   ];
 
+
+  if (loading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <Loader size={48} style={{animation: 'spin 1s linear infinite'}} color="#3b82f6" />
+        <p style={styles.loadingText}>Carregando configurações...</p>
+      </div>
+    );
+  }
+
   return (
     <div style={styles.container}>
       <style>{mediaQueries}</style>
@@ -87,7 +189,7 @@ export default function AIConfiguracao() {
             <span>Configurações da IA</span>
           </div>
           <h1 style={styles.title}>Configure sua Assistente</h1>
-          <p style={styles.subtitle}>Personalize o jeito que sua IA conversa</p>
+          <p style={styles.subtitle}>Personalize o jeito que sua IA conversa e responde</p>
         </div>
         {!isMobile && (
           <div style={styles.headerActions}>
@@ -139,7 +241,7 @@ export default function AIConfiguracao() {
                 <Brain size={24} color="#3b82f6" />
                 <div>
                   <h2 style={styles.sectionTitle}>Identidade da IA</h2>
-                  <p style={styles.sectionDescription}>Defina como sua IA se apresenta</p>
+                  <p style={styles.sectionDescription}>Defina como sua IA se apresenta aos clientes</p>
                 </div>
               </div>
 
@@ -156,7 +258,7 @@ export default function AIConfiguracao() {
                     style={styles.input}
                     placeholder="Ex: AIM Assistant"
                   />
-                  <span style={styles.hint}>Como a IA se apresentará</span>
+                  <span style={styles.hint}>Como a IA se apresentará nas conversas</span>
                 </div>
 
                 <div style={styles.formGroup}>
@@ -173,7 +275,7 @@ export default function AIConfiguracao() {
                     <option value="en-US">English (US)</option>
                     <option value="es-ES">Español</option>
                   </select>
-                  <span style={styles.hint}>Idioma das respostas</span>
+                  <span style={styles.hint}>Idioma padrão das respostas</span>
                 </div>
 
                 <div style={styles.formGroup}>
@@ -181,28 +283,17 @@ export default function AIConfiguracao() {
                     <Volume2 size={16} />
                     Tom de Voz
                   </label>
-                  <div style={styles.radioGroup}>
-                    {[
-                      { value: 'professional', label: 'Profissional', desc: 'Formal e cortês' },
-                      { value: 'friendly', label: 'Amigável', desc: 'Casual e próximo' },
-                      { value: 'formal', label: 'Formal', desc: 'Corporativo' }
-                    ].map(option => (
-                      <label key={option.value} style={styles.radioCard}>
-                        <input
-                          type="radio"
-                          name="tone"
-                          value={option.value}
-                          checked={config.tone === option.value}
-                          onChange={(e) => handleSimpleChange('tone', e.target.value)}
-                          style={styles.radio}
-                        />
-                        <div>
-                          <div style={styles.radioLabel}>{option.label}</div>
-                          <div style={styles.radioDesc}>{option.desc}</div>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
+                  <select
+                    value={config.tone}
+                    onChange={(e) => handleSimpleChange('tone', e.target.value)}
+                    style={styles.select}
+                  >
+                    <option value="friendly">Amigável</option>
+                    <option value="professional">Profissional</option>
+                    <option value="neutral">Neutro</option>
+                    <option value="humorous">Bem-humorado</option>
+                  </select>
+                  <span style={styles.hint}>Estilo de comunicação</span>
                 </div>
 
                 <div style={styles.formGroup}>
@@ -212,9 +303,10 @@ export default function AIConfiguracao() {
                   </label>
                   <div style={styles.radioGroup}>
                     {[
-                      { value: 'helpful', label: 'Prestativo', desc: 'Foca em resolver' },
-                      { value: 'concise', label: 'Direto', desc: 'Respostas curtas' },
-                      { value: 'detailed', label: 'Detalhista', desc: 'Explicações completas' }
+                      { value: 'helpful', label: 'Prestativo', desc: 'Foca em resolver problemas' },
+                      { value: 'creative', label: 'Criativo', desc: 'Respostas inovadoras' },
+                      { value: 'serious', label: 'Sério', desc: 'Formal e direto' },
+                      { value: 'efficient', label: 'Eficiente', desc: 'Rápido e objetivo' }
                     ].map(option => (
                       <label key={option.value} style={styles.radioCard}>
                         <input
@@ -243,7 +335,7 @@ export default function AIConfiguracao() {
                 <Clock size={24} color="#10b981" />
                 <div>
                   <h2 style={styles.sectionTitle}>Regras & Horários</h2>
-                  <p style={styles.sectionDescription}>Configure quando a IA deve responder</p>
+                  <p style={styles.sectionDescription}>Configure quando e como a IA deve responder</p>
                 </div>
               </div>
 
@@ -307,7 +399,7 @@ export default function AIConfiguracao() {
                         <Zap size={16} />
                         Resposta Automática
                       </label>
-                      <span style={styles.hint}>IA responde automaticamente mensagens</span>
+                      <span style={styles.hint}>IA responde automaticamente mensagens recebidas</span>
                     </div>
                     <label style={styles.switch}>
                       <input
@@ -327,7 +419,7 @@ export default function AIConfiguracao() {
                         <Shield size={16} />
                         Confirmação Obrigatória
                       </label>
-                      <span style={styles.hint}>Exige confirmação antes de agendar</span>
+                      <span style={styles.hint}>Exige confirmação humana antes de agendar</span>
                     </div>
                     <label style={styles.switch}>
                       <input
@@ -349,14 +441,14 @@ export default function AIConfiguracao() {
                     <input
                       type="number"
                       value={config.maxResponseTime}
-                      onChange={(e) => handleSimpleChange('maxResponseTime', e.target.value)}
+                      onChange={(e) => handleSimpleChange('maxResponseTime', parseInt(e.target.value))}
                       style={{...styles.input, width: '100px'}}
                       min="1"
                       max="120"
                     />
                     <span style={styles.unit}>segundos</span>
                   </div>
-                  <span style={styles.hint}>Tempo de espera antes de responder</span>
+                  <span style={styles.hint}>Tempo de espera antes de responder automaticamente</span>
                 </div>
               </div>
             </div>
@@ -368,7 +460,7 @@ export default function AIConfiguracao() {
                 <Bell size={24} color="#f59e0b" />
                 <div>
                   <h2 style={styles.sectionTitle}>Notificações</h2>
-                  <p style={styles.sectionDescription}>Escolha quando receber alertas</p>
+                  <p style={styles.sectionDescription}>Escolha quando e como receber alertas</p>
                 </div>
               </div>
 
@@ -376,7 +468,7 @@ export default function AIConfiguracao() {
                 {[
                   { 
                     key: 'newAppointment', icon: Calendar, label: 'Novo Agendamento',
-                    description: 'Notificar quando um novo agendamento for criado', color: '#3b82f6'
+                    description: 'Notificar quando um novo agendamento for criado pela IA', color: '#3b82f6'
                   },
                   { 
                     key: 'cancellation', icon: AlertCircle, label: 'Cancelamentos',
@@ -384,15 +476,15 @@ export default function AIConfiguracao() {
                   },
                   { 
                     key: 'reminder', icon: Clock, label: 'Lembretes',
-                    description: 'Receber lembretes de agendamentos', color: '#f59e0b'
+                    description: 'Receber lembretes automáticos de agendamentos próximos', color: '#f59e0b'
                   },
                   { 
                     key: 'aiResponse', icon: Brain, label: 'Respostas da IA',
-                    description: 'Notificar cada resposta da IA', color: '#8b5cf6'
+                    description: 'Notificar cada vez que a IA responder uma mensagem', color: '#8b5cf6'
                   },
                   { 
                     key: 'dailySummary', icon: Mail, label: 'Resumo Diário',
-                    description: 'Email com resumo das atividades', color: '#10b981'
+                    description: 'Receber email com resumo das atividades do dia', color: '#10b981'
                   }
                 ].map(notification => {
                   const Icon = notification.icon;
@@ -426,7 +518,7 @@ export default function AIConfiguracao() {
                 <MessageSquare size={24} color="#8b5cf6" />
                 <div>
                   <h2 style={styles.sectionTitle}>Respostas Padrão</h2>
-                  <p style={styles.sectionDescription}>Personalize as mensagens automáticas</p>
+                  <p style={styles.sectionDescription}>Personalize as mensagens automáticas da IA</p>
                 </div>
               </div>
 
@@ -434,19 +526,19 @@ export default function AIConfiguracao() {
                 {[
                   { 
                     key: 'greeting', label: 'Saudação Inicial',
-                    description: 'Primeira mensagem enviada', icon: MessageSquare
+                    description: 'Primeira mensagem enviada ao cliente', icon: MessageSquare
                   },
                   { 
                     key: 'confirmation', label: 'Confirmação',
-                    description: 'Após agendar com sucesso', icon: CheckCircle
+                    description: 'Mensagem após agendar com sucesso', icon: CheckCircle
                   },
                   { 
                     key: 'cancellation', label: 'Cancelamento',
-                    description: 'Ao cancelar um agendamento', icon: AlertCircle
+                    description: 'Resposta ao cancelar um agendamento', icon: AlertCircle
                   },
                   { 
                     key: 'unavailable', label: 'Indisponível',
-                    description: 'Horário não disponível', icon: Clock
+                    description: 'Quando o horário solicitado não está disponível', icon: Clock
                   }
                 ].map(template => {
                   const Icon = template.icon;
@@ -466,6 +558,7 @@ export default function AIConfiguracao() {
                         onChange={(e) => handleChange('templates', template.key, e.target.value)}
                         style={styles.textarea}
                         rows={3}
+                        placeholder="Digite a mensagem..."
                       />
                       <div style={styles.templateFooter}>
                         <Info size={14} color="#6b7280" />
@@ -490,13 +583,21 @@ export default function AIConfiguracao() {
           </div>
         )}
         <div style={styles.footerActions}>
-          <button style={styles.btnReset} onClick={handleReset}>
-            <RotateCcw size={18} />
+          <button 
+            style={{...styles.btnReset, ...(saving ? {opacity: 0.6, cursor: 'not-allowed'} : {})}} 
+            onClick={handleReset}
+            disabled={saving}
+          >
+            {saving ? <Loader size={18} style={{animation: 'spin 1s linear infinite'}} /> : <RotateCcw size={18} />}
             {!isMobile && 'Resetar'}
           </button>
-          <button style={styles.btnSave} onClick={handleSave}>
-            <Save size={18} />
-            Salvar
+          <button 
+            style={{...styles.btnSave, ...(saving ? {opacity: 0.8, cursor: 'not-allowed'} : {})}} 
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? <Loader size={18} style={{animation: 'spin 1s linear infinite'}} /> : <Save size={18} />}
+            {saving ? 'Salvando...' : 'Salvar Alterações'}
           </button>
         </div>
       </div>
@@ -505,7 +606,7 @@ export default function AIConfiguracao() {
         <div style={styles.modalOverlay} onClick={() => setShowPreview(false)}>
           <div style={styles.previewModal} onClick={(e) => e.stopPropagation()}>
             <div style={styles.previewHeader}>
-              <h3 style={styles.previewTitle}>Pré-visualização</h3>
+              <h3 style={styles.previewTitle}>Pré-visualização da Conversa</h3>
               <button style={styles.btnClose} onClick={() => setShowPreview(false)}>×</button>
             </div>
             <div style={styles.previewBody}>
@@ -528,6 +629,10 @@ export default function AIConfiguracao() {
                   </div>
                 </div>
               </div>
+              <div style={styles.previewInfo}>
+                <Info size={16} color="#3b82f6" />
+                <span>Esta é uma simulação de como a IA conversará com seus clientes</span>
+              </div>
             </div>
           </div>
         </div>
@@ -543,6 +648,19 @@ const styles = {
     minHeight: '100vh',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     paddingBottom: '100px'
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    gap: '1rem'
+  },
+  loadingText: {
+    fontSize: '1rem',
+    color: '#6b7280',
+    fontWeight: '500'
   },
   header: {
     display: 'flex',
@@ -1097,10 +1215,26 @@ const styles = {
     fontSize: '0.875rem',
     maxWidth: '80%',
     wordWrap: 'break-word'
+  },
+  previewInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    marginTop: '1rem',
+    padding: '1rem',
+    background: '#eff6ff',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    color: '#1e40af'
   }
 };
 
 const mediaQueries = `
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
   input[type="checkbox"] {
     opacity: 0;
     width: 0;
@@ -1136,6 +1270,30 @@ const mediaQueries = `
     }
   }
 
+  button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .radioCard:hover {
+    border-color: #3b82f6;
+    background: #f9fafb;
+  }
+
+  .notificationItem:hover {
+    border-color: #d1d5db;
+    background: #fafafa;
+  }
+
   @media (max-width: 768px) {
     .tab-button {
       padding: 0.75rem 1rem !important;
@@ -1148,6 +1306,12 @@ const mediaQueries = `
     
     .tab-button svg {
       margin: 0 !important;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .formGrid {
+      grid-template-columns: repeat(2, 1fr) !important;
     }
   }
 `;

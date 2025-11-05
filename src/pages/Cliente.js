@@ -12,6 +12,15 @@ export default function Cliente() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTag, setFilterTag] = useState('all');
   const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [clients, setClients] = useState([]);
+
+  const getToken = () => localStorage.getItem("token");
+  const API_URL = "http://localhost:5000/api/clientes";
+
+  const [newClient, setNewClient] = useState({
+    nome: '', telefone: '', email: '', observacoes: ''
+  });
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -20,53 +29,126 @@ export default function Cliente() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const [newClient, setNewClient] = useState({
-    name: '', phone: '', email: '', notes: ''
-  });
+  // 🔹 Carregar clientes
+  const carregarClientes = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(API_URL, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error("Erro ao buscar clientes");
+      const data = await res.json();
 
-  const [clients, setClients] = useState([
-    {
-      id: 1, name: 'João Silva', phone: '+55 11 98765-4321', email: 'joao@email.com',
-      lastInteraction: '2025-01-29', status: 'active', tags: ['VIP', 'Recorrente'],
-      notes: 'Cliente preferencial', totalAppointments: 12, totalValue: 8500,
-      satisfactionRate: 5,
-      history: [
-        { id: 1, type: 'ai_message', date: '2025-01-29 10:30',
-          content: 'IA: Olá João! Gostaria de agendar sua consulta mensal?',
-          response: 'João: Sim, pode ser amanhã às 14h?' }
-      ]
-    },
-    {
-      id: 2, name: 'Maria Santos', phone: '+55 11 98765-1234', email: 'maria@email.com',
-      lastInteraction: '2025-01-28', status: 'active', tags: ['Recorrente'], notes: '',
-      totalAppointments: 8, totalValue: 5200, satisfactionRate: 5, history: []
-    },
-    {
-      id: 3, name: 'Pedro Costa', phone: '+55 11 98765-5678', email: 'pedro@email.com',
-      lastInteraction: '2025-01-20', status: 'inactive', tags: ['Inativo'],
-      notes: 'Não responde há 2 semanas', totalAppointments: 3, totalValue: 2100,
-      satisfactionRate: 4, history: []
-    },
-    {
-      id: 4, name: 'Ana Oliveira', phone: '+55 11 98765-9012', email: 'ana@email.com',
-      lastInteraction: '2025-01-29', status: 'active', tags: ['VIP'],
-      notes: 'Empresária, horários flexíveis', totalAppointments: 15, totalValue: 12300,
-      satisfactionRate: 5, history: []
-    },
-    {
-      id: 5, name: 'Carlos Ferreira', phone: '+55 11 98765-3456', email: 'carlos@email.com',
-      lastInteraction: '2025-01-29', status: 'new', tags: ['Novo'],
-      notes: 'Primeiro contato via WhatsApp', totalAppointments: 1, totalValue: 800,
-      satisfactionRate: 4, history: []
+      // Mapear dados do backend para o formato do frontend
+      setClients(data.map(c => ({
+        id: c._id,
+        _id: c._id,
+        name: c.nome || "Sem nome",
+        nome: c.nome || "Sem nome",
+        phone: c.telefone || "—",
+        telefone: c.telefone || "—",
+        email: c.email || "—",
+        tags: c.tags || [],
+        status: c.status || "new",
+        lastInteraction: c.ultimaInteracao || c.createdAt || new Date().toISOString(),
+        totalAppointments: c.totalAgendamentos || 0,
+        satisfactionRate: c.taxaSatisfacao || 5,
+        totalValue: c.valorTotal || 0,
+        history: (c.historico || []).map(h => ({
+          id: h._id || Math.random().toString(36),
+          date: new Date(h.data || h.createdAt).toLocaleDateString('pt-BR'),
+          content: h.descricao || h.content || "Sem descrição",
+          response: h.resposta || h.response || ""
+        })),
+        notes: c.observacoes || ""
+      })));
+    } catch (err) {
+      console.error("❌ Erro ao carregar clientes:", err);
+      alert("Erro ao carregar clientes: " + err.message);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
-  const stats = [
-    { label: 'Total', value: clients.length, icon: Users, color: '#3b82f6' },
-    { label: 'Ativos', value: clients.filter(c => c.status === 'active').length, icon: CheckCircle, color: '#10b981' },
-    { label: 'Novos', value: clients.filter(c => c.tags.includes('Novo')).length, icon: TrendingUp, color: '#f59e0b' },
-    { label: 'Retenção', value: '94%', icon: Star, color: '#8b5cf6' }
-  ];
+  useEffect(() => {
+    carregarClientes();
+  }, []);
+
+  // 🔹 Criar cliente
+  const criarCliente = async () => {
+    if (!newClient.nome || !newClient.telefone) {
+      alert("Nome e telefone são obrigatórios!");
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(newClient),
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.mensagem || "Erro ao criar cliente");
+      }
+      
+      const novo = await res.json();
+      
+      // Mapear novo cliente para o formato do frontend
+      const clienteMapeado = {
+        id: novo._id,
+        _id: novo._id,
+        name: novo.nome,
+        nome: novo.nome,
+        phone: novo.telefone,
+        telefone: novo.telefone,
+        email: novo.email || "—",
+        tags: novo.tags || [],
+        status: novo.status || "new",
+        lastInteraction: novo.ultimaInteracao || novo.createdAt,
+        totalAppointments: 0,
+        satisfactionRate: 5,
+        totalValue: 0,
+        history: [],
+        notes: novo.observacoes || ""
+      };
+      
+      setClients([clienteMapeado, ...clients]);
+      setShowAddModal(false);
+      setNewClient({ nome: '', telefone: '', email: '', observacoes: '' });
+      alert("Cliente adicionado com sucesso!");
+    } catch (err) {
+      console.error("Erro ao adicionar cliente:", err);
+      alert("Erro ao adicionar cliente: " + err.message);
+    }
+  };
+
+  // 🔹 Deletar cliente
+  const deletarCliente = async (id) => {
+    if (!window.confirm("Tem certeza que deseja excluir este cliente?")) return;
+    
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.mensagem || "Erro ao excluir cliente");
+      }
+      
+      setClients(clients.filter(c => c._id !== id && c.id !== id));
+      alert("Cliente excluído com sucesso!");
+    } catch (err) {
+      console.error("Erro ao excluir cliente:", err);
+      alert("Erro ao excluir cliente: " + err.message);
+    }
+  };
 
   const tagConfig = {
     'Novo': { color: '#3b82f6', bg: '#eff6ff' },
@@ -81,33 +163,27 @@ export default function Cliente() {
       inactive: { label: 'Inativo', color: '#6b7280', bg: '#f3f4f6' },
       new: { label: 'Novo', color: '#3b82f6', bg: '#eff6ff' }
     };
-    return configs[status] || { label: 'Desconhecido', color: '#6b7280', bg: '#f3f4f6' };
+    return configs[status] || configs.new;
   };
 
+  const stats = [
+    { label: 'Total', value: clients.length, icon: Users, color: '#3b82f6' },
+    { label: 'Ativos', value: clients.filter(c => c.status === 'active').length, icon: CheckCircle, color: '#10b981' },
+    { label: 'Novos', value: clients.filter(c => (c.tags || []).includes('Novo')).length, icon: TrendingUp, color: '#f59e0b' },
+    { label: 'Retenção', value: '94%', icon: Star, color: '#8b5cf6' }
+  ];
+
   const filteredClients = clients.filter(client => {
-    const matchesSearch = 
-      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.phone.includes(searchTerm) ||
-      client.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTag = filterTag === 'all' || client.tags.includes(filterTag);
+    const matchesSearch =
+      client.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.phone?.includes(searchTerm) ||
+      client.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTag = filterTag === 'all' || (client.tags || []).includes(filterTag);
     return matchesSearch && matchesTag;
   });
 
-  const handleAddClient = () => {
-    const client = {
-      id: clients.length + 1, ...newClient,
-      lastInteraction: new Date().toISOString().split('T')[0],
-      status: 'new', tags: ['Novo'], totalAppointments: 0,
-      totalValue: 0, satisfactionRate: 0, history: []
-    };
-    setClients([...clients, client]);
-    setShowAddModal(false);
-    setNewClient({ name: '', phone: '', email: '', notes: '' });
-  };
-
-  const handleDeleteClient = (clientId) => {
-    
-  };
+  const handleAddClient = () => criarCliente();
+  const handleDeleteClient = (id) => deletarCliente(id);
 
   const ClientCard = ({ client }) => {
     const statusConfig = getStatusConfig(client.status);
@@ -120,7 +196,7 @@ export default function Cliente() {
             </div>
             <div>
               <div style={styles.clientName}>{client.name}</div>
-              <div style={styles.clientId}>ID: #{client.id}</div>
+              <div style={styles.clientId}>ID: #{client.id.substring(0, 8)}</div>
             </div>
           </div>
           <div style={{...styles.statusBadge, background: statusConfig.bg, color: statusConfig.color}}>
@@ -193,7 +269,6 @@ export default function Cliente() {
         <div style={styles.headerActions}>
           {!isMobile && (
             <>
-              <button style={styles.btnSecondary}><Upload size={18} />Importar</button>
               <button style={styles.btnSecondary}><Download size={18} />Exportar</button>
             </>
           )}
@@ -249,7 +324,12 @@ export default function Cliente() {
         </div>
       </div>
 
-      {isMobile ? (
+      {loading ? (
+        <div style={styles.emptyState}>
+          <Activity size={48} color="#3b82f6" />
+          <h3 style={styles.emptyTitle}>Carregando clientes...</h3>
+        </div>
+      ) : isMobile ? (
         <div style={styles.cardsGrid}>
           {filteredClients.map((client) => <ClientCard key={client.id} client={client} />)}
         </div>
@@ -279,7 +359,7 @@ export default function Cliente() {
                         </div>
                         <div>
                           <div style={styles.clientName}>{client.name}</div>
-                          <div style={styles.clientId}>ID: #{client.id}</div>
+                          <div style={styles.clientId}>ID: #{client.id.substring(0, 8)}</div>
                         </div>
                       </div>
                     </td>
@@ -341,7 +421,7 @@ export default function Cliente() {
         </div>
       )}
 
-      {filteredClients.length === 0 && (
+      {filteredClients.length === 0 && !loading && (
         <div style={styles.emptyState}>
           <Users size={48} color="#d1d5db" />
           <h3 style={styles.emptyTitle}>Nenhum cliente encontrado</h3>
@@ -367,22 +447,22 @@ export default function Cliente() {
                 <div style={styles.formGroup}>
                   <label style={styles.label}><User size={16} />Nome Completo *</label>
                   <input type="text" style={styles.input} placeholder="Ex: João Silva"
-                    value={newClient.name} onChange={(e) => setNewClient({...newClient, name: e.target.value})} />
+                    value={newClient.nome} onChange={(e) => setNewClient({...newClient, nome: e.target.value})} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}><Phone size={16} />Telefone *</label>
                   <input type="tel" style={styles.input} placeholder="+55 11 98765-4321"
-                    value={newClient.phone} onChange={(e) => setNewClient({...newClient, phone: e.target.value})} />
+                    value={newClient.telefone} onChange={(e) => setNewClient({...newClient, telefone: e.target.value})} />
                 </div>
                 <div style={{...styles.formGroup, gridColumn: isMobile ? '1' : '1 / -1'}}>
-                  <label style={styles.label}><Mail size={16} />Email *</label>
+                  <label style={styles.label}><Mail size={16} />Email</label>
                   <input type="email" style={styles.input} placeholder="email@exemplo.com"
                     value={newClient.email} onChange={(e) => setNewClient({...newClient, email: e.target.value})} />
                 </div>
                 <div style={{...styles.formGroup, gridColumn: isMobile ? '1' : '1 / -1'}}>
                   <label style={styles.label}><FileText size={16} />Observações</label>
                   <textarea style={styles.textarea} placeholder="Adicione notas sobre o cliente..." rows={3}
-                    value={newClient.notes} onChange={(e) => setNewClient({...newClient, notes: e.target.value})} />
+                    value={newClient.observacoes} onChange={(e) => setNewClient({...newClient, observacoes: e.target.value})} />
                 </div>
               </div>
               <div style={styles.aiSuggestion}>

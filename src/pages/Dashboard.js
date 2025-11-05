@@ -103,10 +103,19 @@ export default function Dashboard() {
   const unreadCount = notifications.filter(n => n.unread).length;
 
   const handleLogout = () => {
-    console.log('Saindo do sistema...');
-    setLogoutModalOpen(false);
-    navigate('/login');
-  };
+  console.log('Saindo do sistema...');
+  
+  // 🔹 Remove o token e dados do usuário
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+
+  // 🔹 Fecha o modal
+  setLogoutModalOpen(false);
+
+  // 🔹 Redireciona para a tela de login
+  navigate('/login');
+};
+
 
   const handleMenuClick = (menuId) => {
     setActiveMenu(menuId);
@@ -131,6 +140,19 @@ export default function Dashboard() {
         return <MainContent />;
     }
   };
+
+  // Extrai apenas os dois primeiros nomes
+const nomeCurto = user?.nomeCompleto
+  ? user.nomeCompleto.split(" ").slice(0, 2).join(" ")
+  : "";
+
+  const iniciaisNome = user?.nomeCompleto
+  ? user.nomeCompleto
+      .split(" ")
+      .slice(0, 2)
+      .map((parte) => parte[0].toUpperCase())
+      .join("")
+  : "";
 
   return (
     <div className="dashboard-container">
@@ -836,7 +858,7 @@ export default function Dashboard() {
 
             <div className="header-info">
               <h1 className="header-title">Painel</h1>
-              <p className="header-subtitle">Bem-vindo de volta, João Silva</p>
+              <p className="header-subtitle">Bem-vindo de volta, {nomeCurto}</p>
             </div>
           </div>
 
@@ -909,9 +931,9 @@ export default function Dashboard() {
             {/* User Menu */}
             <div className="user-menu">
               <button className="user-button" onClick={() => setUserMenuOpen(!userMenuOpen)}>
-                <div className="user-avatar">JS</div>
+                <div className="user-avatar">{iniciaisNome}</div>
                 <div className="user-info">
-                  <span className="user-name">João Silva</span>
+                  <span className="user-name">{nomeCurto}</span>
                   <span className="user-role">Admin</span>
                 </div>
                 <ChevronDown size={16} />
@@ -940,6 +962,7 @@ export default function Dashboard() {
 
         {/* Conteúdo dinâmico */}
         {renderContent()}
+        
       </main>
 
       {/* Modal de Logout */}

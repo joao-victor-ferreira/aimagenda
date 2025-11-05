@@ -7,6 +7,10 @@ import {
 export default function Equipe() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState({ title: '', description: '', member: null });
+  const [memberToDelete, setMemberToDelete] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
@@ -86,14 +90,204 @@ export default function Equipe() {
     { label: 'Convites', value: 2, color: '#f59e0b' }
   ];
 
-  const handleInvite = () => {
-    console.log('Sending invite:', inviteData);
-    setShowInviteModal(false);
-    setInviteData({ email: '', name: '', role: 'viewer' });
+  const handleInvite = async () => {
+    if (!inviteData.name?.trim() || !inviteData.email?.trim()) {
+      alert("Por favor, preencha nome e e-mail.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Token não encontrado. Faça login novamente.");
+        return;
+      }
+
+      const payload = {
+        name: inviteData.name,
+        email: inviteData.email,
+        role: inviteData.role,
+      };
+
+      const res = await fetch("http://localhost:5000/api/equipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const body = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const msg = body.erro || body.message || "Erro ao criar membro";
+        throw new Error(msg);
+      }
+
+      const novoMembro = body;
+
+      const membroParaUI = {
+        id: novoMembro._id,
+        name: novoMembro.name,
+        email: novoMembro.email,
+        role: novoMembro.role,
+        status: novoMembro.status || "offline",
+        avatar:
+          (novoMembro.name || "NA")
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase(),
+        joinedAt: novoMembro.joinedAt || novoMembro.createdAt || new Date().toISOString(),
+        lastActive: novoMembro.lastActive || "Agora",
+        permissions:
+          novoMembro.role === "admin"
+            ? ["read", "edit", "admin"]
+            : novoMembro.role === "editor"
+            ? ["read", "edit"]
+            : ["read"],
+      };
+
+      setMembers((prev) => [...prev, membroParaUI]);
+      setShowInviteModal(false);
+      setInviteData({ email: "", name: "", role: "viewer" });
+
+      // Mostra modal de sucesso
+      setSuccessMessage({
+        title: 'Membro Adicionado!',
+        description: 'O novo membro foi adicionado à equipe com sucesso.',
+        member: membroParaUI
+      });
+      setShowSuccessModal(true);
+
+      // Fecha o modal de sucesso após 3 segundos
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 3000);
+    } catch (erro) {
+      console.error("Erro ao adicionar membro:", erro);
+      alert(`Erro: ${erro.message}`);
+    }
   };
 
-  const handleDeleteMember = (memberId) => {
- 
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://localhost:5000/api/equipe", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("Erro ao buscar equipe");
+        const data = await res.json();
+        setMembers(data);
+        console.log("Membros carregados:", data);
+      } catch (erro) {
+        console.error("Erro ao carregar membros:", erro);
+      }
+    };
+
+    fetchMembers();
+  }, []);
+
+  const openDeleteModal = (member) => {
+    setMemberToDelete(member);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteMember = async (memberId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Token não encontrado. Faça login novamente.");
+        return;
+      }
+
+      const res = await fetch(`http://localhost:5000/api/equipe/${memberId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      const body = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const msg = body.erro || body.message || "Erro ao remover membro";
+        throw new Error(msg);
+      }
+
+      setMembers((prev) => prev.filter((m) => m.id !== memberId && m._id !== memberId));
+      setShowDeleteModal(false);
+      setMemberToDelete(null);
+
+      // Mostra modal de sucesso
+      setSuccessMessage({
+        title: 'Membro Removido!',
+        description: 'O membro foi removido da equipe com sucesso.',
+        member: memberToDelete
+      });
+      setShowSuccessModal(true);
+
+      // Fecha o modal de sucesso após 3 segundos
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 3000);
+    } catch (erro) {
+      console.error("Erro ao remover membro:", erro);
+      alert(`Erro: ${erro.message}`);
+    }
+  };
+
+  const handleUpdateMember = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5000/api/equipe/${selectedMember.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          role: selectedMember.role,
+        }),
+      });
+
+      const body = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const msg = body.erro || body.message || "Erro ao atualizar membro";
+        throw new Error(msg);
+      }
+
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === selectedMember.id ? { ...m, role: selectedMember.role } : m
+        )
+      );
+
+      // Mostra modal de sucesso
+      setSuccessMessage({
+        title: 'Membro Atualizado!',
+        description: 'As permissões do membro foram atualizadas com sucesso.',
+        member: selectedMember
+      });
+      setShowSuccessModal(true);
+      setShowEditModal(false);
+
+      // Fecha o modal de sucesso após 3 segundos
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 3000);
+    } catch (erro) {
+      console.error("Erro ao atualizar membro:", erro);
+      alert(`Erro: ${erro.message}`);
+    }
   };
 
   const MemberCard = ({ member }) => {
@@ -137,7 +331,7 @@ export default function Equipe() {
             <button style={styles.cardActionBtn} onClick={() => { setSelectedMember(member); setShowEditModal(true); }}>
               <Edit size={16} />
             </button>
-            <button style={styles.cardActionBtn} onClick={() => handleDeleteMember(member.id)}>
+            <button style={styles.cardActionBtn} onClick={() => openDeleteModal(member)}>
               <Trash2 size={16} color="#ef4444" />
             </button>
           </div>
@@ -158,12 +352,6 @@ export default function Equipe() {
           <p style={styles.subtitle}>Gerencie membros e permissões</p>
         </div>
         <div style={styles.headerActions}>
-          {!isMobile && (
-            <button style={styles.btnSecondary}>
-              <Settings size={18} />
-              Configurações
-            </button>
-          )}
           <button style={styles.btnPrimary} onClick={() => setShowInviteModal(true)}>
             <UserPlus size={18} />
             {!isMobile && 'Adicionar'}
@@ -312,7 +500,7 @@ export default function Equipe() {
                         <button style={styles.actionBtn} onClick={() => { setSelectedMember(member); setShowEditModal(true); }}>
                           <Edit size={16} />
                         </button>
-                        <button style={styles.actionBtn} onClick={() => handleDeleteMember(member.id)}>
+                        <button style={styles.actionBtn} onClick={() => openDeleteModal(member)}>
                           <Trash2 size={16} color="#ef4444" />
                         </button>
                       </div>
@@ -495,7 +683,10 @@ export default function Equipe() {
               <div style={styles.dangerZone}>
                 <h4 style={styles.dangerTitle}>Zona de Perigo</h4>
                 <p style={styles.dangerText}>Ações irreversíveis que afetam permanentemente este membro</p>
-                <button style={styles.btnDanger} onClick={() => { setShowEditModal(false); handleDeleteMember(selectedMember.id); }}>
+                <button style={styles.btnDanger} onClick={() => {
+                  setShowEditModal(false);
+                  openDeleteModal(selectedMember);
+                }}>
                   <Trash2 size={16} />
                   Remover Membro
                 </button>
@@ -506,9 +697,230 @@ export default function Equipe() {
               <button style={styles.btnCancel} onClick={() => setShowEditModal(false)}>
                 Cancelar
               </button>
-              <button style={styles.btnSave}>
+              <button style={styles.btnSave} onClick={handleUpdateMember}>
                 <Check size={18} />
                 Salvar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && memberToDelete && (
+        <div style={styles.modalOverlay} onClick={() => setShowDeleteModal(false)}>
+          <div style={{...styles.modal, maxWidth: '480px'}} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <div style={styles.modalTitleContainer}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: '#fee2e2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <AlertCircle size={24} color="#dc2626" />
+                </div>
+              </div>
+              <button style={styles.btnClose} onClick={() => setShowDeleteModal(false)}>
+                <X size={24} />
+              </button>
+            </div>
+
+            <div style={styles.modalBody}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '0.75rem',
+                textAlign: 'center'
+              }}>
+                Remover Membro?
+              </h2>
+              
+              <p style={{
+                fontSize: '0.95rem',
+                color: '#6b7280',
+                textAlign: 'center',
+                marginBottom: '1.5rem',
+                lineHeight: '1.6'
+              }}>
+                Você está prestes a remover <strong style={{color: '#1f2937'}}>{memberToDelete.name}</strong> da equipe. Esta ação não pode ser desfeita.
+              </p>
+
+              <div style={{
+                background: '#f9fafb',
+                padding: '1rem',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb',
+                marginBottom: '1.5rem'
+              }}>
+                <div style={styles.memberCell}>
+                  <div style={styles.memberAvatarContainer}>
+                    <div style={styles.memberAvatar}>{memberToDelete.avatar}</div>
+                  </div>
+                  <div>
+                    <div style={styles.memberName}>{memberToDelete.name}</div>
+                    <div style={styles.memberJoined}>{memberToDelete.email}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.75rem',
+                padding: '1rem',
+                background: '#fef2f2',
+                borderRadius: '8px',
+                border: '1px solid #fecaca'
+              }}>
+                <AlertCircle size={20} color="#dc2626" style={{flexShrink: 0, marginTop: '2px'}} />
+                <div>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    color: '#991b1b',
+                    marginBottom: '0.25rem'
+                  }}>
+                    Atenção: Esta ação é irreversível
+                  </p>
+                  <p style={{
+                    fontSize: '0.8rem',
+                    color: '#7f1d1d',
+                    margin: 0,
+                    lineHeight: '1.5'
+                  }}>
+                    O membro perderá acesso imediato ao sistema e todos os dados associados serão mantidos para auditoria.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button 
+                style={styles.btnCancel} 
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancelar
+              </button>
+              <button 
+                style={{
+                  ...styles.btnDanger,
+                  padding: '0.75rem 1.5rem'
+                }} 
+                onClick={() => handleDeleteMember(memberToDelete.id || memberToDelete._id)}
+              >
+                <Trash2 size={18} />
+                Sim, Remover
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Sucesso */}
+      {showSuccessModal && successMessage.member && (
+        <div style={styles.modalOverlay} onClick={() => setShowSuccessModal(false)}>
+          <div style={{...styles.modal, maxWidth: '450px'}} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <div style={styles.modalTitleContainer}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: '#dcfce7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  animation: 'scaleIn 0.3s ease-out'
+                }}>
+                  <CheckCircle size={28} color="#16a34a" />
+                </div>
+              </div>
+              <button style={styles.btnClose} onClick={() => setShowSuccessModal(false)}>
+                <X size={24} />
+              </button>
+            </div>
+
+            <div style={styles.modalBody}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                color: '#1f2937',
+                marginBottom: '0.75rem',
+                textAlign: 'center'
+              }}>
+                {successMessage.title}
+              </h2>
+              
+              <p style={{
+                fontSize: '0.95rem',
+                color: '#6b7280',
+                textAlign: 'center',
+                marginBottom: '1.5rem',
+                lineHeight: '1.6'
+              }}>
+                {successMessage.description}
+              </p>
+
+              <div style={{
+                background: '#f9fafb',
+                padding: '1rem',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb',
+                marginBottom: '1rem'
+              }}>
+                <div style={styles.memberCell}>
+                  <div style={styles.memberAvatarContainer}>
+                    <div style={styles.memberAvatar}>{successMessage.member.avatar}</div>
+                    <div style={{
+                      ...styles.statusDot, 
+                      background: '#10b981',
+                      animation: 'pulse 2s ease-in-out infinite'
+                    }}></div>
+                  </div>
+                  <div>
+                    <div style={styles.memberName}>{successMessage.member.name}</div>
+                    <div style={styles.memberJoined}>{successMessage.member.email}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                padding: '0.75rem',
+                background: '#dcfce7',
+                borderRadius: '8px',
+                border: '1px solid #bbf7d0'
+              }}>
+                <CheckCircle size={18} color="#16a34a" />
+                <p style={{
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  color: '#166534',
+                  margin: 0
+                }}>
+                  Operação concluída com sucesso!
+                </p>
+              </div>
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button 
+                style={{
+                  ...styles.btnSave,
+                  width: '100%',
+                  justifyContent: 'center'
+                }} 
+                onClick={() => setShowSuccessModal(false)}
+              >
+                <Check size={18} />
+                Entendi
               </button>
             </div>
           </div>
@@ -1217,3 +1629,28 @@ const styles = {
     transition: 'all 0.2s'
   }
 };
+
+// Adiciona as animações CSS
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+`;
+document.head.appendChild(styleSheet);

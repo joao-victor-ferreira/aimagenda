@@ -47,6 +47,8 @@ function MainContent() {
     { icon: BarChart3, label: 'Ver Relatório', color: '#f59e0b' }
   ];
 
+  
+
   return (
     <div className="main-content-wrapper">
       <style>{`
