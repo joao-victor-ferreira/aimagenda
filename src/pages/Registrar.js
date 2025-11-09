@@ -3,7 +3,6 @@ import {  Lock, User, Eye, EyeOff, Mail, Phone, Building,
   ArrowRight, ArrowLeft, Check, Zap, Crown, Sparkles, CreditCard, QrCode,
   Calendar, Shield, AlertCircle, X, CheckCircle
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 // Custom Alert Component
 const CustomAlert = ({ type = 'error', title, message, onClose }) => {
@@ -116,13 +115,6 @@ const CustomAlert = ({ type = 'error', title, message, onClose }) => {
             transform: translateX(100%);
           }
         }
-        @media (max-width: 640px) {
-          .alert-container {
-            right: 1rem !important;
-            left: 1rem !important;
-            min-width: auto !important;
-          }
-        }
       `}</style>
       <div style={alertStyles.alert} className="alert-container">
         <div style={alertStyles.iconWrapper}>
@@ -166,19 +158,17 @@ export default function Registrar() {
   const [buttonHover, setButtonHover] = useState(false);
   const [focusedField, setFocusedField] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('credit_card');
   const [pixGenerated, setPixGenerated] = useState(false);
+  const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
+  const [resendTimer, setResendTimer] = useState(0);
   
-  // Estados para Custom Alert
   const [showAlert, setShowAlert] = useState(false);
   const [alertConfig, setAlertConfig] = useState({
-    type: 'error', // 'error', 'success', 'warning', 'info'
+    type: 'error',
     title: '',
     message: ''
   });
-
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -197,10 +187,119 @@ export default function Registrar() {
     cpf: ''
   });
 
-  // Função para mostrar alertas customizados
   const showCustomAlert = (type, title, message) => {
     setAlertConfig({ type, title, message });
     setShowAlert(true);
+  };
+
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
+
+  const handleSendVerificationCode = async () => {
+    if (!formData.email) {
+      showCustomAlert('error', 'Email Necessário', 'Informe seu email para receber o código.');
+      return false;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/auth/enviar-codigo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        setResendTimer(60);
+        showCustomAlert('success', 'Código Enviado!', `Enviamos um código de 6 dígitos para ${formData.email}`);
+        return true;
+      } else {
+        showCustomAlert('error', 'Erro ao Enviar', data.mensagem || 'Não foi possível enviar o código. Tente novamente.');
+        return false;
+      }
+    } catch (err) {
+      showCustomAlert('error', 'Erro de Conexão', 'Não foi possível conectar ao servidor.');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    const code = verificationCode.join('');
+    
+    if (code.length !== 6) {
+      showCustomAlert('error', 'Código Incompleto', 'Digite o código completo de 6 dígitos.');
+      return false;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/auth/verificar-codigo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          email: formData.email,
+          codigo: code 
+        })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        showCustomAlert('success', 'Email Verificado!', 'Seu email foi confirmado com sucesso.');
+        return true;
+      } else {
+        showCustomAlert('error', 'Código Inválido', data.mensagem || 'O código digitado está incorreto.');
+        setVerificationCode(['', '', '', '', '', '']);
+        return false;
+      }
+    } catch (err) {
+      showCustomAlert('error', 'Erro de Conexão', 'Não foi possível verificar o código.');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCodeChange = (index, value) => {
+    if (value.length > 1) return;
+    if (!/^\d*$/.test(value)) return;
+
+    const newCode = [...verificationCode];
+    newCode[index] = value;
+    setVerificationCode(newCode);
+
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`code-input-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  const handleCodeKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
+      const prevInput = document.getElementById(`code-input-${index - 1}`);
+      if (prevInput) prevInput.focus();
+    }
+  };
+
+  const handleCodePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').slice(0, 6);
+    if (!/^\d+$/.test(pastedData)) return;
+
+    const newCode = pastedData.split('').concat(['', '', '', '', '', '']).slice(0, 6);
+    setVerificationCode(newCode);
+
+    const lastFilledIndex = pastedData.length - 1;
+    const nextInput = document.getElementById(`code-input-${Math.min(lastFilledIndex + 1, 5)}`);
+    if (nextInput) nextInput.focus();
   };
 
   const handleChange = (e) => {
@@ -208,14 +307,12 @@ export default function Registrar() {
       ...formData,
       [e.target.name]: e.target.value
     });
-    setError('');
   };
 
   const handlePaymentChange = (e) => {
     let value = e.target.value;
     const name = e.target.name;
 
-    // Formatação automática
     if (name === 'cardNumber') {
       value = value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
       if (value.length > 19) value = value.substr(0, 19);
@@ -240,7 +337,6 @@ export default function Registrar() {
       ...paymentData,
       [name]: value
     });
-    setError('');
   };
 
   const validateStep1 = () => {
@@ -253,13 +349,13 @@ export default function Registrar() {
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
-      showCustomAlert('error', 'Senhas Diferentes', 'As senhas não coincidem. Verifique e tente novamente.');
+      showCustomAlert('error', 'Senhas Diferentes', 'As senhas não coincidem.');
       return false;
     }
     return true;
   };
 
-  const validateStep3 = () => {
+  const validateStep4 = () => {
     if (paymentMethod === 'credit_card') {
       if (!paymentData.cardNumber || !paymentData.cardName || !paymentData.cardExpiry || !paymentData.cardCVV || !paymentData.cpf) {
         showCustomAlert('error', 'Dados Incompletos', 'Preencha todos os dados do cartão.');
@@ -279,17 +375,22 @@ export default function Registrar() {
     return true;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1) {
-      if (validateStep1()) setStep(2);
+      if (validateStep1()) {
+       setStep(2)
+      }
     } else if (step === 2) {
+      const verified = await handleVerifyCode();
+      if (verified) {
+        setTimeout(() => setStep(3), 1000);
+      }
+    } else if (step === 3) {
       if (!selectedPlan) {
         showCustomAlert('warning', 'Selecione um Plano', 'Escolha um plano para continuar.');
         return;
       }
-      setStep(3);
-    } else {
-      handleSubmit();
+      setStep(4);
     }
   };
 
@@ -299,14 +400,13 @@ export default function Registrar() {
       return;
     }
     setPixGenerated(true);
-    showCustomAlert('success', 'PIX Gerado!', 'QR Code gerado com sucesso. Escaneie ou copie o código.');
+    showCustomAlert('success', 'PIX Gerado!', 'QR Code gerado com sucesso.');
   };
 
   const handleSubmit = async () => {
-    if (!validateStep3()) return;
+    if (!validateStep4()) return;
 
     setIsLoading(true);
-    setError('');
 
     try {
       const planoFormatado = selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1);
@@ -321,6 +421,7 @@ export default function Registrar() {
           empresa: formData.company || 'Sem Empresa',
           senha: formData.password,
           plano: planoFormatado,
+          codigoVerificacao: verificationCode.join(''),
           metodoPagamento: paymentMethod,
           dadosPagamento: paymentMethod === 'credit_card' ? {
             numeroCartao: paymentData.cardNumber.replace(/\s/g, ''),
@@ -337,13 +438,12 @@ export default function Registrar() {
       const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
-        showCustomAlert('success', 'Cadastro Realizado!', 'Sua conta foi criada com sucesso. Redirecionando...');
-        setTimeout(() => navigate('/obrigado'), 2000);
+        showCustomAlert('success', 'Cadastro Realizado!', 'Sua conta foi criada com sucesso!');
       } else {
-        showCustomAlert('error', 'Erro no Cadastro', data.mensagem || 'Erro ao processar pagamento. Tente novamente.');
+        showCustomAlert('error', 'Erro no Cadastro', data.mensagem || 'Erro ao processar. Tente novamente.');
       }
     } catch (err) {
-      showCustomAlert('error', 'Erro de Conexão', 'Não foi possível conectar ao servidor. Verifique sua internet.');
+      showCustomAlert('error', 'Erro de Conexão', 'Não foi possível conectar ao servidor.');
     } finally {
       setIsLoading(false);
     }
@@ -381,8 +481,7 @@ export default function Registrar() {
         'Todas as integrações',
         'Relatórios avançados',
         'Suporte padrão'
-      ],
-      badge: 'Mais Popular'
+      ]
     },
     {
       id: 'premium',
@@ -411,25 +510,19 @@ export default function Registrar() {
           .form-grid { grid-template-columns: 1fr !important; }
           .plans-grid { grid-template-columns: 1fr !important; }
           .payment-methods { flex-direction: column !important; }
-          .wrapper { max-width: 100% !important; padding: 0 1rem; }
-          .card { padding: 1.5rem !important; }
-          .card-title { font-size: 1.25rem !important; }
-          .plan-card { padding: 1.25rem !important; }
         }
       `}</style>
       
-      <div style={styles.wrapper} className="wrapper">
-        {/* Logo e Título */}
+      <div style={styles.wrapper}>
         <div style={styles.logoSection}>
           <div style={styles.logoIcon}>
-            <img alt='logoempresa' src={require('../assets/logo.png')} style={{ width: '4.5rem', height: '4.5rem', color: 'white' }} />
+            <Mail size={48} color="white" />
           </div>
           <h1 style={styles.title}>AIM Agenda</h1>
           <p style={styles.subtitle}>Crie sua conta e comece a organizar seus compromissos</p>
         </div>
 
-        {/* Card de Registro */}
-        <div style={styles.card} className="card">
+        <div style={styles.card}>
           {/* Barra de Progresso */}
           <div style={styles.progressBar}>
             <div style={styles.progressStep}>
@@ -438,7 +531,7 @@ export default function Registrar() {
                 background: step >= 1 ? 'linear-gradient(135deg, #2563eb, #9333ea)' : '#e5e7eb',
                 color: step >= 1 ? 'white' : '#9ca3af'
               }}>
-                {step > 1 ? <Check style={{ width: '1rem', height: '1rem' }} /> : '1'}
+                {step > 1 ? <Check size={16} /> : '1'}
               </div>
               <span style={{ 
                 fontSize: '0.875rem', 
@@ -456,13 +549,13 @@ export default function Registrar() {
                 background: step >= 2 ? 'linear-gradient(135deg, #2563eb, #9333ea)' : '#e5e7eb',
                 color: step >= 2 ? 'white' : '#9ca3af'
               }}>
-                {step > 2 ? <Check style={{ width: '1rem', height: '1rem' }} /> : '2'}
+                {step > 2 ? <Check size={16} /> : '2'}
               </div>
               <span style={{ 
                 fontSize: '0.875rem', 
                 fontWeight: '500',
                 color: step >= 2 ? '#1f2937' : '#9ca3af'
-              }}>Plano</span>
+              }}>Verificação</span>
             </div>
             <div style={{
               ...styles.progressLine,
@@ -474,48 +567,54 @@ export default function Registrar() {
                 background: step >= 3 ? 'linear-gradient(135deg, #2563eb, #9333ea)' : '#e5e7eb',
                 color: step >= 3 ? 'white' : '#9ca3af'
               }}>
-                3
+                {step > 3 ? <Check size={16} /> : '3'}
               </div>
               <span style={{ 
                 fontSize: '0.875rem', 
                 fontWeight: '500',
                 color: step >= 3 ? '#1f2937' : '#9ca3af'
+              }}>Plano</span>
+            </div>
+            <div style={{
+              ...styles.progressLine,
+              background: step >= 4 ? 'linear-gradient(90deg, #2563eb, #9333ea)' : '#e5e7eb'
+            }}></div>
+            <div style={styles.progressStep}>
+              <div style={{
+                ...styles.progressCircle,
+                background: step >= 4 ? 'linear-gradient(135deg, #2563eb, #9333ea)' : '#e5e7eb',
+                color: step >= 4 ? 'white' : '#9ca3af'
+              }}>
+                4
+              </div>
+              <span style={{ 
+                fontSize: '0.875rem', 
+                fontWeight: '500',
+                color: step >= 4 ? '#1f2937' : '#9ca3af'
               }}>Pagamento</span>
             </div>
           </div>
 
-          {error && (
-            <div style={styles.errorBanner}>
-              <AlertCircle size={20} />
-              <span>{error}</span>
-            </div>
-          )}
-
           {/* STEP 1: DADOS */}
           {step === 1 && (
             <>
-              <h2 style={styles.cardTitle} className="card-title">Criar conta</h2>
+              <h2 style={styles.cardTitle}>Criar conta</h2>
               <p style={styles.cardSubtitle}>Preencha seus dados para começar</p>
               
               <div style={styles.formGrid} className="form-grid">
-                <div style={{...styles.formGroup, ...styles.formGroupFull}}>
+                <div style={{...styles.formGroup, gridColumn: '1 / -1'}}>
                   <label style={styles.label}>Nome Completo</label>
                   <div style={styles.inputWrapper}>
                     <div style={styles.inputIcon}>
-                      <User style={{ width: '1.25rem', height: '1.25rem' }} />
+                      <User size={20} />
                     </div>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      onFocus={() => setFocusedField('name')}
-                      onBlur={() => setFocusedField('')}
                       placeholder="João Silva"
-                      style={{
-                        ...styles.input,
-                        ...(focusedField === 'name' ? styles.inputFocus : {})
-                      }}
+                      style={styles.input}
                     />
                   </div>
                 </div>
@@ -524,20 +623,15 @@ export default function Registrar() {
                   <label style={styles.label}>Email</label>
                   <div style={styles.inputWrapper}>
                     <div style={styles.inputIcon}>
-                      <Mail style={{ width: '1.25rem', height: '1.25rem' }} />
+                      <Mail size={20} />
                     </div>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      onFocus={() => setFocusedField('email')}
-                      onBlur={() => setFocusedField('')}
                       placeholder="seu@email.com"
-                      style={{
-                        ...styles.input,
-                        ...(focusedField === 'email' ? styles.inputFocus : {})
-                      }}
+                      style={styles.input}
                     />
                   </div>
                 </div>
@@ -546,42 +640,32 @@ export default function Registrar() {
                   <label style={styles.label}>Telefone</label>
                   <div style={styles.inputWrapper}>
                     <div style={styles.inputIcon}>
-                      <Phone style={{ width: '1.25rem', height: '1.25rem' }} />
+                      <Phone size={20} />
                     </div>
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      onFocus={() => setFocusedField('phone')}
-                      onBlur={() => setFocusedField('')}
                       placeholder="(11) 99999-9999"
-                      style={{
-                        ...styles.input,
-                        ...(focusedField === 'phone' ? styles.inputFocus : {})
-                      }}
+                      style={styles.input}
                     />
                   </div>
                 </div>
 
-                <div style={{...styles.formGroup, ...styles.formGroupFull}}>
+                <div style={{...styles.formGroup, gridColumn: '1 / -1'}}>
                   <label style={styles.label}>Empresa (opcional)</label>
                   <div style={styles.inputWrapper}>
                     <div style={styles.inputIcon}>
-                      <Building style={{ width: '1.25rem', height: '1.25rem' }} />
+                      <Building size={20} />
                     </div>
                     <input
                       type="text"
                       name="company"
                       value={formData.company}
                       onChange={handleChange}
-                      onFocus={() => setFocusedField('company')}
-                      onBlur={() => setFocusedField('')}
                       placeholder="Nome da sua empresa"
-                      style={{
-                        ...styles.input,
-                        ...(focusedField === 'company' ? styles.inputFocus : {})
-                      }}
+                      style={styles.input}
                     />
                   </div>
                 </div>
@@ -590,32 +674,22 @@ export default function Registrar() {
                   <label style={styles.label}>Senha</label>
                   <div style={styles.inputWrapper}>
                     <div style={styles.inputIcon}>
-                      <Lock style={{ width: '1.25rem', height: '1.25rem' }} />
+                      <Lock size={20} />
                     </div>
                     <input
                       type={showPassword ? "text" : "password"}
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      onFocus={() => setFocusedField('password')}
-                      onBlur={() => setFocusedField('')}
                       placeholder="••••••••"
-                      style={{
-                        ...styles.input,
-                        paddingRight: '3rem',
-                        ...(focusedField === 'password' ? styles.inputFocus : {})
-                      }}
+                      style={{...styles.input, paddingRight: '3rem'}}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       style={styles.passwordToggle}
                     >
-                      {showPassword ? (
-                        <EyeOff style={{ width: '1.25rem', height: '1.25rem' }} />
-                      ) : (
-                        <Eye style={{ width: '1.25rem', height: '1.25rem' }} />
-                      )}
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
                 </div>
@@ -624,32 +698,22 @@ export default function Registrar() {
                   <label style={styles.label}>Confirmar Senha</label>
                   <div style={styles.inputWrapper}>
                     <div style={styles.inputIcon}>
-                      <Lock style={{ width: '1.25rem', height: '1.25rem' }} />
+                      <Lock size={20} />
                     </div>
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      onFocus={() => setFocusedField('confirmPassword')}
-                      onBlur={() => setFocusedField('')}
                       placeholder="••••••••"
-                      style={{
-                        ...styles.input,
-                        paddingRight: '3rem',
-                        ...(focusedField === 'confirmPassword' ? styles.inputFocus : {})
-                      }}
+                      style={{...styles.input, paddingRight: '3rem'}}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       style={styles.passwordToggle}
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff style={{ width: '1.25rem', height: '1.25rem' }} />
-                      ) : (
-                        <Eye style={{ width: '1.25rem', height: '1.25rem' }} />
-                      )}
+                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
                 </div>
@@ -657,24 +721,102 @@ export default function Registrar() {
 
               <button
                 onClick={handleNext}
-                onMouseEnter={() => setButtonHover(true)}
-                onMouseLeave={() => setButtonHover(false)}
+                disabled={isLoading}
                 style={{
                   ...styles.button,
                   ...styles.buttonPrimary,
-                  ...(buttonHover ? styles.buttonPrimaryHover : {})
+                  ...(isLoading ? styles.buttonDisabled : {})
                 }}
               >
-                Próximo
-                <ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} />
+                {isLoading ? 'Enviando código...' : 'Próximo'}
+                <ArrowRight size={20} />
               </button>
             </>
           )}
 
-          {/* STEP 2: PLANOS */}
+          {/* STEP 2: VERIFICAÇÃO */}
           {step === 2 && (
             <>
-              <h2 style={styles.cardTitle} className="card-title">Escolha seu plano</h2>
+              <h2 style={styles.cardTitle}>Verificar Email</h2>
+              <p style={styles.cardSubtitle}>
+                Enviamos um código de 6 dígitos para {formData.email}
+              </p>
+
+              <div style={styles.verificationContainer}>
+                <div style={styles.emailIcon}>
+                  <Mail size={48} color="#3b82f6" />
+                </div>
+
+                <div style={styles.codeInputContainer}>
+                  {verificationCode.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`code-input-${index}`}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength="1"
+                      value={digit}
+                      onChange={(e) => handleCodeChange(index, e.target.value)}
+                      onKeyDown={(e) => handleCodeKeyDown(index, e)}
+                      onPaste={handleCodePaste}
+                      style={styles.codeInput}
+                    />
+                  ))}
+                </div>
+
+                <div style={styles.resendContainer}>
+                  {resendTimer > 0 ? (
+                    <p style={styles.resendTimer}>
+                      Reenviar código em {resendTimer}s
+                    </p>
+                  ) : (
+                    <button
+                      onClick={handleSendVerificationCode}
+                      disabled={isLoading}
+                      style={styles.resendButton}
+                    >
+                      Não recebeu o código? <span style={styles.resendLink}>Reenviar</span>
+                    </button>
+                  )}
+                </div>
+
+                <div style={styles.verificationInfo}>
+                  <AlertCircle size={18} color="#6b7280" />
+                  <span>Verifique também sua caixa de spam</span>
+                </div>
+              </div>
+
+              <div style={styles.buttonGroup}>
+                <button
+                  onClick={() => setStep(1)}
+                  style={{
+                    ...styles.button,
+                    ...styles.buttonSecondary
+                  }}
+                >
+                  <ArrowLeft size={20} />
+                  Voltar
+                </button>
+                <button
+                  onClick={handleNext}
+                  disabled={isLoading || verificationCode.join('').length !== 6}
+                  style={{
+                    ...styles.button,
+                    ...styles.buttonPrimary,
+                    ...(isLoading || verificationCode.join('').length !== 6 ? styles.buttonDisabled : {})
+                  }}
+                >
+                  {isLoading ? 'Verificando...' : 'Verificar Código'}
+                  <Check size={20} />
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* STEP 3: PLANOS */}
+          {step === 3 && (
+            <>
+              <h2 style={styles.cardTitle}>Escolha seu plano</h2>
               <p style={styles.cardSubtitle}>Selecione o plano ideal para suas necessidades</p>
               
               <div style={styles.plansGrid} className="plans-grid">
@@ -692,10 +834,10 @@ export default function Registrar() {
                       style={{
                         ...styles.planCard,
                         borderColor: isSelected ? plan.color : '#e5e7eb',
-                        ...(isSelected ? styles.planCardSelected : {}),
-                        ...(isHovered && !isSelected ? styles.planCardHover : {})
+                        transform: isSelected ? 'translateY(-8px)' : isHovered ? 'translateY(-4px)' : 'none',
+                        boxShadow: isSelected ? '0 20px 25px -5px rgba(0, 0, 0, 0.15)' : 
+                                   isHovered ? '0 10px 15px -3px rgba(0, 0, 0, 0.1)' : 'none'
                       }}
-                      className="plan-card"
                     >
                       {plan.popular && (
                         <div style={styles.popularBadge}>
@@ -707,7 +849,7 @@ export default function Registrar() {
                         ...styles.planIcon,
                         background: plan.gradient
                       }}>
-                        <Icon style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} />
+                        <Icon size={24} color="white" />
                       </div>
                       
                       <div style={styles.planName}>{plan.name}</div>
@@ -742,41 +884,37 @@ export default function Registrar() {
 
               <div style={styles.buttonGroup}>
                 <button
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(2)}
                   style={{
                     ...styles.button,
                     ...styles.buttonSecondary
                   }}
                 >
-                  <ArrowLeft style={{ width: '1.25rem', height: '1.25rem' }} />
+                  <ArrowLeft size={20} />
                   Voltar
                 </button>
                 <button
                   onClick={handleNext}
                   disabled={!selectedPlan}
-                  onMouseEnter={() => setButtonHover(true)}
-                  onMouseLeave={() => setButtonHover(false)}
                   style={{
                     ...styles.button,
                     ...styles.buttonPrimary,
-                    ...(buttonHover && selectedPlan ? styles.buttonPrimaryHover : {}),
                     ...(!selectedPlan ? styles.buttonDisabled : {})
                   }}
                 >
                   Próximo
-                  <ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} />
+                  <ArrowRight size={20} />
                 </button>
               </div>
             </>
           )}
 
-          {/* STEP 3: PAGAMENTO */}
-          {step === 3 && (
+          {/* STEP 4: PAGAMENTO */}
+          {step === 4 && (
             <>
-              <h2 style={styles.cardTitle} className="card-title">Pagamento</h2>
+              <h2 style={styles.cardTitle}>Pagamento</h2>
               <p style={styles.cardSubtitle}>Finalize sua assinatura do plano {selectedPlan}</p>
 
-              {/* Resumo do Plano */}
               {selectedPlanData && (
                 <div style={styles.planSummary}>
                   <div style={styles.summaryHeader}>
@@ -796,7 +934,6 @@ export default function Registrar() {
                 </div>
               )}
 
-              {/* Métodos de Pagamento */}
               <div style={styles.paymentMethodsContainer}>
                 <label style={styles.label}>Método de Pagamento</label>
                 <div style={styles.paymentMethods} className="payment-methods">
@@ -826,50 +963,38 @@ export default function Registrar() {
                 </div>
               </div>
 
-              {/* Formulário de Cartão */}
               {paymentMethod === 'credit_card' && (
                 <div style={styles.formGrid} className="form-grid">
-                  <div style={{...styles.formGroup, ...styles.formGroupFull}}>
+                  <div style={{...styles.formGroup, gridColumn: '1 / -1'}}>
                     <label style={styles.label}>Número do Cartão</label>
                     <div style={styles.inputWrapper}>
                       <div style={styles.inputIcon}>
-                        <CreditCard style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <CreditCard size={20} />
                       </div>
                       <input
                         type="text"
                         name="cardNumber"
                         value={paymentData.cardNumber}
                         onChange={handlePaymentChange}
-                        onFocus={() => setFocusedField('cardNumber')}
-                        onBlur={() => setFocusedField('')}
                         placeholder="1234 5678 9012 3456"
-                        style={{
-                          ...styles.input,
-                          ...(focusedField === 'cardNumber' ? styles.inputFocus : {})
-                        }}
+                        style={styles.input}
                       />
                     </div>
                   </div>
 
-                  <div style={{...styles.formGroup, ...styles.formGroupFull}}>
+                  <div style={{...styles.formGroup, gridColumn: '1 / -1'}}>
                     <label style={styles.label}>Nome no Cartão</label>
                     <div style={styles.inputWrapper}>
                       <div style={styles.inputIcon}>
-                        <User style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <User size={20} />
                       </div>
                       <input
                         type="text"
                         name="cardName"
                         value={paymentData.cardName}
                         onChange={handlePaymentChange}
-                        onFocus={() => setFocusedField('cardName')}
-                        onBlur={() => setFocusedField('')}
                         placeholder="JOÃO SILVA"
-                        style={{
-                          ...styles.input,
-                          ...(focusedField === 'cardName' ? styles.inputFocus : {}),
-                          textTransform: 'uppercase'
-                        }}
+                        style={{...styles.input, textTransform: 'uppercase'}}
                       />
                     </div>
                   </div>
@@ -878,20 +1003,15 @@ export default function Registrar() {
                     <label style={styles.label}>Validade</label>
                     <div style={styles.inputWrapper}>
                       <div style={styles.inputIcon}>
-                        <Calendar style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <Calendar size={20} />
                       </div>
                       <input
                         type="text"
                         name="cardExpiry"
                         value={paymentData.cardExpiry}
                         onChange={handlePaymentChange}
-                        onFocus={() => setFocusedField('cardExpiry')}
-                        onBlur={() => setFocusedField('')}
                         placeholder="MM/AA"
-                        style={{
-                          ...styles.input,
-                          ...(focusedField === 'cardExpiry' ? styles.inputFocus : {})
-                        }}
+                        style={styles.input}
                       />
                     </div>
                   </div>
@@ -900,75 +1020,59 @@ export default function Registrar() {
                     <label style={styles.label}>CVV</label>
                     <div style={styles.inputWrapper}>
                       <div style={styles.inputIcon}>
-                        <Shield style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <Shield size={20} />
                       </div>
                       <input
                         type="text"
                         name="cardCVV"
                         value={paymentData.cardCVV}
                         onChange={handlePaymentChange}
-                        onFocus={() => setFocusedField('cardCVV')}
-                        onBlur={() => setFocusedField('')}
                         placeholder="123"
-                        style={{
-                          ...styles.input,
-                          ...(focusedField === 'cardCVV' ? styles.inputFocus : {})
-                        }}
+                        style={styles.input}
                       />
                     </div>
                   </div>
 
-                  <div style={{...styles.formGroup, ...styles.formGroupFull}}>
+                  <div style={{...styles.formGroup, gridColumn: '1 / -1'}}>
                     <label style={styles.label}>CPF do Titular</label>
                     <div style={styles.inputWrapper}>
                       <div style={styles.inputIcon}>
-                        <User style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <User size={20} />
                       </div>
                       <input
                         type="text"
                         name="cpf"
                         value={paymentData.cpf}
                         onChange={handlePaymentChange}
-                        onFocus={() => setFocusedField('cpf')}
-                        onBlur={() => setFocusedField('')}
                         placeholder="000.000.000-00"
-                        style={{
-                          ...styles.input,
-                          ...(focusedField === 'cpf' ? styles.inputFocus : {})
-                        }}
+                        style={styles.input}
                       />
                     </div>
                   </div>
 
-                  <div style={styles.securityBanner}>
+                  <div style={{...styles.securityBanner, gridColumn: '1 / -1'}}>
                     <Shield size={20} color="#10b981" />
                     <span>Seus dados estão protegidos com criptografia SSL</span>
                   </div>
                 </div>
               )}
 
-              {/* Pagamento PIX */}
               {paymentMethod === 'pix' && (
                 <>
                   <div style={styles.formGrid} className="form-grid">
-                    <div style={{...styles.formGroup, ...styles.formGroupFull}}>
+                    <div style={{...styles.formGroup, gridColumn: '1 / -1'}}>
                       <label style={styles.label}>CPF</label>
                       <div style={styles.inputWrapper}>
                         <div style={styles.inputIcon}>
-                          <User style={{ width: '1.25rem', height: '1.25rem' }} />
+                          <User size={20} />
                         </div>
                         <input
                           type="text"
                           name="cpf"
                           value={paymentData.cpf}
                           onChange={handlePaymentChange}
-                          onFocus={() => setFocusedField('cpf')}
-                          onBlur={() => setFocusedField('')}
                           placeholder="000.000.000-00"
-                          style={{
-                            ...styles.input,
-                            ...(focusedField === 'cpf' ? styles.inputFocus : {})
-                          }}
+                          style={styles.input}
                         />
                       </div>
                     </div>
@@ -1002,7 +1106,7 @@ export default function Registrar() {
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText('00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-42661417400052040000530398654041.005802BR5925AIM AGENDA LTDA6009SAO PAULO62070503***6304ABCD');
-                          showCustomAlert('success', 'Código Copiado!', 'O código PIX foi copiado para sua área de transferência.');
+                          showCustomAlert('success', 'Código Copiado!', 'O código PIX foi copiado.');
                         }}
                         style={{
                           ...styles.button,
@@ -1014,7 +1118,7 @@ export default function Registrar() {
                       </button>
                       <div style={styles.pixWarning}>
                         <AlertCircle size={18} color="#f59e0b" />
-                        <span>Após o pagamento, sua conta será ativada automaticamente em até 5 minutos.</span>
+                        <span>Após o pagamento, sua conta será ativada em até 5 minutos.</span>
                       </div>
                     </div>
                   )}
@@ -1023,52 +1127,37 @@ export default function Registrar() {
 
               <div style={styles.buttonGroup}>
                 <button
-                  onClick={() => setStep(2)}
+                  onClick={() => setStep(3)}
                   style={{
                     ...styles.button,
                     ...styles.buttonSecondary
                   }}
                 >
-                  <ArrowLeft style={{ width: '1.25rem', height: '1.25rem' }} />
+                  <ArrowLeft size={20} />
                   Voltar
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={isLoading || (paymentMethod === 'pix' && !pixGenerated)}
-                  onMouseEnter={() => setButtonHover(true)}
-                  onMouseLeave={() => setButtonHover(false)}
                   style={{
                     ...styles.button,
                     ...styles.buttonPrimary,
-                    ...(buttonHover && !isLoading ? styles.buttonPrimaryHover : {}),
                     ...(isLoading || (paymentMethod === 'pix' && !pixGenerated) ? styles.buttonDisabled : {})
                   }}
                 >
-                  {isLoading ? 'Processando...' : paymentMethod === 'pix' ? 'Confirmar Pagamento PIX' : 'Finalizar Pagamento'}
-                  {!isLoading && <Check style={{ width: '1.25rem', height: '1.25rem' }} />}
+                  {isLoading ? 'Processando...' : 'Finalizar Pagamento'}
+                  <Check size={20} />
                 </button>
               </div>
             </>
           )}
-
-          {/* Link de Login */}
-          <div style={styles.loginLink}>
-            <p style={styles.loginText}>
-              Já tem uma conta?{' '}
-              <button onClick={() => navigate('/login')} style={styles.link}>
-                Fazer login
-              </button>
-            </p>
-          </div>
         </div>
 
-        {/* Footer */}
         <div style={styles.footer}>
           <p>© 2025 AIM Agenda. Todos os direitos reservados.</p>
         </div>
       </div>
 
-      {/* Custom Alert Modal */}
       {showAlert && (
         <CustomAlert
           type={alertConfig.type}
@@ -1089,12 +1178,11 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '2rem 1rem',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   },
   wrapper: {
     width: '100%',
-    maxWidth: '75rem',
-    transition: 'all 0.3s'
+    maxWidth: '75rem'
   },
   logoSection: {
     textAlign: 'center',
@@ -1169,20 +1257,7 @@ const styles = {
   progressLine: {
     width: '3rem',
     height: '2px',
-    background: '#e5e7eb',
     transition: 'all 0.3s'
-  },
-  errorBanner: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    padding: '1rem',
-    background: '#fef2f2',
-    border: '1px solid #fecaca',
-    borderRadius: '0.75rem',
-    color: '#991b1b',
-    fontSize: '0.875rem',
-    marginBottom: '1.5rem'
   },
   formGrid: {
     display: 'grid',
@@ -1191,10 +1266,7 @@ const styles = {
     marginBottom: '1.5rem'
   },
   formGroup: {
-    marginBottom: '1.25rem'
-  },
-  formGroupFull: {
-    gridColumn: '1 / -1'
+    marginBottom: '0'
   },
   label: {
     display: 'block',
@@ -1227,10 +1299,6 @@ const styles = {
     background: 'white',
     boxSizing: 'border-box'
   },
-  inputFocus: {
-    borderColor: '#3b82f6',
-    boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
-  },
   passwordToggle: {
     position: 'absolute',
     right: '1rem',
@@ -1243,6 +1311,71 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     color: '#9ca3af'
+  },
+  verificationContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '2rem 1rem',
+    gap: '2rem'
+  },
+  emailIcon: {
+    width: '5rem',
+    height: '5rem',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  codeInputContainer: {
+    display: 'flex',
+    gap: '0.75rem',
+    justifyContent: 'center',
+    flexWrap: 'wrap'
+  },
+  codeInput: {
+    width: '3.5rem',
+    height: '3.5rem',
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    textAlign: 'center',
+    border: '2px solid #d1d5db',
+    borderRadius: '0.75rem',
+    outline: 'none',
+    transition: 'all 0.2s',
+    background: 'white'
+  },
+  resendContainer: {
+    textAlign: 'center'
+  },
+  resendTimer: {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+    margin: 0
+  },
+  resendButton: {
+    background: 'none',
+    border: 'none',
+    fontSize: '0.875rem',
+    color: '#6b7280',
+    cursor: 'pointer',
+    padding: 0
+  },
+  resendLink: {
+    color: '#2563eb',
+    fontWeight: '600',
+    textDecoration: 'underline'
+  },
+  verificationInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1rem',
+    background: '#f9fafb',
+    borderRadius: '0.5rem',
+    fontSize: '0.875rem',
+    color: '#6b7280'
   },
   plansGrid: {
     display: 'grid',
@@ -1260,14 +1393,6 @@ const styles = {
     transition: 'all 0.3s',
     display: 'flex',
     flexDirection: 'column'
-  },
-  planCardSelected: {
-    transform: 'translateY(-8px)',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)'
-  },
-  planCardHover: {
-    transform: 'translateY(-4px)',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
   },
   popularBadge: {
     position: 'absolute',
@@ -1297,18 +1422,17 @@ const styles = {
   },
   planPrice: {
     fontSize: '2rem',
-    fontWeight: '700',
-    marginBottom: '0.25rem'
+    fontWeight: '700'
   },
   planPeriod: {
     fontSize: '1rem',
     color: '#6b7280',
-    marginBottom: '1.5rem'
+    marginLeft: '0.25rem'
   },
   featureList: {
     listStyle: 'none',
     padding: 0,
-    margin: 0,
+    margin: '1.5rem 0 0 0',
     flex: 1
   },
   featureItem: {
@@ -1317,8 +1441,7 @@ const styles = {
     gap: '0.5rem',
     marginBottom: '0.75rem',
     fontSize: '0.875rem',
-    color: '#4b5563',
-    marginTop: '20px'
+    color: '#4b5563'
   },
   checkIcon: {
     minWidth: '1rem',
@@ -1402,8 +1525,7 @@ const styles = {
     border: '1px solid #86efac',
     borderRadius: '0.75rem',
     color: '#166534',
-    fontSize: '0.875rem',
-    gridColumn: '1 / -1'
+    fontSize: '0.875rem'
   },
   pixContainer: {
     display: 'flex',
@@ -1481,11 +1603,6 @@ const styles = {
     color: 'white',
     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
   },
-  buttonPrimaryHover: {
-    background: 'linear-gradient(90deg, #1d4ed8, #7e22ce)',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
-    transform: 'translateY(-2px)'
-  },
   buttonSecondary: {
     background: 'white',
     color: '#4b5563',
@@ -1494,22 +1611,6 @@ const styles = {
   buttonDisabled: {
     opacity: 0.6,
     cursor: 'not-allowed'
-  },
-  loginLink: {
-    textAlign: 'center',
-    marginTop: '1.5rem'
-  },
-  loginText: {
-    color: '#4b5563',
-    fontSize: '0.875rem'
-  },
-  link: {
-    color: '#2563eb',
-    background: 'none',
-    border: 'none',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'color 0.2s'
   },
   footer: {
     textAlign: 'center',
