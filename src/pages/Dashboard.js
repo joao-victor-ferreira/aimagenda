@@ -39,6 +39,17 @@ export default function Dashboard() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const { user, loading } = useAuth();
 
+  const handleOpenAgenda = () => {
+  setActiveMenu('appointments');
+};
+  const handleOpenInsights = () => {
+  setActiveMenu('insights');
+};
+
+
+  const handleOpenClientes = () => {
+  setActiveMenu('clients');
+};
 
   console.log('Usuário autenticado:', user);
 
@@ -137,7 +148,7 @@ export default function Dashboard() {
       case 'team':
         return <Equipe />;
       default:
-        return <MainContent />;
+        return <MainContent onNovoAgendamento={handleOpenAgenda} onInsights={handleOpenInsights} onClients={handleOpenClientes} />;
     }
   };
 
@@ -941,7 +952,7 @@ const nomeCurto = user?.nomeCompleto
 
               {userMenuOpen && (
                 <div className="user-dropdown">
-                  <button className="dropdown-item">
+                  <button onClick={() => navigate('/configuracao')} className="dropdown-item">
                     <Settings size={16} /> Configurações
                   </button>
                   <button 

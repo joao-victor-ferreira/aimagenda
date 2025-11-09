@@ -21,7 +21,7 @@ import {
   BarChart3
 } from 'lucide-react';
 
-function MainContent() {
+function MainContent({ onNovoAgendamento, onInsights, onClients }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -618,18 +618,48 @@ function MainContent() {
               <h2 className="card-title">Ações Rápidas</h2>
             </div>
             <div className="quick-actions-grid">
-              {quickActions.map((action, index) => {
-                const Icon = action.icon;
-                return (
-                  <button key={index} className="quick-action-btn">
-                    <div className="quick-action-icon" style={{ background: `${action.color}15`, color: action.color }}>
-                      <Icon size={20} />
-                    </div>
-                    <span className="quick-action-label">{action.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+  {quickActions.map((action, index) => {
+    const Icon = action.icon;
+
+    return (
+      <button
+        key={index}
+        className="quick-action-btn"
+        onClick={() => {
+          switch (action.label) {
+            case "Novo Agendamento":
+              if (onNovoAgendamento) onNovoAgendamento();
+              break;
+
+            case "Adicionar Cliente":
+              if (onClients) onClients();
+              break;
+
+            case "Enviar Campanha":
+              console.log("Abrir ferramenta de campanhas");
+              break;
+
+            case "Ver Relatório":
+              if (onInsights) onInsights();
+              break;
+
+            default:
+              console.log(`Ação desconhecida: ${action.label}`);
+          }
+        }}
+      >
+        <div
+          className="quick-action-icon"
+          style={{ background: `${action.color}15`, color: action.color }}
+        >
+          <Icon size={20} />
+        </div>
+        <span className="quick-action-label">{action.label}</span>
+      </button>
+    );
+  })}
+</div>
+
           </div>
 
           <div className="ai-card">

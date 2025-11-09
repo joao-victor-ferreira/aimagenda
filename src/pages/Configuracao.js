@@ -1,16 +1,146 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Settings, Sun, Moon, Bell, Globe, Lock, Mail, User, CreditCard, Shield,
   Volume2, Clock, Check, X, Save, Key, Smartphone, Laptop, LogOut, Trash2,
-  AlertCircle, CheckCircle, Crown, Zap, ArrowLeft
+  AlertCircle, CheckCircle, Crown, Zap, ArrowLeft,Sparkles
 } from 'lucide-react';
+import useAuth from '../config/useAuth';
 
 export default function Configuracao() {
+  const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('appearance');
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  
+  // Estados para os dados do usuário
+  const [nomeCompleto, setNomeCompleto] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [email, setEmail] = useState("");
+  const [senhaAtual, setSenhaAtual] = useState("");
+  const [novaSenha, setNovaSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+
+  console.log(user)
+  
+  // Estados de loading e mensagens
+  const [salvandoDados, setSalvandoDados] = useState(false);
+  const [salvandoSenha, setSalvandoSenha] = useState(false);
+  const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [mensagemErro, setMensagemErro] = useState("");
+
+
+const [planoAtual, setPlanoAtual] = useState(null);
+const [carregandoPlano, setCarregandoPlano] = useState(true);
+const [trocandoPlano, setTrocandoPlano] = useState(false);
+
+
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [senhaConfirmacao, setSenhaConfirmacao] = useState("");
+const [excluindoConta, setExcluindoConta] = useState(false);
+const [dispositivos, setDispositivos] = useState([]);
+const [loading1, setLoading] = useState(true);
+
+
+useEffect(() => {
+  async function fetchDispositivos() {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Usuário não autenticado");
+
+      const resposta = await fetch("http://localhost:5000/api/seguranca/dispositivos", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await resposta.json();
+      if (!resposta.ok) throw new Error(data.erro || "Erro ao buscar dispositivos");
+
+      setDispositivos(data.dispositivos || []);
+    } catch (erro) {
+      console.error("Erro ao buscar dispositivos:", erro);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  fetchDispositivos();
+}, []);
+
+
+useEffect(() => {
+  async function carregarPlano() {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Usuário não autenticado");
+
+      const resposta = await fetch("http://localhost:5000/api/plano/atual", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await resposta.json();
+      if (!resposta.ok) throw new Error(data.erro || "Erro ao buscar plano");
+
+      setPlanoAtual(data.plano);
+    } catch (erro) {
+      console.error("Erro ao carregar plano:", erro);
+      setMensagemErro(erro.message);
+    } finally {
+      setCarregandoPlano(false);
+    }
+  }
+
+  carregarPlano();
+}, []);
+
+// --- Função para trocar de plano ---
+async function trocarPlano(novoPlano) {
+  try {
+    setTrocandoPlano(true);
+    setMensagemErro("");
+    setMensagemSucesso("");
+
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Usuário não autenticado");
+
+    const resposta = await fetch("http://localhost:5000/api/plano/trocar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ novoPlano }),
+    });
+
+    const data = await resposta.json();
+    if (!resposta.ok) throw new Error(data.erro || "Erro ao trocar plano");
+
+    setPlanoAtual(data.plano);
+    setMensagemSucesso(`Plano alterado para ${novoPlano} com sucesso!`);
+
+    // Atualiza o localStorage do usuário, se quiser manter coerência
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (usuario?.user) {
+      usuario.user.plano = novoPlano;
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+    }
+
+  } catch (erro) {
+    setMensagemErro(erro.message);
+  } finally {
+    setTrocandoPlano(false);
+  }
+}
+
+  useEffect(() => {
+  if (user) {
+    setNomeCompleto(user.nomeCompleto || '');
+    setEmail(user.email || '');
+    setTelefone(user.telefone || '');
+  }
+}, [user]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -18,6 +148,8 @@ export default function Configuracao() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+ 
 
   const [settings, setSettings] = useState({
     theme: 'light',
@@ -33,9 +165,9 @@ export default function Configuracao() {
     language: 'pt-BR',
     dateFormat: 'DD/MM/YYYY',
     timeFormat: '24h',
-    name: 'João Silva',
-    email: 'joao@empresa.com',
-    phone: '+55 11 98765-4321',
+    name: '',
+    email: '',
+    phone: '',
     twoFactorEnabled: false
   });
 
@@ -48,26 +180,260 @@ export default function Configuracao() {
     { id: 'billing', label: 'Plano', icon: CreditCard }
   ];
 
-  const plans = [
-    {
-      id: 'free', name: 'Free', price: 0,
-      features: ['1 usuário', '20 agendamentos/mês', 'Suporte básico'],
-      current: false
-    },
-    {
-      id: 'pro', name: 'Pro', price: 95,
-      features: ['5 usuários', 'Agendamentos ilimitados', 'IA avançada', 'Suporte prioritário'],
-      current: true, badge: 'Plano Atual'
-    },
-    {
-      id: 'business', name: 'Business', price: 245,
-      features: ['Usuários ilimitados', 'API + Webhooks', 'Suporte 24/7', 'White label'],
-      current: false, badge: 'Mais Popular'
+ const plans = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    price: 149,
+    period: '/mês',
+    icon: Sparkles,
+    color: '#6b7280',
+    gradient: 'linear-gradient(135deg, #6b7280, #9ca3af)',
+    features: [
+      '200 mensagens IA/mês',
+      '1 usuário',
+      'Todas as integrações',
+      'Relatórios avançados',
+      'Suporte por e-mail'
+    ],
+    current: user?.plano === 'Starter'
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    price: 299,
+    period: '/mês',
+    icon: Zap,
+    color: '#3b82f6',
+    gradient: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+    popular: true,
+    badge: 'Mais Popular',
+    features: [
+      '500 mensagens IA/mês',
+      '3 usuários',
+      'Todas as integrações',
+      'Relatórios avançados',
+      'Suporte padrão'
+    ],
+    current: user?.plano === 'Pro'
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    price: 499,
+    period: '/mês',
+    icon: Crown,
+    color: '#9333ea',
+    gradient: 'linear-gradient(135deg, #9333ea, #ec4899)',
+    features: [
+      '1000 mensagens IA/mês',
+      '10 usuários',
+      'Todas as integrações',
+      'Relatórios avançados',
+      'Suporte prioritário'
+    ],
+    current: user?.plano === 'Premium'
+  }
+];
+
+async function handleExcluirConta() {
+  try {
+    if (!senhaConfirmacao) {
+      throw new Error("Digite sua senha para confirmar a exclusão.");
     }
-  ];
+
+    setExcluindoConta(true);
+    setMensagemErro("");
+    setMensagemSucesso("");
+
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Você precisa estar autenticado.");
+
+    const resposta = await fetch("http://localhost:5000/auth/excluir-conta", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ senha: senhaConfirmacao }),
+    });
+
+    const resultado = await resposta.json();
+
+    if (!resposta.ok) throw new Error(resultado.erro || "Erro ao excluir conta.");
+
+    // Limpa o localStorage e redireciona
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+
+    setMensagemSucesso("Conta excluída com sucesso!");
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 2000);
+  } catch (erro) {
+    setMensagemErro(erro.message);
+    setTimeout(() => setMensagemErro(""), 4000);
+  } finally {
+    setExcluindoConta(false);
+    setSenhaConfirmacao("");
+    setShowDeleteModal(false);
+  }
+}
+
+
+
+  async function salvarDadosPessoais() {
+    const dadosParaAtualizar = {};
+    
+    // user.user contém os dados reais
+    const userData = user?.user || {};
+    
+    // Compara com os dados originais do user
+    if (nomeCompleto !== (userData.nomeCompleto || "")) {
+      dadosParaAtualizar.nomeCompleto = nomeCompleto;
+    }
+    if (email !== (userData.email || "")) {
+      dadosParaAtualizar.email = email;
+    }
+    if (telefone !== (userData.telefone || "")) {
+      dadosParaAtualizar.telefone = telefone;
+    }
+
+    if (Object.keys(dadosParaAtualizar).length === 0) {
+      setMensagemErro("Nenhuma alteração detectada");
+      setTimeout(() => setMensagemErro(""), 3000);
+      return;
+    }
+
+    try {
+      setSalvandoDados(true);
+      setMensagemErro("");
+      setMensagemSucesso("");
+      
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        throw new Error("Você precisa estar autenticado");
+      }
+
+      const resposta = await fetch("http://localhost:5000/auth/atualizar-conta", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(dadosParaAtualizar),
+      });
+
+      const resultado = await resposta.json();
+
+      if (!resposta.ok) {
+        throw new Error(resultado.erro || "Erro ao atualizar os dados.");
+      }
+
+      // Atualizar localStorage com novos dados
+      if (resultado.usuario) {
+        const usuarioAtualizado = {
+          ...userData,
+          nomeCompleto: resultado.usuario.nomeCompleto || userData.nomeCompleto,
+          email: resultado.usuario.email || userData.email,
+          telefone: resultado.usuario.telefone || userData.telefone
+        };
+        
+        localStorage.setItem("usuario", JSON.stringify({ user: usuarioAtualizado }));
+        
+        // Atualizar estados locais
+        setNomeCompleto(resultado.usuario.nomeCompleto || nomeCompleto);
+        setEmail(resultado.usuario.email || email);
+        setTelefone(resultado.usuario.telefone || telefone);
+        
+        setSettings(prev => ({
+          ...prev,
+          name: resultado.usuario.nomeCompleto || prev.name,
+          email: resultado.usuario.email || prev.email,
+          phone: resultado.usuario.telefone || prev.phone
+        }));
+      }
+
+      setMensagemSucesso("Dados atualizados com sucesso!");
+      setUnsavedChanges(false);
+      
+      setTimeout(() => setMensagemSucesso(""), 3000);
+      
+    } catch (erro) {
+      setMensagemErro(erro.message);
+      setTimeout(() => setMensagemErro(""), 5000);
+    } finally {
+      setSalvandoDados(false);
+    }
+  }
+
+  async function atualizarSenha() {
+    try {
+      setSalvandoSenha(true);
+      setMensagemErro("");
+      setMensagemSucesso("");
+
+      if (!senhaAtual || !novaSenha || !confirmarSenha) {
+        throw new Error("Preencha todos os campos de senha");
+      }
+
+      if (novaSenha !== confirmarSenha) {
+        throw new Error("As senhas não coincidem");
+      }
+
+      if (novaSenha.length < 6) {
+        throw new Error("A nova senha deve ter pelo menos 6 caracteres");
+      }
+
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        throw new Error("Você precisa estar autenticado");
+      }
+
+      const resposta = await fetch("http://localhost:5000/auth/atualizar-conta", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          senhaAtual,
+          novaSenha
+        }),
+      });
+
+      const resultado = await resposta.json();
+
+      if (!resposta.ok) {
+        throw new Error(resultado.erro || "Erro ao atualizar a senha.");
+      }
+
+      setMensagemSucesso("Senha atualizada com sucesso!");
+      
+      setSenhaAtual("");
+      setNovaSenha("");
+      setConfirmarSenha("");
+      setShowPasswordModal(false);
+      
+      setTimeout(() => setMensagemSucesso(""), 3000);
+      
+    } catch (erro) {
+      setMensagemErro(erro.message);
+      setTimeout(() => setMensagemErro(""), 5000);
+    } finally {
+      setSalvandoSenha(false);
+    }
+  }
 
   const handleChange = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    
+    if (key === 'name') setNomeCompleto(value);
+    if (key === 'email') setEmail(value);
+    if (key === 'phone') setTelefone(value);
+    
     setUnsavedChanges(true);
   };
 
@@ -84,6 +450,34 @@ export default function Configuracao() {
   return (
     <div style={styles.container}>
       <style>{mediaQueries}</style>
+
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(255, 255, 255, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              width: '50px',
+              height: '50px',
+              border: '4px solid #e5e7eb',
+              borderTop: '4px solid #3b82f6',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 1rem'
+            }}></div>
+            <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>Carregando dados...</p>
+          </div>
+        </div>
+      )}
 
       <div style={styles.header}>
         <div style={styles.headerTop}>
@@ -103,6 +497,48 @@ export default function Configuracao() {
           </div>
         </div>
       </div>
+
+      {mensagemSucesso && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          backgroundColor: '#10b981',
+          color: 'white',
+          padding: '1rem 1.5rem',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          boxShadow: '0 10px 25px rgba(16, 185, 129, 0.3)',
+          zIndex: 9999,
+          fontWeight: 500
+        }}>
+          <CheckCircle size={20} />
+          <span>{mensagemSucesso}</span>
+        </div>
+      )}
+      
+      {mensagemErro && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          backgroundColor: '#ef4444',
+          color: 'white',
+          padding: '1rem 1.5rem',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          boxShadow: '0 10px 25px rgba(239, 68, 68, 0.3)',
+          zIndex: 9999,
+          fontWeight: 500
+        }}>
+          <AlertCircle size={20} />
+          <span>{mensagemErro}</span>
+        </div>
+      )}
 
       {isMobile && (
         <div style={styles.mobileTabSelector}>
@@ -353,17 +789,27 @@ export default function Configuracao() {
                   <input
                     type="text"
                     style={styles.input}
-                    value={settings.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
+                    value={nomeCompleto}
+                    onChange={(e) => {
+                      setNomeCompleto(e.target.value);
+                      setUnsavedChanges(true);
+                    }}
+                    placeholder="Seu nome completo"
                   />
                 </div>
 
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Email</label>
-                  <div style={styles.inputWithButton}>
-                    <input type="email" style={styles.input} value={settings.email} disabled />
-                    <button style={styles.inputButton}>Alterar</button>
-                  </div>
+                  <input
+                    type="email"
+                    style={styles.input}
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setUnsavedChanges(true);
+                    }}
+                    placeholder="seu@email.com"
+                  />
                 </div>
 
                 <div style={styles.formGroup}>
@@ -371,10 +817,33 @@ export default function Configuracao() {
                   <input
                     type="tel"
                     style={styles.input}
-                    value={settings.phone}
-                    onChange={(e) => handleChange('phone', e.target.value)}
+                    value={telefone}
+                    onChange={(e) => {
+                      setTelefone(e.target.value);
+                      setUnsavedChanges(true);
+                    }}
+                    placeholder="+55 11 98765-4321"
                   />
                 </div>
+
+                <button 
+                  style={{
+                    ...styles.btnSecondary,
+                    width: '100%',
+                    marginTop: '1rem',
+                    opacity: salvandoDados || !unsavedChanges ? 0.5 : 1,
+                    cursor: salvandoDados || !unsavedChanges ? 'not-allowed' : 'pointer'
+                  }}
+                  onClick={salvarDadosPessoais}
+                  disabled={salvandoDados || !unsavedChanges}
+                >
+                  {salvandoDados ? 'Salvando...' : (
+                    <>
+                      <Save size={18} />
+                      Salvar Alterações
+                    </>
+                  )}
+                </button>
               </div>
 
               <div style={styles.settingGroup}>
@@ -427,46 +896,50 @@ export default function Configuracao() {
               <div style={styles.settingGroup}>
                 <h3 style={styles.groupTitle}>Dispositivos</h3>
                 <div style={styles.devicesList}>
-                  {[
-                    { name: 'Chrome - Windows', icon: Laptop, location: 'São Paulo, Brasil', current: true },
-                    { name: 'Safari - iPhone', icon: Smartphone, location: 'São Paulo, Brasil', current: false }
-                  ].map((device, idx) => {
-                    const Icon = device.icon;
-                    return (
-                      <div key={idx} style={styles.deviceItem}>
-                        <div style={styles.deviceIcon}>
-                          <Icon size={24} color="#6b7280" />
-                        </div>
-                        <div style={styles.deviceInfo}>
-                          <div style={styles.deviceName}>
-                            {device.name}
-                            {device.current && <span style={styles.currentBadge}>Atual</span>}
-                          </div>
-                          <div style={styles.deviceLocation}>{device.location}</div>
-                        </div>
-                        {!device.current && (
-                          <button style={styles.deviceLogout}>
-                            <LogOut size={16} />
-                            {!isMobile && 'Desconectar'}
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
+      {dispositivos.length === 0 ? (
+        <p>Nenhum dispositivo conectado ainda.</p>
+      ) : (
+        dispositivos.map((d, idx) => {
+          const Icon = d.tipo === "Mobile" ? Smartphone : Laptop;
+          return (
+            <div key={idx} style={styles.deviceItem}>
+              <div style={styles.deviceIcon}>
+                <Icon size={24} color="#6b7280" />
+              </div>
+              <div style={styles.deviceInfo}>
+                <div style={styles.deviceName}>
+                  {d.navegador.split("(")[0].trim()}
+                  <span style={styles.deviceLocation}>{d.ip}</span>
+                </div>
+                <div style={styles.deviceDate}>
+                  Último login: {new Date(d.dataLogin).toLocaleString("pt-BR")}
                 </div>
               </div>
-
-              <div style={styles.dangerZone}>
-                <h3 style={styles.dangerTitle}>
-                  <AlertCircle size={20} />
-                  Zona de Perigo
-                </h3>
-                <p style={styles.dangerText}>Ações irreversíveis</p>
-                <button style={styles.btnDanger}>
-                  <Trash2 size={18} />
-                  Excluir Conta
-                </button>
+              <button style={styles.deviceLogout}>
+                <LogOut size={16} />
+              </button>
+            </div>
+          );
+        })
+      )}
+    </div>
               </div>
+
+            <div style={styles.dangerZone}>
+  <h3 style={styles.dangerTitle}>
+    <AlertCircle size={20} />
+    Zona de Perigo
+  </h3>
+  <p style={styles.dangerText}>Ações irreversíveis</p>
+  <button
+    style={styles.btnDanger}
+    onClick={() => setShowDeleteModal(true)}
+  >
+    <Trash2 size={18} />
+    Excluir Conta
+  </button>
+</div>
+
             </div>
           )}
 
@@ -480,25 +953,43 @@ export default function Configuracao() {
                 </div>
               </div>
 
-              <div style={styles.currentPlan}>
-                <div style={styles.planHeader}>
-                  <Crown size={32} color="#8b5cf6" />
-                  <div>
-                    <h3 style={styles.planName}>Plano Pro</h3>
-                    <p style={styles.planDesc}>R$ 95/mês • Renovação em 15/02/2025</p>
-                  </div>
-                </div>
-                <div style={styles.planStats}>
-                  <div style={styles.planStatItem}>
-                    <Zap size={18} color="#3b82f6" />
-                    <span>5 usuários</span>
-                  </div>
-                  <div style={styles.planStatItem}>
-                    <CheckCircle size={18} color="#10b981" />
-                    <span>Ilimitado</span>
-                  </div>
-                </div>
-              </div>
+              {planoAtual && (
+  <div style={styles.currentPlan}>
+    <div style={styles.planHeader}>
+      <Crown size={32} color="#8b5cf6" />
+      <div>
+        <h3 style={styles.planName}>Plano {planoAtual.tipoPlano}</h3>
+        <p style={styles.planDesc}>
+          R$ {planoAtual.valorPlano}/mês • Renovação em{" "}
+          {new Date(planoAtual.dataVencimento).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })}
+        </p>
+      </div>
+    </div>
+
+    <div style={styles.planStats}>
+      <div style={styles.planStatItem}>
+        <Zap size={18} color="#3b82f6" />
+        <span>
+          {planoAtual.tipoPlano === "Starter"
+            ? "1 usuário"
+            : planoAtual.tipoPlano === "Pro"
+            ? "3 usuários"
+            : "10 usuários"}
+        </span>
+      </div>
+
+      <div style={styles.planStatItem}>
+        <CheckCircle size={18} color="#10b981" />
+        <span>Todas as integrações</span>
+      </div>
+    </div>
+  </div>
+)}
+
 
               <div style={styles.plansGrid} className="plans-grid">
                 {plans.map(plan => (
@@ -518,12 +1009,18 @@ export default function Configuracao() {
                         </li>
                       ))}
                     </ul>
-                    <button
-                      style={plan.current ? styles.planBtnCurrent : styles.planBtnUpgrade}
-                      disabled={plan.current}
-                    >
-                      {plan.current ? 'Atual' : plan.id === 'free' ? 'Downgrade' : 'Upgrade'}
-                    </button>
+
+                  <button
+  style={plan.current || planoAtual?.tipoPlano === plan.name ? styles.planBtnCurrent : styles.planBtnUpgrade}
+  disabled={trocandoPlano || planoAtual?.tipoPlano === plan.name}
+  onClick={() => trocarPlano(plan.name)}
+>
+  {planoAtual?.tipoPlano === plan.name
+    ? "Atual"
+    : trocandoPlano
+    ? "Trocando..."
+    : "Mudar Plano"}
+</button>
                   </div>
                 ))}
               </div>
@@ -562,24 +1059,119 @@ export default function Configuracao() {
             <div style={styles.modalBody}>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Senha Atual</label>
-                <input type="password" style={styles.input} />
+                <input 
+                  type="password" 
+                  style={styles.input}
+                  value={senhaAtual}
+                  onChange={(e) => setSenhaAtual(e.target.value)}
+                  placeholder="Digite sua senha atual"
+                />
               </div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Nova Senha</label>
-                <input type="password" style={styles.input} />
+                <input 
+                  type="password" 
+                  style={styles.input}
+                  value={novaSenha}
+                  onChange={(e) => setNovaSenha(e.target.value)}
+                  placeholder="Mínimo 6 caracteres"
+                />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Confirmar</label>
-                <input type="password" style={styles.input} />
+                <label style={styles.label}>Confirmar Nova Senha</label>
+                <input 
+                  type="password" 
+                  style={styles.input}
+                  value={confirmarSenha}
+                  onChange={(e) => setConfirmarSenha(e.target.value)}
+                  placeholder="Confirme a nova senha"
+                />
               </div>
             </div>
             <div style={styles.modalFooter}>
-              <button style={styles.btnCancel} onClick={() => setShowPasswordModal(false)}>Cancelar</button>
-              <button style={styles.btnSave}>Atualizar</button>
+              <button 
+                style={styles.btnCancel} 
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setSenhaAtual("");
+                  setNovaSenha("");
+                  setConfirmarSenha("");
+                  setMensagemErro("");
+                }}
+                disabled={salvandoSenha}
+              >
+                Cancelar
+              </button>
+              <button 
+                style={{
+                  ...styles.btnSave,
+                  opacity: salvandoSenha ? 0.7 : 1,
+                  cursor: salvandoSenha ? 'wait' : 'pointer'
+                }}
+                onClick={atualizarSenha}
+                disabled={salvandoSenha}
+              >
+                {salvandoSenha ? 'Atualizando...' : 'Atualizar'}
+              </button>
             </div>
           </div>
         </div>
       )}
+
+
+
+      {showDeleteModal && (
+  <div style={styles.modalOverlay} onClick={() => setShowDeleteModal(false)}>
+    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div style={styles.modalHeader}>
+        <h3 style={styles.modalTitle}>Excluir Conta</h3>
+        <button style={styles.btnClose} onClick={() => setShowDeleteModal(false)}>
+          <X size={24} />
+        </button>
+      </div>
+      <div style={styles.modalBody}>
+        <p style={{ marginBottom: "1rem", color: "#ef4444", fontWeight: "500" }}>
+          ⚠️ Essa ação é irreversível! Todos os seus dados serão apagados permanentemente.
+        </p>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Digite sua senha para confirmar</label>
+          <input
+            type="password"
+            style={styles.input}
+            value={senhaConfirmacao}
+            onChange={(e) => setSenhaConfirmacao(e.target.value)}
+            placeholder="Sua senha atual"
+          />
+        </div>
+      </div>
+      <div style={styles.modalFooter}>
+        <button
+          style={styles.btnCancel}
+          onClick={() => {
+            setShowDeleteModal(false);
+            setSenhaConfirmacao("");
+          }}
+          disabled={excluindoConta}
+        >
+          Cancelar
+        </button>
+        <button
+          style={{
+            ...styles.btnDanger,
+            opacity: excluindoConta ? 0.7 : 1,
+            cursor: excluindoConta ? "wait" : "pointer",
+          }}
+          onClick={handleExcluirConta}
+          disabled={excluindoConta}
+        >
+          {excluindoConta ? "Excluindo..." : "Confirmar Exclusão"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
