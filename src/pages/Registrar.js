@@ -516,7 +516,7 @@ export default function Registrar() {
       <div style={styles.wrapper}>
         <div style={styles.logoSection}>
           <div style={styles.logoIcon}>
-            <Mail size={48} color="white" />
+            <img src={require("../assets/logo.png")} style={{ width: 80, height: 80}} />
           </div>
           <h1 style={styles.title}>AIM Agenda</h1>
           <p style={styles.subtitle}>Crie sua conta e comece a organizar seus compromissos</p>

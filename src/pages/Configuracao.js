@@ -911,7 +911,7 @@ async function handleExcluirConta() {
                   {d.navegador.split("(")[0].trim()}
                   <span style={styles.deviceLocation}>{d.ip}</span>
                 </div>
-                <div style={styles.deviceDate}>
+                <div style={styles.settingDesc}>
                   Último login: {new Date(d.dataLogin).toLocaleString("pt-BR")}
                 </div>
               </div>
