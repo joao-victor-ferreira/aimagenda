@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Zap, Calendar, Mail, MessageSquare, Instagram, CheckCircle, XCircle,
-  Settings, ExternalLink, Clock, TrendingUp, Shield, Sparkles, Info,
-  ChevronRight, Link as LinkIcon
+import {
+  Zap,
+  Calendar,
+  Mail,
+  MessageSquare,
+  Instagram,
+  CheckCircle,
+  XCircle,
+  Settings,
+  ExternalLink,
+  Clock,
+  TrendingUp,
+  Shield,
+  Sparkles,
+  Info,
+  ChevronRight,
+  Link as LinkIcon,
 } from 'lucide-react';
 
 export default function Integracao() {
@@ -19,63 +32,113 @@ export default function Integracao() {
 
   const [integrations, setIntegrations] = useState([
     {
-      id: 1, name: 'Google Calendar', icon: Calendar,
-      description: 'Sincronize seus agendamentos automaticamente com o Google Calendar',
-      category: 'Calendário', status: 'connected', color: '#4285f4', bgColor: '#e8f0fe',
-      features: ['Sincronização bidirecional', 'Eventos em tempo real', 'Múltiplas agendas'],
-      lastSync: '2 min atrás', eventsToday: 12
+      id: 1,
+      name: 'Google Calendar',
+      icon: Calendar,
+      description:
+        'Sincronize seus agendamentos automaticamente com o Google Calendar',
+      category: 'Calendário',
+      status: 'connected',
+      color: '#4285f4',
+      bgColor: '#e8f0fe',
+      features: [
+        'Sincronização bidirecional',
+        'Eventos em tempo real',
+        'Múltiplas agendas',
+      ],
+      lastSync: '2 min atrás',
+      eventsToday: 12,
     },
     {
-      id: 2, name: 'WhatsApp Business', icon: MessageSquare,
-      description: 'Responda clientes e confirme agendamentos via WhatsApp automaticamente',
-      category: 'Mensageria', status: 'connected', color: '#25d366', bgColor: '#d4f4dd',
+      id: 2,
+      name: 'WhatsApp Business',
+      icon: MessageSquare,
+      description:
+        'Responda clientes e confirme agendamentos via WhatsApp automaticamente',
+      category: 'Mensageria',
+      status: 'connected',
+      color: '#25d366',
+      bgColor: '#d4f4dd',
       features: ['Respostas automáticas', 'Confirmações', 'Lembretes'],
-      lastSync: '5 min atrás', messagesProcessed: 156
+      lastSync: '5 min atrás',
+      messagesProcessed: 156,
     },
     {
-      id: 3, name: 'Gmail', icon: Mail,
-      description: 'Envie confirmações e lembretes por email de forma automatizada',
-      category: 'Email', status: 'disconnected', color: '#ea4335', bgColor: '#fce8e6',
-      features: ['Templates personalizados', 'Tracking de abertura', 'Agendamento'],
-      lastSync: null, emailsSent: 0
+      id: 3,
+      name: 'Gmail',
+      icon: Mail,
+      description:
+        'Envie confirmações e lembretes por email de forma automatizada',
+      category: 'Email',
+      status: 'disconnected',
+      color: '#ea4335',
+      bgColor: '#fce8e6',
+      features: [
+        'Templates personalizados',
+        'Tracking de abertura',
+        'Agendamento',
+      ],
+      lastSync: null,
+      emailsSent: 0,
     },
     {
-      id: 4, name: 'Instagram', icon: Instagram,
+      id: 4,
+      name: 'Instagram',
+      icon: Instagram,
       description: 'Receba mensagens do Instagram e converta em agendamentos',
-      category: 'Redes Sociais', status: 'pending', color: '#e4405f', bgColor: '#fce8ec',
+      category: 'Redes Sociais',
+      status: 'pending',
+      color: '#e4405f',
+      bgColor: '#fce8ec',
       features: ['DMs automáticas', 'Stories integration', 'Quick replies'],
-      lastSync: null, interactions: 0
+      lastSync: null,
+      interactions: 0,
     },
     {
-      id: 5, name: 'Slack', icon: MessageSquare,
+      id: 5,
+      name: 'Slack',
+      icon: MessageSquare,
       description: 'Notificações e alertas da equipe em tempo real no Slack',
-      category: 'Comunicação', status: 'disconnected', color: '#4a154b', bgColor: '#f4ecf7',
+      category: 'Comunicação',
+      status: 'disconnected',
+      color: '#4a154b',
+      bgColor: '#f4ecf7',
       features: ['Notificações em tempo real', 'Comandos slash', 'Webhooks'],
-      lastSync: null, notifications: 0
+      lastSync: null,
+      notifications: 0,
     },
     {
-      id: 6, name: 'Zoom', icon: LinkIcon,
-      description: 'Crie automaticamente links de reuniões Zoom para seus agendamentos',
-      category: 'Videoconferência', status: 'disconnected', color: '#2d8cff', bgColor: '#e3f2fd',
+      id: 6,
+      name: 'Zoom',
+      icon: LinkIcon,
+      description:
+        'Crie automaticamente links de reuniões Zoom para seus agendamentos',
+      category: 'Videoconferência',
+      status: 'disconnected',
+      color: '#2d8cff',
+      bgColor: '#e3f2fd',
       features: ['Links automáticos', 'Gravações', 'Integração com calendário'],
-      lastSync: null, meetingsCreated: 0
-    }
+      lastSync: null,
+      meetingsCreated: 0,
+    },
   ]);
 
   const stats = [
     { label: 'Ativas', value: '2', icon: CheckCircle, color: '#10b981' },
     { label: 'Eventos', value: '1.2k', icon: TrendingUp, color: '#3b82f6' },
     { label: 'Automações', value: '8', icon: Zap, color: '#f59e0b' },
-    { label: 'Sucesso', value: '98%', icon: Shield, color: '#8b5cf6' }
+    { label: 'Sucesso', value: '98%', icon: Shield, color: '#8b5cf6' },
   ];
 
   const handleToggleConnection = (integration) => {
     if (integration.status === 'connected') {
-      setIntegrations(integrations.map(int => 
-        int.id === integration.id 
-          ? { ...int, status: 'disconnected', lastSync: null }
-          : int
-      ));
+      setIntegrations(
+        integrations.map((int) =>
+          int.id === integration.id
+            ? { ...int, status: 'disconnected', lastSync: null }
+            : int,
+        ),
+      );
     } else {
       setSelectedIntegration(integration);
       setShowConfigModal(true);
@@ -84,11 +147,13 @@ export default function Integracao() {
 
   const handleConnect = () => {
     if (selectedIntegration) {
-      setIntegrations(integrations.map(int => 
-        int.id === selectedIntegration.id 
-          ? { ...int, status: 'connected', lastSync: 'Agora' }
-          : int
-      ));
+      setIntegrations(
+        integrations.map((int) =>
+          int.id === selectedIntegration.id
+            ? { ...int, status: 'connected', lastSync: 'Agora' }
+            : int,
+        ),
+      );
       setShowConfigModal(false);
       setSelectedIntegration(null);
     }
@@ -96,9 +161,24 @@ export default function Integracao() {
 
   const getStatusConfig = (status) => {
     const configs = {
-      connected: { icon: CheckCircle, text: 'Conectado', color: '#10b981', bg: '#d1fae5' },
-      pending: { icon: Clock, text: 'Pendente', color: '#f59e0b', bg: '#fef3c7' },
-      disconnected: { icon: XCircle, text: 'Desconectado', color: '#ef4444', bg: '#fee2e2' }
+      connected: {
+        icon: CheckCircle,
+        text: 'Conectado',
+        color: '#10b981',
+        bg: '#d1fae5',
+      },
+      pending: {
+        icon: Clock,
+        text: 'Pendente',
+        color: '#f59e0b',
+        bg: '#fef3c7',
+      },
+      disconnected: {
+        icon: XCircle,
+        text: 'Desconectado',
+        color: '#ef4444',
+        bg: '#fee2e2',
+      },
     };
     return configs[status] || configs.disconnected;
   };
@@ -108,7 +188,7 @@ export default function Integracao() {
       <style>{mediaQueries}</style>
 
       <div style={styles.header}>
-        <div style={{width: '100%'}}>
+        <div style={{ width: '100%' }}>
           <div style={styles.headerBadge}>
             <Zap size={16} />
             <span>Integrações</span>
@@ -123,7 +203,13 @@ export default function Integracao() {
           const Icon = stat.icon;
           return (
             <div key={index} style={styles.statCard}>
-              <div style={{...styles.statIcon, background: `${stat.color}15`, color: stat.color}}>
+              <div
+                style={{
+                  ...styles.statIcon,
+                  background: `${stat.color}15`,
+                  color: stat.color,
+                }}
+              >
                 <Icon size={isMobile ? 20 : 24} />
               </div>
               <div>
@@ -152,14 +238,26 @@ export default function Integracao() {
           const Icon = integration.icon;
           const statusConfig = getStatusConfig(integration.status);
           const StatusIcon = statusConfig.icon;
-          
+
           return (
             <div key={integration.id} style={styles.integrationCard}>
               <div style={styles.cardHeader}>
-                <div style={{...styles.integrationIcon, background: integration.bgColor, color: integration.color}}>
+                <div
+                  style={{
+                    ...styles.integrationIcon,
+                    background: integration.bgColor,
+                    color: integration.color,
+                  }}
+                >
                   <Icon size={isMobile ? 28 : 32} />
                 </div>
-                <div style={{...styles.statusBadge, background: statusConfig.bg, color: statusConfig.color}}>
+                <div
+                  style={{
+                    ...styles.statusBadge,
+                    background: statusConfig.bg,
+                    color: statusConfig.color,
+                  }}
+                >
                   <StatusIcon size={14} />
                   <span>{statusConfig.text}</span>
                 </div>
@@ -168,7 +266,9 @@ export default function Integracao() {
               <div style={styles.cardBody}>
                 <div style={styles.categoryBadge}>{integration.category}</div>
                 <h3 style={styles.integrationName}>{integration.name}</h3>
-                <p style={styles.integrationDescription}>{integration.description}</p>
+                <p style={styles.integrationDescription}>
+                  {integration.description}
+                </p>
 
                 <div style={styles.featuresList}>
                   {integration.features.map((feature, idx) => (
@@ -204,14 +304,17 @@ export default function Integracao() {
               <div style={styles.cardFooter}>
                 {integration.status === 'connected' ? (
                   <>
-                    <button 
+                    <button
                       style={styles.btnSettings}
-                      onClick={() => { setSelectedIntegration(integration); setShowConfigModal(true); }}
+                      onClick={() => {
+                        setSelectedIntegration(integration);
+                        setShowConfigModal(true);
+                      }}
                     >
                       <Settings size={16} />
                       {!isMobile && 'Configurar'}
                     </button>
-                    <button 
+                    <button
                       style={styles.btnDisconnect}
                       onClick={() => handleToggleConnection(integration)}
                     >
@@ -220,7 +323,7 @@ export default function Integracao() {
                     </button>
                   </>
                 ) : (
-                  <button 
+                  <button
                     style={styles.btnConnect}
                     onClick={() => handleToggleConnection(integration)}
                   >
@@ -238,7 +341,7 @@ export default function Integracao() {
       <div style={styles.helpSection}>
         <div style={styles.helpCard}>
           <Info size={24} color="#3b82f6" />
-          <div style={{flex: 1}}>
+          <div style={{ flex: 1 }}>
             <h3 style={styles.helpTitle}>Precisa de ajuda?</h3>
             <p style={styles.helpText}>Confira nossa documentação completa</p>
             <button style={styles.helpButton}>
@@ -250,20 +353,28 @@ export default function Integracao() {
       </div>
 
       {showConfigModal && selectedIntegration && (
-        <div style={styles.modalOverlay} onClick={() => setShowConfigModal(false)}>
+        <div
+          style={styles.modalOverlay}
+          onClick={() => setShowConfigModal(false)}
+        >
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <div style={styles.modalTitleContainer}>
-                {React.createElement(selectedIntegration.icon, { 
-                  size: isMobile ? 24 : 32, 
-                  color: selectedIntegration.color 
+                {React.createElement(selectedIntegration.icon, {
+                  size: isMobile ? 24 : 32,
+                  color: selectedIntegration.color,
                 })}
                 <div>
                   <h2 style={styles.modalTitle}>{selectedIntegration.name}</h2>
                   <p style={styles.modalSubtitle}>Configuração de integração</p>
                 </div>
               </div>
-              <button style={styles.btnClose} onClick={() => setShowConfigModal(false)}>×</button>
+              <button
+                style={styles.btnClose}
+                onClick={() => setShowConfigModal(false)}
+              >
+                ×
+              </button>
             </div>
 
             <div style={styles.modalBody}>
@@ -274,8 +385,12 @@ export default function Integracao() {
                     <div style={styles.connectionStatus}>
                       <CheckCircle size={20} color="#10b981" />
                       <div>
-                        <p style={styles.connectionStatusText}>Conectado com sucesso</p>
-                        <p style={styles.connectionStatusTime}>Última sincronização: {selectedIntegration.lastSync}</p>
+                        <p style={styles.connectionStatusText}>
+                          Conectado com sucesso
+                        </p>
+                        <p style={styles.connectionStatusTime}>
+                          Última sincronização: {selectedIntegration.lastSync}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -284,13 +399,21 @@ export default function Integracao() {
                     <h3 style={styles.sectionTitle}>Configurações</h3>
                     <div style={styles.settingItem}>
                       <label style={styles.settingLabel}>
-                        <input type="checkbox" defaultChecked style={styles.checkbox} />
+                        <input
+                          type="checkbox"
+                          defaultChecked
+                          style={styles.checkbox}
+                        />
                         Sincronização automática
                       </label>
                     </div>
                     <div style={styles.settingItem}>
                       <label style={styles.settingLabel}>
-                        <input type="checkbox" defaultChecked style={styles.checkbox} />
+                        <input
+                          type="checkbox"
+                          defaultChecked
+                          style={styles.checkbox}
+                        />
                         Notificações em tempo real
                       </label>
                     </div>
@@ -308,7 +431,9 @@ export default function Integracao() {
                       <TrendingUp size={16} />
                       Forçar sincronização agora
                     </button>
-                    <button style={{...styles.actionButton, marginTop: '0.5rem'}}>
+                    <button
+                      style={{ ...styles.actionButton, marginTop: '0.5rem' }}
+                    >
                       <Settings size={16} />
                       Configurações avançadas
                     </button>
@@ -318,7 +443,9 @@ export default function Integracao() {
                 <>
                   <div style={styles.modalSection}>
                     <h3 style={styles.sectionTitle}>Sobre esta integração</h3>
-                    <p style={styles.modalText}>{selectedIntegration.description}</p>
+                    <p style={styles.modalText}>
+                      {selectedIntegration.description}
+                    </p>
                   </div>
 
                   <div style={styles.modalSection}>
@@ -360,7 +487,10 @@ export default function Integracao() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button style={styles.btnCancel} onClick={() => setShowConfigModal(false)}>
+              <button
+                style={styles.btnCancel}
+                onClick={() => setShowConfigModal(false)}
+              >
                 Cancelar
               </button>
               {selectedIntegration.status === 'connected' ? (
@@ -403,10 +533,11 @@ const styles = {
     padding: '1rem',
     background: '#fafafa',
     minHeight: '100vh',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   header: {
-    marginBottom: '1.5rem'
+    marginBottom: '1.5rem',
   },
   headerBadge: {
     display: 'inline-flex',
@@ -418,24 +549,24 @@ const styles = {
     borderRadius: '9999px',
     fontSize: '0.875rem',
     fontWeight: '600',
-    marginBottom: '0.75rem'
+    marginBottom: '0.75rem',
   },
   title: {
     fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
     fontWeight: '700',
     color: '#1f2937',
-    marginBottom: '0.5rem'
+    marginBottom: '0.5rem',
   },
   subtitle: {
     fontSize: 'clamp(0.875rem, 3vw, 1.125rem)',
     color: '#6b7280',
-    lineHeight: '1.6'
+    lineHeight: '1.6',
   },
   statsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
     gap: '1rem',
-    marginBottom: '1.5rem'
+    marginBottom: '1.5rem',
   },
   statCard: {
     display: 'flex',
@@ -444,7 +575,7 @@ const styles = {
     background: 'white',
     padding: '1rem',
     borderRadius: '12px',
-    border: '1px solid #f3f4f6'
+    border: '1px solid #f3f4f6',
   },
   statIcon: {
     width: '48px',
@@ -453,18 +584,18 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    flexShrink: 0
+    flexShrink: 0,
   },
   statLabel: {
     fontSize: '0.75rem',
     color: '#6b7280',
-    margin: '0 0 0.25rem 0'
+    margin: '0 0 0.25rem 0',
   },
   statValue: {
     fontSize: '1.5rem',
     fontWeight: '700',
     color: '#1f2937',
-    margin: 0
+    margin: 0,
   },
   infoBanner: {
     display: 'flex',
@@ -474,7 +605,7 @@ const styles = {
     padding: '1.5rem',
     borderRadius: '12px',
     marginBottom: '1.5rem',
-    color: 'white'
+    color: 'white',
   },
   infoBannerIcon: {
     width: '48px',
@@ -484,27 +615,27 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    flexShrink: 0
+    flexShrink: 0,
   },
   infoBannerContent: {
-    flex: 1
+    flex: 1,
   },
   infoBannerTitle: {
     fontSize: 'clamp(1rem, 4vw, 1.5rem)',
     fontWeight: '700',
-    margin: '0 0 0.5rem 0'
+    margin: '0 0 0.5rem 0',
   },
   infoBannerText: {
     fontSize: 'clamp(0.875rem, 3vw, 1rem)',
     opacity: 0.95,
     margin: 0,
-    lineHeight: '1.6'
+    lineHeight: '1.6',
   },
   integrationsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
     gap: '1rem',
-    marginBottom: '2rem'
+    marginBottom: '2rem',
   },
   integrationCard: {
     background: 'white',
@@ -513,14 +644,14 @@ const styles = {
     overflow: 'hidden',
     transition: 'all 0.3s',
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
   },
   cardHeader: {
     padding: '1.25rem',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    borderBottom: '1px solid #f3f4f6'
+    borderBottom: '1px solid #f3f4f6',
   },
   integrationIcon: {
     width: '56px',
@@ -529,7 +660,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    flexShrink: 0
+    flexShrink: 0,
   },
   statusBadge: {
     display: 'flex',
@@ -539,11 +670,11 @@ const styles = {
     borderRadius: '9999px',
     fontSize: '0.75rem',
     fontWeight: '600',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
   },
   cardBody: {
     padding: '1.25rem',
-    flex: 1
+    flex: 1,
   },
   categoryBadge: {
     display: 'inline-block',
@@ -553,32 +684,32 @@ const styles = {
     fontSize: '0.75rem',
     fontWeight: '600',
     borderRadius: '9999px',
-    marginBottom: '0.75rem'
+    marginBottom: '0.75rem',
   },
   integrationName: {
     fontSize: '1.125rem',
     fontWeight: '700',
     color: '#1f2937',
-    margin: '0 0 0.5rem 0'
+    margin: '0 0 0.5rem 0',
   },
   integrationDescription: {
     fontSize: '0.875rem',
     color: '#6b7280',
     lineHeight: '1.6',
-    margin: '0 0 1rem 0'
+    margin: '0 0 1rem 0',
   },
   featuresList: {
     display: 'flex',
     flexDirection: 'column',
     gap: '0.5rem',
-    marginBottom: '1rem'
+    marginBottom: '1rem',
   },
   featureItem: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
     fontSize: '0.875rem',
-    color: '#374151'
+    color: '#374151',
   },
   integrationStats: {
     display: 'flex',
@@ -587,20 +718,20 @@ const styles = {
     padding: '1rem',
     background: '#f9fafb',
     borderRadius: '8px',
-    marginTop: '1rem'
+    marginTop: '1rem',
   },
   integrationStatItem: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
     fontSize: '0.875rem',
-    color: '#6b7280'
+    color: '#6b7280',
   },
   cardFooter: {
     padding: '1rem 1.25rem',
     borderTop: '1px solid #f3f4f6',
     display: 'flex',
-    gap: '0.5rem'
+    gap: '0.5rem',
   },
   btnConnect: {
     display: 'flex',
@@ -616,7 +747,7 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
   },
   btnSettings: {
     display: 'flex',
@@ -632,7 +763,7 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
   },
   btnDisconnect: {
     display: 'flex',
@@ -647,10 +778,10 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
   },
   helpSection: {
-    marginTop: '2rem'
+    marginTop: '2rem',
   },
   helpCard: {
     display: 'flex',
@@ -660,19 +791,19 @@ const styles = {
     padding: '1.5rem',
     borderRadius: '12px',
     border: '1px solid #f3f4f6',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   },
   helpTitle: {
     fontSize: '1.125rem',
     fontWeight: '700',
     color: '#1f2937',
-    margin: '0 0 0.5rem 0'
+    margin: '0 0 0.5rem 0',
   },
   helpText: {
     fontSize: '0.875rem',
     color: '#6b7280',
     margin: '0 0 0.75rem 0',
-    lineHeight: '1.6'
+    lineHeight: '1.6',
   },
   helpButton: {
     display: 'inline-flex',
@@ -686,7 +817,7 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
   },
   modalOverlay: {
     position: 'fixed',
@@ -697,7 +828,7 @@ const styles = {
     justifyContent: 'center',
     zIndex: 1000,
     backdropFilter: 'blur(4px)',
-    padding: '1rem'
+    padding: '1rem',
   },
   modal: {
     background: 'white',
@@ -708,30 +839,30 @@ const styles = {
     overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
   },
   modalHeader: {
     padding: '1.5rem',
     borderBottom: '1px solid #f3f4f6',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-start'
+    alignItems: 'flex-start',
   },
   modalTitleContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: '0.75rem'
+    gap: '0.75rem',
   },
   modalTitle: {
     fontSize: 'clamp(1.125rem, 4vw, 1.5rem)',
     fontWeight: '700',
     color: '#1f2937',
-    margin: '0 0 0.25rem 0'
+    margin: '0 0 0.25rem 0',
   },
   modalSubtitle: {
     fontSize: '0.875rem',
     color: '#6b7280',
-    margin: 0
+    margin: 0,
   },
   btnClose: {
     width: '32px',
@@ -746,27 +877,27 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.2s',
-    flexShrink: 0
+    flexShrink: 0,
   },
   modalBody: {
     padding: '1.5rem',
     overflowY: 'auto',
-    flex: 1
+    flex: 1,
   },
   modalSection: {
-    marginBottom: '1.5rem'
+    marginBottom: '1.5rem',
   },
   sectionTitle: {
     fontSize: '1rem',
     fontWeight: '700',
     color: '#1f2937',
-    marginBottom: '1rem'
+    marginBottom: '1rem',
   },
   modalText: {
     fontSize: '0.875rem',
     color: '#6b7280',
     lineHeight: '1.6',
-    margin: 0
+    margin: 0,
   },
   connectionStatus: {
     display: 'flex',
@@ -774,22 +905,22 @@ const styles = {
     gap: '1rem',
     padding: '1rem',
     background: '#d1fae5',
-    borderRadius: '8px'
+    borderRadius: '8px',
   },
   connectionStatusText: {
     fontSize: '0.875rem',
     fontWeight: '600',
     color: '#10b981',
-    margin: '0 0 0.25rem 0'
+    margin: '0 0 0.25rem 0',
   },
   connectionStatusTime: {
     fontSize: '0.75rem',
     color: '#059669',
-    margin: 0
+    margin: 0,
   },
   settingItem: {
     padding: '0.75rem 0',
-    borderBottom: '1px solid #f3f4f6'
+    borderBottom: '1px solid #f3f4f6',
   },
   settingLabel: {
     display: 'flex',
@@ -797,12 +928,12 @@ const styles = {
     gap: '0.75rem',
     fontSize: '0.875rem',
     color: '#374151',
-    cursor: 'pointer'
+    cursor: 'pointer',
   },
   checkbox: {
     width: '18px',
     height: '18px',
-    cursor: 'pointer'
+    cursor: 'pointer',
   },
   actionButton: {
     display: 'flex',
@@ -818,12 +949,12 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
   },
   permissionsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.75rem'
+    gap: '0.75rem',
   },
   permissionItem: {
     display: 'flex',
@@ -833,7 +964,7 @@ const styles = {
     background: '#f9fafb',
     borderRadius: '8px',
     fontSize: '0.875rem',
-    color: '#374151'
+    color: '#374151',
   },
   securityNote: {
     display: 'flex',
@@ -844,7 +975,7 @@ const styles = {
     borderRadius: '8px',
     marginTop: '1.5rem',
     fontSize: '0.875rem',
-    color: '#059669'
+    color: '#059669',
   },
   modalFooter: {
     padding: '1rem 1.5rem',
@@ -852,7 +983,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'flex-end',
     gap: '0.75rem',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   },
   btnCancel: {
     padding: '0.75rem 1.5rem',
@@ -863,7 +994,7 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
   },
   btnSave: {
     padding: '0.75rem 1.5rem',
@@ -874,7 +1005,7 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
   },
   btnPrimary: {
     display: 'flex',
@@ -888,6 +1019,6 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s'
-  }
+    transition: 'all 0.2s',
+  },
 };

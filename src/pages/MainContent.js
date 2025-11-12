@@ -1,53 +1,117 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Home,
   Users,
   Calendar,
   Zap,
   Brain,
   TrendingUp,
-  UsersRound,
-  Bell,
-  Search,
   Settings,
-  LogOut,
-  ChevronDown,
   Activity,
   MessageSquare,
   ArrowUpRight,
   ArrowDownRight,
   Sparkles,
-  Mail,
-  BarChart3
+  BarChart3,
 } from 'lucide-react';
 
-function MainContent({ onNovoAgendamento, onInsights, onClients }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-
+function MainContent({
+  onNovoAgendamento,
+  onInsights,
+  onClients,
+  onconfiguracaoIA,
+}) {
   const stats = [
-    { title: 'Clientes Ativos', value: '284', change: '+12%', trend: 'up', icon: Users, color: '#3b82f6', bgColor: '#eff6ff' },
-    { title: 'Agendamentos Hoje', value: '12', change: '+8%', trend: 'up', icon: Calendar, color: '#10b981', bgColor: '#d1fae5' },
-    { title: 'Mensagens IA', value: '156', change: '+24%', trend: 'up', icon: MessageSquare, color: '#8b5cf6', bgColor: '#f3e8ff' },
-    { title: 'Taxa de Conversão', value: '94%', change: '+2%', trend: 'up', icon: TrendingUp, color: '#f59e0b', bgColor: '#fef3c7' }
+    {
+      title: 'Clientes Ativos',
+      value: '284',
+      change: '+12%',
+      trend: 'up',
+      icon: Users,
+      color: '#3b82f6',
+      bgColor: '#eff6ff',
+    },
+    {
+      title: 'Agendamentos Hoje',
+      value: '12',
+      change: '+8%',
+      trend: 'up',
+      icon: Calendar,
+      color: '#10b981',
+      bgColor: '#d1fae5',
+    },
+    {
+      title: 'Mensagens IA',
+      value: '156',
+      change: '+24%',
+      trend: 'up',
+      icon: MessageSquare,
+      color: '#8b5cf6',
+      bgColor: '#f3e8ff',
+    },
+    {
+      title: 'Taxa de Conversão',
+      value: '94%',
+      change: '+2%',
+      trend: 'up',
+      icon: TrendingUp,
+      color: '#f59e0b',
+      bgColor: '#fef3c7',
+    },
   ];
 
   const recentActivities = [
-    { id: 1, icon: Brain, color: '#8b5cf6', title: 'IA respondeu João Silva', description: 'Agendamento confirmado para amanhã às 14h', time: '2 min atrás', status: 'success' },
-    { id: 2, icon: Calendar, color: '#10b981', title: 'Novo agendamento', description: 'Maria Santos - Consulta de acompanhamento', time: '15 min atrás', status: 'success' },
-    { id: 3, icon: MessageSquare, color: '#3b82f6', title: 'Nova mensagem recebida', description: 'Pedro Costa perguntou sobre disponibilidade', time: '1 hora atrás', status: 'pending' },
-    { id: 4, icon: Sparkles, color: '#f59e0b', title: 'IA aprendeu nova preferência', description: 'Horários de manhã são mais populares', time: '2 horas atrás', status: 'info' },
-    { id: 5, icon: Zap, color: '#ec4899', title: 'Integração sincronizada', description: 'Google Calendar atualizado com sucesso', time: '3 horas atrás', status: 'success' }
+    {
+      id: 1,
+      icon: Brain,
+      color: '#8b5cf6',
+      title: 'IA respondeu João Silva',
+      description: 'Agendamento confirmado para amanhã às 14h',
+      time: '2 min atrás',
+      status: 'success',
+    },
+    {
+      id: 2,
+      icon: Calendar,
+      color: '#10b981',
+      title: 'Novo agendamento',
+      description: 'Maria Santos - Consulta de acompanhamento',
+      time: '15 min atrás',
+      status: 'success',
+    },
+    {
+      id: 3,
+      icon: MessageSquare,
+      color: '#3b82f6',
+      title: 'Nova mensagem recebida',
+      description: 'Pedro Costa perguntou sobre disponibilidade',
+      time: '1 hora atrás',
+      status: 'pending',
+    },
+    {
+      id: 4,
+      icon: Sparkles,
+      color: '#f59e0b',
+      title: 'IA aprendeu nova preferência',
+      description: 'Horários de manhã são mais populares',
+      time: '2 horas atrás',
+      status: 'info',
+    },
+    {
+      id: 5,
+      icon: Zap,
+      color: '#ec4899',
+      title: 'Integração sincronizada',
+      description: 'Google Calendar atualizado com sucesso',
+      time: '3 horas atrás',
+      status: 'success',
+    },
   ];
 
   const quickActions = [
     { icon: Calendar, label: 'Novo Agendamento', color: '#3b82f6' },
     { icon: Users, label: 'Adicionar Cliente', color: '#10b981' },
-    { icon: Mail, label: 'Enviar Campanha', color: '#8b5cf6' },
-    { icon: BarChart3, label: 'Ver Relatório', color: '#f59e0b' }
+    { icon: BarChart3, label: 'Ver Relatório', color: '#f59e0b' },
   ];
-
-  
 
   return (
     <div className="main-content-wrapper">
@@ -556,7 +620,10 @@ function MainContent({ onNovoAgendamento, onInsights, onClients }) {
                 <div className="stat-icon" style={{ background: stat.bgColor }}>
                   <Icon size={24} color={stat.color} />
                 </div>
-                <div className="stat-change" style={{ color: stat.trend === 'up' ? '#10b981' : '#ef4444' }}>
+                <div
+                  className="stat-change"
+                  style={{ color: stat.trend === 'up' ? '#10b981' : '#ef4444' }}
+                >
                   <TrendIcon size={16} /> {stat.change}
                 </div>
               </div>
@@ -584,12 +651,20 @@ function MainContent({ onNovoAgendamento, onInsights, onClients }) {
               const Icon = activity.icon;
               return (
                 <div key={activity.id} className="activity-item">
-                  <div className="activity-icon" style={{ background: `${activity.color}15`, color: activity.color }}>
+                  <div
+                    className="activity-icon"
+                    style={{
+                      background: `${activity.color}15`,
+                      color: activity.color,
+                    }}
+                  >
                     <Icon size={18} />
                   </div>
                   <div className="activity-content">
                     <h4 className="activity-title">{activity.title}</h4>
-                    <p className="activity-description">{activity.description}</p>
+                    <p className="activity-description">
+                      {activity.description}
+                    </p>
                   </div>
                   <div className="activity-meta">
                     <span className="activity-time">{activity.time}</span>
@@ -600,8 +675,8 @@ function MainContent({ onNovoAgendamento, onInsights, onClients }) {
                           activity.status === 'success'
                             ? '#10b981'
                             : activity.status === 'pending'
-                            ? '#f59e0b'
-                            : '#3b82f6'
+                              ? '#f59e0b'
+                              : '#3b82f6',
                       }}
                     ></span>
                   </div>
@@ -618,48 +693,46 @@ function MainContent({ onNovoAgendamento, onInsights, onClients }) {
               <h2 className="card-title">Ações Rápidas</h2>
             </div>
             <div className="quick-actions-grid">
-  {quickActions.map((action, index) => {
-    const Icon = action.icon;
+              {quickActions.map((action, index) => {
+                const Icon = action.icon;
 
-    return (
-      <button
-        key={index}
-        className="quick-action-btn"
-        onClick={() => {
-          switch (action.label) {
-            case "Novo Agendamento":
-              if (onNovoAgendamento) onNovoAgendamento();
-              break;
+                return (
+                  <button
+                    key={index}
+                    className="quick-action-btn"
+                    onClick={() => {
+                      switch (action.label) {
+                        case 'Novo Agendamento':
+                          if (onNovoAgendamento) onNovoAgendamento();
+                          break;
 
-            case "Adicionar Cliente":
-              if (onClients) onClients();
-              break;
+                        case 'Adicionar Cliente':
+                          if (onClients) onClients();
+                          break;
 
-            case "Enviar Campanha":
-              console.log("Abrir ferramenta de campanhas");
-              break;
+                        case 'Ver Relatório':
+                          if (onInsights) onInsights();
+                          break;
 
-            case "Ver Relatório":
-              if (onInsights) onInsights();
-              break;
-
-            default:
-              console.log(`Ação desconhecida: ${action.label}`);
-          }
-        }}
-      >
-        <div
-          className="quick-action-icon"
-          style={{ background: `${action.color}15`, color: action.color }}
-        >
-          <Icon size={20} />
-        </div>
-        <span className="quick-action-label">{action.label}</span>
-      </button>
-    );
-  })}
-</div>
-
+                        default:
+                          console.log(`Ação desconhecida: ${action.label}`);
+                      }
+                    }}
+                  >
+                    <div
+                      className="quick-action-icon"
+                      style={{
+                        background: `${action.color}15`,
+                        color: action.color,
+                      }}
+                    >
+                      <Icon size={20} />
+                    </div>
+                    <span className="quick-action-label">{action.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="ai-card">
@@ -687,7 +760,7 @@ function MainContent({ onNovoAgendamento, onInsights, onClients }) {
                 <span className="ai-stat-value">2.3s</span>
               </div>
             </div>
-            <button className="ai-config-btn">
+            <button onClick={onconfiguracaoIA} className="ai-config-btn">
               <Settings size={16} /> Configurar IA
             </button>
           </div>

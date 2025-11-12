@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Lock, User, Eye, EyeOff, AlertCircle, X, CheckCircle } from 'lucide-react';
+import {
+  Calendar,
+  Lock,
+  User,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  X,
+  CheckCircle,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { config } from '../config/http.js';
 
@@ -26,7 +35,7 @@ const CustomAlert = ({ type = 'error', message, onClose }) => {
       maxWidth: '400px',
       animation: isVisible ? 'slideIn 0.3s ease-out' : 'slideOut 0.3s ease-out',
       opacity: isVisible ? 1 : 0,
-      transform: isVisible ? 'translateX(0)' : 'translateX(100%)'
+      transform: isVisible ? 'translateX(0)' : 'translateX(100%)',
     },
     alert: {
       display: 'flex',
@@ -37,7 +46,7 @@ const CustomAlert = ({ type = 'error', message, onClose }) => {
       boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
       border: '1px solid',
       background: type === 'error' ? '#fef2f2' : '#f0fdf4',
-      borderColor: type === 'error' ? '#fecaca' : '#bbf7d0'
+      borderColor: type === 'error' ? '#fecaca' : '#bbf7d0',
     },
     iconWrapper: {
       flexShrink: 0,
@@ -47,22 +56,22 @@ const CustomAlert = ({ type = 'error', message, onClose }) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: type === 'error' ? '#fee2e2' : '#dcfce7'
+      background: type === 'error' ? '#fee2e2' : '#dcfce7',
     },
     content: {
       flex: 1,
-      paddingTop: '0.25rem'
+      paddingTop: '0.25rem',
     },
     title: {
       fontSize: '0.95rem',
       fontWeight: '700',
       color: type === 'error' ? '#991b1b' : '#166534',
-      marginBottom: '0.25rem'
+      marginBottom: '0.25rem',
     },
     message: {
       fontSize: '0.875rem',
       color: type === 'error' ? '#7f1d1d' : '#14532d',
-      lineHeight: '1.5'
+      lineHeight: '1.5',
     },
     closeButton: {
       flexShrink: 0,
@@ -75,8 +84,8 @@ const CustomAlert = ({ type = 'error', message, onClose }) => {
       transition: 'background 0.2s',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
-    }
+      justifyContent: 'center',
+    },
   };
 
   return (
@@ -102,7 +111,8 @@ const CustomAlert = ({ type = 'error', message, onClose }) => {
             setTimeout(onClose, 300);
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = type === 'error' ? '#fee2e2' : '#dcfce7';
+            e.currentTarget.style.background =
+              type === 'error' ? '#fee2e2' : '#dcfce7';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'none';
@@ -120,91 +130,113 @@ const AutoLoginModal = ({ onLogout }) => {
   const [logoutHover, setLogoutHover] = useState(false);
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0, 0, 0, 0.6)',
-      backdropFilter: 'blur(8px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 10000,
-      animation: 'fadeIn 0.3s ease-out'
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '1.5rem',
-        padding: '2.5rem',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        textAlign: 'center',
-        maxWidth: '420px',
-        animation: 'scaleIn 0.3s ease-out'
-      }}>
-        <div style={{
-          width: '5rem',
-          height: '5rem',
-          margin: '0 auto 1.5rem',
-          background: 'linear-gradient(135deg, #2563eb, #9333ea)',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative'
-        }}>
-          <CheckCircle size={48} color="white" style={{
-            animation: 'checkPulse 1s ease-in-out infinite'
-          }} />
-          <div style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(8px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10000,
+        animation: 'fadeIn 0.3s ease-out',
+      }}
+    >
+      <div
+        style={{
+          background: 'white',
+          borderRadius: '1.5rem',
+          padding: '2.5rem',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          textAlign: 'center',
+          maxWidth: '420px',
+          animation: 'scaleIn 0.3s ease-out',
+        }}
+      >
+        <div
+          style={{
+            width: '5rem',
+            height: '5rem',
+            margin: '0 auto 1.5rem',
+            background: 'linear-gradient(135deg, #2563eb, #9333ea)',
             borderRadius: '50%',
-            border: '3px solid #2563eb',
-            animation: 'pulse 1.5s ease-out infinite'
-          }}></div>
-        </div>
-        
-        <h3 style={{
-          fontSize: '1.5rem',
-          fontWeight: '700',
-          color: '#1f2937',
-          marginBottom: '0.75rem'
-        }}>
-          Bem-vindo de volta!
-        </h3>
-        
-        <p style={{
-          color: '#6b7280',
-          fontSize: '1rem',
-          marginBottom: '1.5rem'
-        }}>
-          Você já está autenticado. Redirecionando para o dashboard...
-        </p>
-        
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          alignItems: 'center'
-        }}>
-          <div style={{
-            display: 'inline-block',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             position: 'relative',
-            width: '40px',
-            height: '40px'
-          }}>
-            <div style={{
+          }}
+        >
+          <CheckCircle
+            size={48}
+            color="white"
+            style={{
+              animation: 'checkPulse 1s ease-in-out infinite',
+            }}
+          />
+          <div
+            style={{
               position: 'absolute',
               width: '100%',
               height: '100%',
-              border: '4px solid #e5e7eb',
-              borderTop: '4px solid #2563eb',
               borderRadius: '50%',
-              animation: 'spin 0.8s linear infinite'
-            }}></div>
+              border: '3px solid #2563eb',
+              animation: 'pulse 1.5s ease-out infinite',
+            }}
+          ></div>
+        </div>
+
+        <h3
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: '700',
+            color: '#1f2937',
+            marginBottom: '0.75rem',
+          }}
+        >
+          Bem-vindo de volta!
+        </h3>
+
+        <p
+          style={{
+            color: '#6b7280',
+            fontSize: '1rem',
+            marginBottom: '1.5rem',
+          }}
+        >
+          Você já está autenticado. Redirecionando para o dashboard...
+        </p>
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem',
+            alignItems: 'center',
+          }}
+        >
+          <div
+            style={{
+              display: 'inline-block',
+              position: 'relative',
+              width: '40px',
+              height: '40px',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                border: '4px solid #e5e7eb',
+                borderTop: '4px solid #2563eb',
+                borderRadius: '50%',
+                animation: 'spin 0.8s linear infinite',
+              }}
+            ></div>
           </div>
 
           <button
@@ -222,8 +254,10 @@ const AutoLoginModal = ({ onLogout }) => {
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              boxShadow: logoutHover ? '0 4px 12px rgba(220, 38, 38, 0.3)' : '0 2px 8px rgba(239, 68, 68, 0.2)',
-              transform: logoutHover ? 'translateY(-1px)' : 'translateY(0)'
+              boxShadow: logoutHover
+                ? '0 4px 12px rgba(220, 38, 38, 0.3)'
+                : '0 2px 8px rgba(239, 68, 68, 0.2)',
+              transform: logoutHover ? 'translateY(-1px)' : 'translateY(0)',
             }}
           >
             Sair da conta
@@ -243,7 +277,7 @@ export default function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    remember: false
+    remember: false,
   });
 
   const handleChange = (e) => {
@@ -252,12 +286,12 @@ export default function Login() {
     if (name === 'email') {
       setFormData({
         ...formData,
-        email: value.replace(/\s+/g, '_').toLowerCase()
+        email: value.replace(/\s+/g, '_').toLowerCase(),
       });
     } else {
       setFormData({
         ...formData,
-        [name]: value
+        [name]: value,
       });
     }
   };
@@ -272,7 +306,10 @@ export default function Login() {
 
   const handleSubmit = async () => {
     if (!formData.email || !formData.password) {
-      showAlert('error', 'Por favor, preencha o email e a senha para continuar.');
+      showAlert(
+        'error',
+        'Por favor, preencha o email e a senha para continuar.',
+      );
       return;
     }
 
@@ -294,8 +331,8 @@ export default function Login() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email,
-          senha: formData.password
-        })
+          senha: formData.password,
+        }),
       });
 
       const data = await response.json();
@@ -343,20 +380,22 @@ export default function Login() {
   const styles = {
     container: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)',
+      background:
+        'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '1rem',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     },
     wrapper: {
       width: '100%',
-      maxWidth: '28rem'
+      maxWidth: '28rem',
     },
     logoSection: {
       textAlign: 'center',
-      marginBottom: '2rem'
+      marginBottom: '2rem',
     },
     logoIcon: {
       display: 'inline-flex',
@@ -367,7 +406,7 @@ export default function Login() {
       background: 'linear-gradient(135deg, #2563eb, #9333ea)',
       borderRadius: '1rem',
       marginBottom: '1rem',
-      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
     },
     title: {
       fontSize: '2.25rem',
@@ -376,37 +415,37 @@ export default function Login() {
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
       backgroundClip: 'text',
-      marginBottom: '0.5rem'
+      marginBottom: '0.5rem',
     },
     subtitle: {
       color: '#4b5563',
-      fontSize: '1rem'
+      fontSize: '1rem',
     },
     card: {
       background: 'white',
       borderRadius: '1.5rem',
       boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
       padding: '2rem',
-      border: '1px solid #f3f4f6'
+      border: '1px solid #f3f4f6',
     },
     cardTitle: {
       fontSize: '1.5rem',
       fontWeight: '700',
       color: '#1f2937',
-      marginBottom: '1.5rem'
+      marginBottom: '1.5rem',
     },
     formGroup: {
-      marginBottom: '1.25rem'
+      marginBottom: '1.25rem',
     },
     label: {
       display: 'block',
       fontSize: '0.875rem',
       fontWeight: '500',
       color: '#374151',
-      marginBottom: '0.5rem'
+      marginBottom: '0.5rem',
     },
     inputWrapper: {
-      position: 'relative'
+      position: 'relative',
     },
     inputIcon: {
       position: 'absolute',
@@ -416,7 +455,7 @@ export default function Login() {
       pointerEvents: 'none',
       display: 'flex',
       alignItems: 'center',
-      color: '#9ca3af'
+      color: '#9ca3af',
     },
     input: {
       width: '100%',
@@ -427,14 +466,14 @@ export default function Login() {
       outline: 'none',
       transition: 'all 0.2s',
       background: 'white',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
     },
     inputFocus: {
       borderColor: '#3b82f6',
-      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
+      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
     },
     passwordInput: {
-      paddingRight: '3rem'
+      paddingRight: '3rem',
     },
     passwordToggle: {
       position: 'absolute',
@@ -447,29 +486,29 @@ export default function Login() {
       padding: '0.25rem',
       display: 'flex',
       alignItems: 'center',
-      color: '#9ca3af'
+      color: '#9ca3af',
     },
     rememberForgot: {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: '1.25rem'
+      marginBottom: '1.25rem',
     },
     rememberLabel: {
       display: 'flex',
       alignItems: 'center',
-      cursor: 'pointer'
+      cursor: 'pointer',
     },
     checkbox: {
       width: '1rem',
       height: '1rem',
       marginRight: '0.5rem',
       cursor: 'pointer',
-      accentColor: '#2563eb'
+      accentColor: '#2563eb',
     },
     rememberText: {
       fontSize: '0.875rem',
-      color: '#4b5563'
+      color: '#4b5563',
     },
     forgotLink: {
       fontSize: '0.875rem',
@@ -478,7 +517,7 @@ export default function Login() {
       border: 'none',
       fontWeight: '500',
       cursor: 'pointer',
-      transition: 'color 0.2s'
+      transition: 'color 0.2s',
     },
     button: {
       width: '100%',
@@ -491,28 +530,28 @@ export default function Login() {
       fontWeight: '600',
       cursor: 'pointer',
       boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-      transition: 'all 0.3s'
+      transition: 'all 0.3s',
     },
     buttonDisabled: {
       opacity: 0.6,
-      cursor: 'not-allowed'
+      cursor: 'not-allowed',
     },
     buttonLoading: {
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     divider: {
       position: 'relative',
       margin: '1.5rem 0',
-      textAlign: 'center'
+      textAlign: 'center',
     },
     dividerLine: {
       position: 'absolute',
       top: '50%',
       left: 0,
       right: 0,
-      borderTop: '1px solid #d1d5db'
+      borderTop: '1px solid #d1d5db',
     },
     dividerText: {
       position: 'relative',
@@ -520,14 +559,14 @@ export default function Login() {
       padding: '0 1rem',
       background: 'white',
       color: '#6b7280',
-      fontSize: '0.875rem'
+      fontSize: '0.875rem',
     },
     signup: {
-      textAlign: 'center'
+      textAlign: 'center',
     },
     signupText: {
       color: '#4b5563',
-      fontSize: '0.875rem'
+      fontSize: '0.875rem',
     },
     signupLink: {
       color: '#2563eb',
@@ -535,14 +574,14 @@ export default function Login() {
       border: 'none',
       fontWeight: '600',
       cursor: 'pointer',
-      transition: 'color 0.2s'
+      transition: 'color 0.2s',
     },
     footer: {
       textAlign: 'center',
       marginTop: '2rem',
       fontSize: '0.875rem',
-      color: '#6b7280'
-    }
+      color: '#6b7280',
+    },
   };
 
   const [buttonHover, setButtonHover] = useState(false);
@@ -565,15 +604,21 @@ export default function Login() {
         <div style={styles.wrapper}>
           <div style={styles.logoSection}>
             <div style={styles.logoIcon}>
-              <img src={require('../assets/logo.png')} alt="AIM Agenda Logo" style={{ width: '4.5rem', height: '4.5rem' }} />
+              <img
+                src={require('../assets/logo.png')}
+                alt="AIM Agenda Logo"
+                style={{ width: '4.5rem', height: '4.5rem' }}
+              />
             </div>
             <h1 style={styles.title}>AIM Agenda</h1>
-            <p style={styles.subtitle}>Gerencie seus compromissos com inteligência</p>
+            <p style={styles.subtitle}>
+              Gerencie seus compromissos com inteligência
+            </p>
           </div>
 
           <div style={styles.card}>
             <h2 style={styles.cardTitle}>Entrar na sua conta</h2>
-            
+
             <div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Email</label>
@@ -592,7 +637,7 @@ export default function Login() {
                     placeholder="seu@email.com"
                     style={{
                       ...styles.input,
-                      ...(emailFocus ? styles.inputFocus : {})
+                      ...(emailFocus ? styles.inputFocus : {}),
                     }}
                   />
                 </div>
@@ -605,7 +650,7 @@ export default function Login() {
                     <Lock size={20} />
                   </div>
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
@@ -616,7 +661,7 @@ export default function Login() {
                     style={{
                       ...styles.input,
                       ...styles.passwordInput,
-                      ...(passwordFocus ? styles.inputFocus : {})
+                      ...(passwordFocus ? styles.inputFocus : {}),
                     }}
                   />
                   <button
@@ -642,7 +687,12 @@ export default function Login() {
                   <span style={styles.rememberText}>Lembrar-me</span>
                 </label>
 
-                <button onClick={() => navigate('/esqueceuasenha')} style={styles.forgotLink}>Esqueci a senha</button>
+                <button
+                  onClick={() => navigate('/esqueceuasenha')}
+                  style={styles.forgotLink}
+                >
+                  Esqueci a senha
+                </button>
               </div>
 
               <button
@@ -652,38 +702,40 @@ export default function Login() {
                 onMouseLeave={() => setButtonHover(false)}
                 style={{
                   ...styles.button,
-                  ...(buttonHover && !isLoading ? {
-                    background: 'linear-gradient(90deg, #1d4ed8, #7e22ce)',
-                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
-                    transform: 'translateY(-2px)'
-                  } : {}),
-                  ...(isLoading ? styles.buttonDisabled : {})
+                  ...(buttonHover && !isLoading
+                    ? {
+                        background: 'linear-gradient(90deg, #1d4ed8, #7e22ce)',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
+                        transform: 'translateY(-2px)',
+                      }
+                    : {}),
+                  ...(isLoading ? styles.buttonDisabled : {}),
                 }}
               >
                 {isLoading ? (
                   <span style={styles.buttonLoading}>
-                    <svg 
-                      style={{ 
-                        width: '1.25rem', 
-                        height: '1.25rem', 
+                    <svg
+                      style={{
+                        width: '1.25rem',
+                        height: '1.25rem',
                         marginRight: '0.75rem',
-                        animation: 'spin 0.6s linear infinite'
-                      }} 
+                        animation: 'spin 0.6s linear infinite',
+                      }}
                       viewBox="0 0 24 24"
                     >
-                      <circle 
-                        style={{ opacity: 0.25 }} 
-                        cx="12" 
-                        cy="12" 
-                        r="10" 
-                        stroke="currentColor" 
-                        strokeWidth="4" 
-                        fill="none" 
+                      <circle
+                        style={{ opacity: 0.25 }}
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
                       />
-                      <path 
-                        style={{ opacity: 0.75 }} 
-                        fill="currentColor" 
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
+                      <path
+                        style={{ opacity: 0.75 }}
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
                     </svg>
                     Entrando...
@@ -702,7 +754,10 @@ export default function Login() {
             <div style={styles.signup}>
               <p style={styles.signupText}>
                 Não tem uma conta?{' '}
-                <button onClick={() => navigate('/registrar')} style={styles.signupLink}>
+                <button
+                  onClick={() => navigate('/registrar')}
+                  style={styles.signupLink}
+                >
                   Cadastre-se gratuitamente
                 </button>
               </p>

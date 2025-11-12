@@ -12,16 +12,9 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  X,
   CheckCircle,
-  AlertCircle,
   Clock,
-  UserPlus,
   Menu,
-  CreditCard,
-  AlertTriangle,
-  DollarSign,
-  Crown
 } from 'lucide-react';
 import Integracao from './Integracao';
 import AIConfiguracao from './AIConfiguracao';
@@ -30,33 +23,45 @@ import Insights from './Insights';
 import Equipe from './Equipe';
 import Cliente from './Cliente';
 import MainContent from './MainContent';
-
+import ModalPagamento from '../components/ModalPagamento';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-  
+
   // Simula pagamento pendente - mude para false para testar sem bloqueio
   const [paymentPending, setPaymentPending] = useState(true);
   const [paymentModalVisible, setPaymentModalVisible] = useState(true);
 
+  const user = {
+    nomeCompleto: 'João Silva Santos',
+    email: 'joao@exemplo.com',
+    plano: 'Pro',
+    valorDevido: '299,00',
+    dataVencimento: '05/11/2024',
+    diasAtraso: 4,
+  };
 
-    const handleOpenAgenda = () => {
-  setActiveMenu('appointments');
-};
+  const handleOpenAgenda = () => {
+    setActiveMenu('appointments');
+  };
   const handleOpenInsights = () => {
-  setActiveMenu('insights');
-};
-
+    setActiveMenu('insights');
+  };
 
   const handleOpenClientes = () => {
-  setActiveMenu('clients');
-};
+    setActiveMenu('clients');
+  };
 
-    const renderContent = () => {
+  const handleOpenIA = () => {
+    setActiveMenu('ai');
+  };
+
+  const renderContent = () => {
     switch (activeMenu) {
       case 'clients':
         return <Cliente />;
@@ -71,18 +76,15 @@ export default function Dashboard() {
       case 'team':
         return <Equipe />;
       default:
-        return <MainContent onNovoAgendamento={handleOpenAgenda} onInsights={handleOpenInsights} onClients={handleOpenClientes} />;
+        return (
+          <MainContent
+            onNovoAgendamento={handleOpenAgenda}
+            onInsights={handleOpenInsights}
+            onClients={handleOpenClientes}
+            onconfiguracaoIA={handleOpenIA}
+          />
+        );
     }
-  };
-
-
-  const user = {
-    nomeCompleto: "João Silva Santos",
-    email: "joao@exemplo.com",
-    plano: "Pro",
-    valorDevido: "299,00",
-    dataVencimento: "05/11/2024",
-    diasAtraso: 4
   };
 
   const menuItems = [
@@ -92,7 +94,7 @@ export default function Dashboard() {
     { id: 'integrations', icon: Zap, label: 'Integrações' },
     { id: 'ai', icon: Brain, label: 'IA' },
     { id: 'insights', icon: TrendingUp, label: 'Insights' },
-    { id: 'team', icon: UsersRound, label: 'Equipe' }
+    { id: 'team', icon: UsersRound, label: 'Equipe' },
   ];
 
   const notifications = [
@@ -105,7 +107,7 @@ export default function Dashboard() {
       title: 'Agendamento confirmado',
       message: 'Maria Silva confirmou consulta para hoje às 14h',
       time: '5 min atrás',
-      unread: true
+      unread: true,
     },
     {
       id: 2,
@@ -116,11 +118,11 @@ export default function Dashboard() {
       title: 'Lembrete de consulta',
       message: 'Próxima consulta em 30 minutos',
       time: '10 min atrás',
-      unread: true
-    }
+      unread: true,
+    },
   ];
 
-  const unreadCount = notifications.filter(n => n.unread).length;
+  const unreadCount = notifications.filter((n) => n.unread).length;
 
   const handleLogout = () => {
     console.log('Saindo do sistema...');
@@ -129,25 +131,21 @@ export default function Dashboard() {
   };
 
   const handlePayment = () => {
-    setPaymentModalVisible(false)
+    setPaymentModalVisible(false);
     alert('Redirecionando para página de pagamento...');
   };
 
   const handleMenuClick = (menuId) => {
-    if (paymentPending) {
-      setPaymentModalVisible(true);
-      return;
-    }
     setActiveMenu(menuId);
     setSidebarOpen(false);
   };
 
-  const nomeCurto = user.nomeCompleto.split(" ").slice(0, 2).join(" ");
+  const nomeCurto = user.nomeCompleto.split(' ').slice(0, 2).join(' ');
   const iniciaisNome = user.nomeCompleto
-    .split(" ")
+    .split(' ')
     .slice(0, 2)
     .map((parte) => parte[0].toUpperCase())
-    .join("");
+    .join('');
 
   return (
     <div className="dashboard-container">
@@ -548,401 +546,9 @@ export default function Dashboard() {
           color: #ef4444;
         }
 
-        .payment-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.8);
-          z-index: 10000;
-          animation: fadeIn 0.3s ease;
-          backdrop-filter: blur(4px);
-        }
-
-        .payment-modal {
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background: white;
-          border-radius: 16px;
-          padding: 0;
-          width: 95%;
-          max-width: 500px;
-          max-height: 95vh;
-          overflow-y: auto;
-          box-shadow: 0 25px 80px rgba(0,0,0,0.4);
-          z-index: 10001;
-          animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @media (min-width: 640px) {
-          .payment-modal {
-            width: 90%;
-            max-height: 90vh;
-            border-radius: 20px;
-          }
-        }
-
-        .payment-modal-header {
-          background: linear-gradient(135deg, #ef4444, #dc2626);
-          padding: 1.5rem 1rem;
-          text-align: center;
-          position: relative;
-        }
-
-        @media (min-width: 640px) {
-          .payment-modal-header {
-            padding: 2rem 1.5rem;
-          }
-        }
-
-        .payment-modal-icon-wrapper {
-          width: 60px;
-          height: 60px;
-          margin: 0 auto 0.75rem;
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          animation: pulse 2s infinite;
-        }
-
-        @media (min-width: 640px) {
-          .payment-modal-icon-wrapper {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1rem;
-          }
-        }
-
-        .payment-modal-title {
-          font-size: 1.25rem;
-          font-weight: 800;
-          color: white;
-          margin: 0 0 0.5rem 0;
-          text-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        @media (min-width: 640px) {
-          .payment-modal-title {
-            font-size: 1.75rem;
-          }
-        }
-
-        .payment-modal-subtitle {
-          font-size: 0.85rem;
-          color: rgba(255, 255, 255, 0.95);
-          margin: 0;
-        }
-
-        @media (min-width: 640px) {
-          .payment-modal-subtitle {
-            font-size: 0.95rem;
-          }
-        }
-
-        .payment-modal-body {
-          padding: 1.25rem;
-        }
-
-        @media (min-width: 640px) {
-          .payment-modal-body {
-            padding: 2rem;
-          }
-        }
-
-        .payment-alert {
-          display: flex;
-          align-items: flex-start;
-          gap: 0.75rem;
-          padding: 0.875rem 1rem;
-          background: #fef2f2;
-          border-left: 4px solid #ef4444;
-          border-radius: 8px;
-          margin-bottom: 1.25rem;
-        }
-
-        @media (min-width: 640px) {
-          .payment-alert {
-            gap: 1rem;
-            padding: 1rem 1.25rem;
-            margin-bottom: 1.5rem;
-          }
-        }
-
-        .payment-alert-icon {
-          color: #ef4444;
-          flex-shrink: 0;
-          margin-top: 0.125rem;
-        }
-
-        .payment-alert-content {
-          flex: 1;
-        }
-
-        .payment-alert-title {
-          font-size: 0.875rem;
-          font-weight: 700;
-          color: #991b1b;
-          margin: 0 0 0.25rem 0;
-        }
-
-        @media (min-width: 640px) {
-          .payment-alert-title {
-            font-size: 0.95rem;
-          }
-        }
-
-        .payment-alert-message {
-          font-size: 0.8rem;
-          color: #7f1d1d;
-          margin: 0;
-          line-height: 1.5;
-        }
-
-        @media (min-width: 640px) {
-          .payment-alert-message {
-            font-size: 0.875rem;
-          }
-        }
-
-        .payment-info-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 0.75rem;
-          margin-bottom: 1.25rem;
-        }
-
-        @media (min-width: 480px) {
-          .payment-info-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-          }
-        }
-
-        @media (min-width: 640px) {
-          .payment-info-grid {
-            margin-bottom: 1.5rem;
-          }
-        }
-
-        .payment-info-card {
-          background: #f9fafb;
-          padding: 0.875rem 1rem;
-          border-radius: 12px;
-          border: 1px solid #e5e7eb;
-        }
-
-        @media (min-width: 640px) {
-          .payment-info-card {
-            padding: 1rem 1.25rem;
-          }
-        }
-
-        .payment-info-label {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: #6b7280;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          margin: 0 0 0.5rem 0;
-        }
-
-        .payment-info-value {
-          font-size: 1.1rem;
-          font-weight: 700;
-          color: #1f2937;
-          margin: 0;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        @media (min-width: 640px) {
-          .payment-info-value {
-            font-size: 1.25rem;
-          }
-        }
-
-        .payment-info-value.danger {
-          color: #ef4444;
-        }
-
-        .payment-info-value.warning {
-          color: #f59e0b;
-        }
-
-        .payment-features {
-          background: #fffbeb;
-          border: 1px solid #fcd34d;
-          border-radius: 12px;
-          padding: 0.875rem 1rem;
-          margin-bottom: 1.25rem;
-        }
-
-        @media (min-width: 640px) {
-          .payment-features {
-            padding: 1rem 1.25rem;
-            margin-bottom: 1.5rem;
-          }
-        }
-
-        .payment-features-title {
-          font-size: 0.875rem;
-          font-weight: 700;
-          color: #92400e;
-          margin: 0 0 0.75rem 0;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .payment-features-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .payment-features-item {
-          font-size: 0.8rem;
-          color: #78350f;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        @media (min-width: 640px) {
-          .payment-features-item {
-            font-size: 0.875rem;
-          }
-        }
-
-        .payment-features-item::before {
-          content: "•";
-          color: #f59e0b;
-          font-weight: 700;
-          font-size: 1.25rem;
-        }
-
-        .payment-modal-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-        }
-
-        .payment-btn {
-          padding: 0.875rem 1rem;
-          border: none;
-          border-radius: 12px;
-          font-size: 0.95rem;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-        }
-
-        @media (min-width: 640px) {
-          .payment-btn {
-            padding: 1rem;
-            font-size: 1rem;
-          }
-        }
-
-        .payment-btn-primary {
-          background: linear-gradient(135deg, #10b981, #059669);
-          color: white;
-          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        .payment-btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-        }
-
-        .payment-btn-secondary {
-          background: transparent;
-          color: #6b7280;
-          border: 2px solid #e5e7eb;
-        }
-
-        .payment-btn-secondary:hover {
-          background: #f9fafb;
-          border-color: #d1d5db;
-        }
-
-        .payment-help-text {
-          text-align: center;
-          font-size: 0.8rem;
-          color: #9ca3af;
-          margin-top: 1rem;
-        }
-
-        .payment-help-link {
-          color: #3b82f6;
-          font-weight: 600;
-          cursor: pointer;
-          text-decoration: none;
-        }
-
-        .payment-help-link:hover {
-          text-decoration: underline;
-        }
-
-        .content-wrapper {
-          padding: 1rem;
-          transition: filter 0.3s ease;
-        }
-
-        @media (min-width: 768px) {
-          .content-wrapper {
-            padding: 2rem;
-          }
-        }
-
-        .content-wrapper.blurred {
-          filter: blur(8px);
-          pointer-events: none;
-          user-select: none;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        @keyframes modalSlideUp {
-          from {
-            opacity: 0;
-            transform: translate(-50%, -40%);
-          }
-          to {
-            opacity: 1;
-            transform: translate(-50%, -50%);
-          }
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-          50% {
-            transform: scale(1.05);
-            opacity: 0.9;
-          }
-        }
       `}</style>
 
-      <div 
+      <div
         className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
         onClick={() => setSidebarOpen(false)}
       />
@@ -950,7 +556,11 @@ export default function Dashboard() {
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="logo">
-            <img src={require("../assets/logo.png")} style={{width: 40, height: 40}} />
+            <img
+              src={require('../assets/logo.png')}
+              alt="logo-aimagendai"
+              style={{ width: 40, height: 40 }}
+            />
           </div>
           <span className="logo-text">AIM Agenda</span>
         </div>
@@ -973,7 +583,7 @@ export default function Dashboard() {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="settings-btn">
+          <button  onClick={() => navigate("/configuracao")} className="settings-btn">
             <Settings size={20} />
             <span>Configurações</span>
           </button>
@@ -983,7 +593,7 @@ export default function Dashboard() {
       <main className="main-content">
         <header className="header">
           <div className="header-left">
-            <button 
+            <button
               className="menu-toggle"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
@@ -997,10 +607,7 @@ export default function Dashboard() {
           </div>
 
           <div className="header-right">
-            <div className="search-container">
-              <Search size={18} className="search-icon" />
-              <input type="text" placeholder="Buscar..." className="search-input" />
-            </div>
+          
 
             <button className="icon-button">
               <Bell size={20} />
@@ -1010,7 +617,10 @@ export default function Dashboard() {
             </button>
 
             <div className="user-menu">
-              <button className="user-button" onClick={() => setUserMenuOpen(!userMenuOpen)}>
+              <button
+                className="user-button"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+              >
                 <div className="user-avatar">{iniciaisNome}</div>
                 <div className="user-info">
                   <span className="user-name">{nomeCurto}</span>
@@ -1021,10 +631,10 @@ export default function Dashboard() {
 
               {userMenuOpen && (
                 <div className="user-dropdown">
-                  <button className="dropdown-item">
+                  <button onClick={() => navigate("/configuracao")} className="dropdown-item">
                     <Settings size={16} /> Configurações
                   </button>
-                  <button 
+                  <button
                     className="dropdown-item logout"
                     onClick={() => {
                       setUserMenuOpen(false);
@@ -1039,162 +649,15 @@ export default function Dashboard() {
           </div>
         </header>
 
-              
-                {/* Conteúdo dinâmico */}
         {renderContent()}
-        
-
       </main>
 
       {paymentPending && paymentModalVisible && (
-        <>
-          <div className="payment-modal-overlay" />
-          <div className="payment-modal">
-            <div className="payment-modal-header">
-              <div className="payment-modal-icon-wrapper">
-                <AlertTriangle size={40} color="white" strokeWidth={2.5} />
-              </div>
-              <h2 className="payment-modal-title">Pagamento Pendente</h2>
-              <p className="payment-modal-subtitle">
-                Seu acesso foi temporariamente bloqueado
-              </p>
-            </div>
-
-            <div className="payment-modal-body">
-              <div className="payment-alert">
-                <AlertCircle size={20} className="payment-alert-icon" />
-                <div className="payment-alert-content">
-                  <h4 className="payment-alert-title">Atenção Necessária</h4>
-                  <p className="payment-alert-message">
-                    Identificamos uma pendência no pagamento da sua assinatura. 
-                    Para continuar utilizando todos os recursos, regularize sua situação.
-                  </p>
-                </div>
-              </div>
-
-              <div className="payment-info-grid">
-                <div className="payment-info-card">
-                  <p className="payment-info-label">Plano Atual</p>
-                  <p className="payment-info-value">
-                    <Crown size={20} color="#3b82f6" />
-                    {user.plano}
-                  </p>
-                </div>
-
-                <div className="payment-info-card">
-                  <p className="payment-info-label">Valor Devido</p>
-                  <p className="payment-info-value danger">
-                    <DollarSign size={20} />
-                    R$ {user.valorDevido}
-                  </p>
-                </div>
-
-                <div className="payment-info-card">
-                  <p className="payment-info-label">Vencimento</p>
-                  <p className="payment-info-value warning">
-                    <Clock size={20} />
-                    {user.dataVencimento}
-                  </p>
-                </div>
-
-                <div className="payment-info-card">
-                  <p className="payment-info-label">Dias em Atraso</p>
-                  <p className="payment-info-value danger">
-                    <AlertTriangle size={20} />
-                    {user.diasAtraso} dias
-                  </p>
-                </div>
-              </div>
-
-              <div className="payment-features">
-                <h4 className="payment-features-title">
-                  <AlertCircle size={16} />
-                  Recursos Bloqueados
-                </h4>
-                <ul className="payment-features-list">
-                  <li className="payment-features-item">Acesso ao dashboard completo</li>
-                  <li className="payment-features-item">Gerenciamento de clientes</li>
-                  <li className="payment-features-item">Criação de agendamentos</li>
-                  <li className="payment-features-item">Integrações e automações</li>
-                  <li className="payment-features-item">Relatórios e insights</li>
-                  <li className="payment-features-item">Suporte técnico prioritário</li>
-                </ul>
-              </div>
-
-              <div className="payment-modal-actions">
-                <button 
-                  className="payment-btn payment-btn-primary"
-                  onClick={handlePayment}
-                >
-                  <CreditCard size={20} />
-                  Regularizar Pagamento
-                </button>
-                
-                <button 
-                  className="payment-btn payment-btn-secondary"
-                  onClick={handleLogout}
-                >
-                  <LogOut size={20} />
-                  Sair da Conta
-                </button>
-              </div>
-
-              <p className="payment-help-text">
-                Precisa de ajuda? <a href="#" className="payment-help-link">Fale com o suporte</a>
-              </p>
-            </div>
-          </div>
-        </>
-      )}
-
-      {logoutModalOpen && (
-        <>
-          <div 
-            className="payment-modal-overlay"
-            onClick={() => setLogoutModalOpen(false)}
-          />
-          <div className="payment-modal" style={{maxWidth: '400px'}}>
-            <div className="payment-modal-header" style={{background: 'linear-gradient(135deg, #6b7280, #4b5563)', padding: '2rem'}}>
-              <div className="payment-modal-icon-wrapper" style={{width: '64px', height: '64px'}}>
-                <LogOut size={32} color="white" />
-              </div>
-              <h2 className="payment-modal-title" style={{fontSize: '1.5rem'}}>Confirmar Saída</h2>
-              <p className="payment-modal-subtitle">
-                Tem certeza que deseja sair?
-              </p>
-            </div>
-
-            <div className="payment-modal-body">
-              <p style={{
-                textAlign: 'center',
-                color: '#6b7280',
-                fontSize: '0.95rem',
-                marginBottom: '1.5rem'
-              }}>
-                Você será desconectado e precisará fazer login novamente para acessar sua conta.
-              </p>
-
-              <div className="payment-modal-actions">
-                <button 
-                  className="payment-btn payment-btn-primary"
-                  onClick={handleLogout}
-                  style={{background: 'linear-gradient(135deg, #ef4444, #dc2626)'}}
-                >
-                  <LogOut size={20} />
-                  Sim, Sair
-                </button>
-                
-                <button 
-                  className="payment-btn payment-btn-secondary"
-                  onClick={() => setLogoutModalOpen(false)}
-                >
-                  <X size={20} />
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
+        <ModalPagamento
+          handlePagamento={handlePayment}
+          handleLogout={handleLogout}
+          user={user}
+        />
       )}
     </div>
   );

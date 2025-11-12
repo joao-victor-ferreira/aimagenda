@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { 
+import {
   TrendingUp,
   BarChart3,
   Clock,
@@ -16,10 +16,9 @@ import {
   ArrowUp,
   ArrowDown,
   Download,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
-import '../css/Insights.css';   
-
+import '../css/Insights.css';
 
 export default function Insights() {
   const [period, setPeriod] = useState('week');
@@ -32,7 +31,7 @@ export default function Insights() {
       trend: 'up',
       icon: Brain,
       color: '#8b5cf6',
-      description: 'IA respondeu com sucesso'
+      description: 'IA respondeu com sucesso',
     },
     {
       label: 'Tempo Médio de Resposta',
@@ -41,7 +40,7 @@ export default function Insights() {
       trend: 'up',
       icon: Zap,
       color: '#f59e0b',
-      description: 'Mais rápido que semana passada'
+      description: 'Mais rápido que semana passada',
     },
     {
       label: 'Agendamentos Esta Semana',
@@ -50,7 +49,7 @@ export default function Insights() {
       trend: 'up',
       icon: Calendar,
       color: '#3b82f6',
-      description: '94 confirmados, 30 pendentes'
+      description: '94 confirmados, 30 pendentes',
     },
     {
       label: 'Taxa de Conversão',
@@ -59,8 +58,8 @@ export default function Insights() {
       trend: 'up',
       icon: Target,
       color: '#10b981',
-      description: 'De contatos para agendamentos'
-    }
+      description: 'De contatos para agendamentos',
+    },
   ];
 
   const weeklyData = [
@@ -70,7 +69,7 @@ export default function Insights() {
     { day: 'Qui', appointments: 20, ai: 17 },
     { day: 'Sex', appointments: 24, ai: 20 },
     { day: 'Sáb', appointments: 10, ai: 8 },
-    { day: 'Dom', appointments: 5, ai: 4 }
+    { day: 'Dom', appointments: 5, ai: 4 },
   ];
 
   const busyHours = [
@@ -80,7 +79,7 @@ export default function Insights() {
     { hour: '14:00', count: 42, percentage: 84 },
     { hour: '15:00', count: 40, percentage: 80 },
     { hour: '16:00', count: 32, percentage: 64 },
-    { hour: '17:00', count: 28, percentage: 56 }
+    { hour: '17:00', count: 28, percentage: 56 },
   ];
 
   const topClients = [
@@ -88,28 +87,49 @@ export default function Insights() {
     { name: 'Maria Santos', appointments: 10, value: 'R$ 7.200', avatar: 'MS' },
     { name: 'Pedro Costa', appointments: 8, value: 'R$ 5.800', avatar: 'PC' },
     { name: 'Ana Oliveira', appointments: 7, value: 'R$ 4.900', avatar: 'AO' },
-    { name: 'Carlos Ferreira', appointments: 6, value: 'R$ 4.200', avatar: 'CF' }
+    {
+      name: 'Carlos Ferreira',
+      appointments: 6,
+      value: 'R$ 4.200',
+      avatar: 'CF',
+    },
   ];
 
   const contactSources = [
-    { source: 'WhatsApp', count: 156, percentage: 52, icon: MessageSquare, color: '#25d366' },
-    { source: 'Site', count: 89, percentage: 30, icon: Globe, color: '#3b82f6' },
-    { source: 'Email', count: 54, percentage: 18, icon: Mail, color: '#ef4444' }
+    {
+      source: 'WhatsApp',
+      count: 156,
+      percentage: 52,
+      icon: MessageSquare,
+      color: '#25d366',
+    },
+    {
+      source: 'Site',
+      count: 89,
+      percentage: 30,
+      icon: Globe,
+      color: '#3b82f6',
+    },
+    {
+      source: 'Email',
+      count: 54,
+      percentage: 18,
+      icon: Mail,
+      color: '#ef4444',
+    },
   ];
 
   const aiPerformance = [
     { metric: 'Mensagens Processadas', value: '1.2k', icon: MessageSquare },
     { metric: 'Respostas Corretas', value: '1.18k', icon: Brain },
     { metric: 'Tempo Total Economizado', value: '48h', icon: Clock },
-    { metric: 'Satisfação do Cliente', value: '4.8/5', icon: Award }
+    { metric: 'Satisfação do Cliente', value: '4.8/5', icon: Award },
   ];
 
-  const maxAppointments = Math.max(...weeklyData.map(d => d.appointments));
+  const maxAppointments = Math.max(...weeklyData.map((d) => d.appointments));
 
   return (
     <div className="container2">
-     
-
       {/* Header */}
       <div className="header">
         <div>
@@ -155,14 +175,25 @@ export default function Insights() {
         {mainMetrics.map((metric, index) => {
           const Icon = metric.icon;
           const TrendIcon = metric.trend === 'up' ? ArrowUp : ArrowDown;
-          
+
           return (
             <div key={index} className="metric-card">
               <div className="metric-header">
-                <div className="metric-icon" style={{background: `${metric.color}15`, color: metric.color}}>
+                <div
+                  className="metric-icon"
+                  style={{
+                    background: `${metric.color}15`,
+                    color: metric.color,
+                  }}
+                >
                   <Icon size={24} />
                 </div>
-                <div className="metric-change" style={{color: metric.trend === 'up' ? '#10b981' : '#ef4444'}}>
+                <div
+                  className="metric-change"
+                  style={{
+                    color: metric.trend === 'up' ? '#10b981' : '#ef4444',
+                  }}
+                >
                   <TrendIcon size={16} />
                   {metric.change}
                 </div>
@@ -186,11 +217,17 @@ export default function Insights() {
             </div>
             <div className="chart-legend">
               <div className="legend-item">
-                <div className="legend-dot" style={{background: '#3b82f6'}}></div>
+                <div
+                  className="legend-dot"
+                  style={{ background: '#3b82f6' }}
+                ></div>
                 <span>Total</span>
               </div>
               <div className="legend-item">
-                <div className="legend-dot" style={{background: '#8b5cf6'}}></div>
+                <div
+                  className="legend-dot"
+                  style={{ background: '#8b5cf6' }}
+                ></div>
                 <span>IA</span>
               </div>
             </div>
@@ -203,7 +240,7 @@ export default function Insights() {
                     className="bar"
                     style={{
                       height: `${(day.appointments / maxAppointments) * 100}%`,
-                      background: '#3b82f6'
+                      background: '#3b82f6',
                     }}
                     title={`${day.appointments} agendamentos`}
                   >
@@ -214,7 +251,7 @@ export default function Insights() {
                     style={{
                       height: `${(day.ai / maxAppointments) * 100}%`,
                       background: '#8b5cf6',
-                      marginLeft: '4px'
+                      marginLeft: '4px',
                     }}
                     title={`${day.ai} pela IA`}
                   >
@@ -240,7 +277,10 @@ export default function Insights() {
               <div key={index} className="hour-item">
                 <div className="hour-label">{hour.hour}</div>
                 <div className="hour-bar-container">
-                  <div className="hour-bar" style={{width: `${hour.percentage}%`}}></div>
+                  <div
+                    className="hour-bar"
+                    style={{ width: `${hour.percentage}%` }}
+                  ></div>
                 </div>
                 <div className="hour-count">{hour.count}</div>
               </div>
@@ -299,18 +339,32 @@ export default function Insights() {
               const Icon = source.icon;
               return (
                 <div key={index} className="source-item">
-                  <div className="source-icon" style={{background: `${source.color}15`, color: source.color}}>
+                  <div
+                    className="source-icon"
+                    style={{
+                      background: `${source.color}15`,
+                      color: source.color,
+                    }}
+                  >
                     <Icon size={24} />
                   </div>
                   <div className="source-info">
                     <div className="source-name">{source.source}</div>
                     <div className="source-bar">
-                      <div className="source-progress" style={{width: `${source.percentage}%`, background: source.color}}></div>
+                      <div
+                        className="source-progress"
+                        style={{
+                          width: `${source.percentage}%`,
+                          background: source.color,
+                        }}
+                      ></div>
                     </div>
                   </div>
                   <div className="source-stats">
                     <div className="source-count">{source.count}</div>
-                    <div className="source-percentage">{source.percentage}%</div>
+                    <div className="source-percentage">
+                      {source.percentage}%
+                    </div>
                   </div>
                 </div>
               );
@@ -365,7 +419,8 @@ export default function Insights() {
           </div>
           <h4 className="insight-title">Crescimento Acelerado</h4>
           <p className="insight-text">
-            Seus agendamentos cresceram <strong>18% esta semana</strong> comparado à semana anterior.
+            Seus agendamentos cresceram <strong>18% esta semana</strong>{' '}
+            comparado à semana anterior.
           </p>
         </div>
 
@@ -375,7 +430,8 @@ export default function Insights() {
           </div>
           <h4 className="insight-title">Horário de Pico</h4>
           <p className="insight-text">
-            <strong>09:00 - 10:00</strong> é seu horário mais procurado. Considere adicionar mais disponibilidade.
+            <strong>09:00 - 10:00</strong> é seu horário mais procurado.
+            Considere adicionar mais disponibilidade.
           </p>
         </div>
 
@@ -385,7 +441,8 @@ export default function Insights() {
           </div>
           <h4 className="insight-title">WhatsApp Domina</h4>
           <p className="insight-text">
-            <strong>52% dos contatos</strong> vêm do WhatsApp. Continue investindo nesse canal.
+            <strong>52% dos contatos</strong> vêm do WhatsApp. Continue
+            investindo nesse canal.
           </p>
         </div>
       </div>

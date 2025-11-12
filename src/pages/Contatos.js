@@ -8,7 +8,7 @@ const Contatos = () => {
     telefone: '',
     empresa: '',
     assunto: '',
-    mensagem: ''
+    mensagem: '',
   });
 
   const [enviado, setEnviado] = useState(false);
@@ -16,7 +16,7 @@ const Contatos = () => {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -30,20 +30,25 @@ const Contatos = () => {
       telefone: '',
       empresa: '',
       assunto: '',
-      mensagem: ''
+      mensagem: '',
     });
   };
 
   return (
     <div className="contatos-container">
-     
       {/* Header */}
       <header className="header">
         <nav className="nav-container">
-          <div className="logo" onClick={() => window.location.href = '/'}>AIM Agenda</div>
+          <div className="logo" onClick={() => (window.location.href = '/')}>
+            AIM Agenda
+          </div>
           <div className="nav-actions">
-            <a href="/login" className="btn-login">Login</a>
-            <a href="/registrar" className="btn-primary">Teste</a>
+            <a href="/login" className="btn-login">
+              Login
+            </a>
+            <a href="/registrar" className="btn-primary">
+              Teste
+            </a>
           </div>
         </nav>
       </header>
@@ -57,7 +62,8 @@ const Contatos = () => {
             Estamos aqui para <span className="gradient-text">ajudar você</span>
           </h1>
           <p className="hero-subtitle">
-            Entre em contato com nossa equipe e tire todas as suas dúvidas sobre a AIM Agenda
+            Entre em contato com nossa equipe e tire todas as suas dúvidas sobre
+            a AIM Agenda
           </p>
         </div>
       </section>
@@ -80,7 +86,12 @@ const Contatos = () => {
               <div className="info-icon">💬</div>
               <h3>WhatsApp</h3>
               <p>Fale diretamente com nosso time de suporte</p>
-              <a href="https://wa.me/5519999999999" className="info-link" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://wa.me/5519999999999"
+                className="info-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 +55 (19) 99999-9999
               </a>
             </div>
@@ -91,8 +102,6 @@ const Contatos = () => {
               <p>Segunda a Sexta: 9h às 18h</p>
               <p>Indaiatuba, São Paulo - Brasil</p>
             </div>
-
-           
           </div>
 
           {/* Form Section */}
@@ -108,7 +117,9 @@ const Contatos = () => {
             )}
 
             <h2 className="form-title">Envie sua mensagem</h2>
-            <p className="form-subtitle">Preencha o formulário abaixo e retornaremos o mais rápido possível</p>
+            <p className="form-subtitle">
+              Preencha o formulário abaixo e retornaremos o mais rápido possível
+            </p>
 
             <div>
               <div className="form-row">
@@ -191,7 +202,11 @@ const Contatos = () => {
                 ></textarea>
               </div>
 
-              <button type="button" onClick={handleSubmit} className="form-submit">
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="form-submit"
+              >
                 Enviar Mensagem
               </button>
             </div>
@@ -205,7 +220,9 @@ const Contatos = () => {
           <h2 className="faq-title">
             Perguntas <span className="gradient-text">Frequentes</span>
           </h2>
-          <p className="faq-subtitle">Respostas rápidas para as dúvidas mais comuns</p>
+          <p className="faq-subtitle">
+            Respostas rápidas para as dúvidas mais comuns
+          </p>
         </div>
 
         <div className="faq-list">
@@ -215,7 +232,8 @@ const Contatos = () => {
               Quanto tempo leva para receber uma resposta?
             </div>
             <p className="faq-answer">
-              Normalmente respondemos em até 24 horas úteis. Para questões urgentes, utilize nosso WhatsApp para atendimento mais rápido.
+              Normalmente respondemos em até 24 horas úteis. Para questões
+              urgentes, utilize nosso WhatsApp para atendimento mais rápido.
             </p>
           </div>
 
@@ -225,7 +243,8 @@ const Contatos = () => {
               Posso agendar uma demonstração?
             </div>
             <p className="faq-answer">
-              Sim! Selecione "Vendas e Planos" no formulário e solicite uma demonstração personalizada da plataforma.
+              Sim! Selecione "Vendas e Planos" no formulário e solicite uma
+              demonstração personalizada da plataforma.
             </p>
           </div>
 
@@ -235,11 +254,10 @@ const Contatos = () => {
               Vocês oferecem suporte em português?
             </div>
             <p className="faq-answer">
-              Sim, todo nosso atendimento é realizado em português por uma equipe brasileira especializada.
+              Sim, todo nosso atendimento é realizado em português por uma
+              equipe brasileira especializada.
             </p>
           </div>
-
-        
         </div>
       </section>
 
@@ -249,7 +267,12 @@ const Contatos = () => {
       </footer>
 
       {/* WhatsApp Float */}
-      <a href="https://wa.me/5519999999999" className="whatsapp-float" target="_blank" rel="noopener noreferrer">
+      <a
+        href="https://wa.me/5519999999999"
+        className="whatsapp-float"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         💬
       </a>
     </div>

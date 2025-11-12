@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Check, Sparkles, ArrowRight, Bell, Layout } from 'lucide-react';
+import {
+  Calendar,
+  Check,
+  Sparkles,
+  ArrowRight,
+  Bell,
+  Layout,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Obrigado() {
@@ -13,7 +20,7 @@ export default function Obrigado() {
     // Animação sequencial
     setTimeout(() => setShowContent(true), 300);
     setTimeout(() => setShowFeatures(true), 800);
-    
+
     // Gera confetes aleatórios
     const pieces = [];
     for (let i = 0; i < 50; i++) {
@@ -22,7 +29,9 @@ export default function Obrigado() {
         left: Math.random() * 100,
         delay: Math.random() * 0.5,
         duration: 2 + Math.random() * 2,
-        color: ['#3b82f6', '#9333ea', '#ec4899', '#f59e0b', '#10b981'][Math.floor(Math.random() * 5)]
+        color: ['#3b82f6', '#9333ea', '#ec4899', '#f59e0b', '#10b981'][
+          Math.floor(Math.random() * 5)
+        ],
       });
     }
     setConfettiPieces(pieces);
@@ -31,14 +40,16 @@ export default function Obrigado() {
   const styles = {
     container: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)',
+      background:
+        'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '2rem 1rem',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
     },
     confetti: {
       position: 'absolute',
@@ -46,13 +57,13 @@ export default function Obrigado() {
       height: '10px',
       borderRadius: '50%',
       top: '-20px',
-      zIndex: 1
+      zIndex: 1,
     },
     wrapper: {
       width: '100%',
       maxWidth: '48rem',
       position: 'relative',
-      zIndex: 2
+      zIndex: 2,
     },
     card: {
       background: 'white',
@@ -63,12 +74,12 @@ export default function Obrigado() {
       textAlign: 'center',
       opacity: 0,
       transform: 'scale(0.9)',
-      animation: showContent ? 'fadeInScale 0.6s ease-out forwards' : 'none'
+      animation: showContent ? 'fadeInScale 0.6s ease-out forwards' : 'none',
     },
     iconWrapper: {
       position: 'relative',
       display: 'inline-flex',
-      marginBottom: '2rem'
+      marginBottom: '2rem',
     },
     successIcon: {
       width: '6rem',
@@ -80,16 +91,18 @@ export default function Obrigado() {
       justifyContent: 'center',
       boxShadow: '0 20px 40px -10px rgba(16, 185, 129, 0.4)',
       animation: showContent ? 'bounce 1s ease-out' : 'none',
-      position: 'relative'
+      position: 'relative',
     },
     checkIcon: {
       color: 'white',
-      animation: showContent ? 'checkAppear 0.6s ease-out 0.3s backwards' : 'none'
+      animation: showContent
+        ? 'checkAppear 0.6s ease-out 0.3s backwards'
+        : 'none',
     },
     sparkle: {
       position: 'absolute',
       color: '#fbbf24',
-      animation: showContent ? 'sparkleFloat 2s ease-in-out infinite' : 'none'
+      animation: showContent ? 'sparkleFloat 2s ease-in-out infinite' : 'none',
     },
     title: {
       fontSize: '2.5rem',
@@ -97,7 +110,7 @@ export default function Obrigado() {
       color: '#1f2937',
       marginBottom: '1rem',
       opacity: 0,
-      animation: showContent ? 'fadeInUp 0.6s ease-out 0.2s forwards' : 'none'
+      animation: showContent ? 'fadeInUp 0.6s ease-out 0.2s forwards' : 'none',
     },
     subtitle: {
       fontSize: '1.125rem',
@@ -105,21 +118,21 @@ export default function Obrigado() {
       marginBottom: '0.5rem',
       lineHeight: '1.75',
       opacity: 0,
-      animation: showContent ? 'fadeInUp 0.6s ease-out 0.3s forwards' : 'none'
+      animation: showContent ? 'fadeInUp 0.6s ease-out 0.3s forwards' : 'none',
     },
     highlight: {
       background: 'linear-gradient(90deg, #3b82f6, #9333ea)',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
       backgroundClip: 'text',
-      fontWeight: '700'
+      fontWeight: '700',
     },
     message: {
       fontSize: '1rem',
       color: '#4b5563',
       marginBottom: '2.5rem',
       opacity: 0,
-      animation: showContent ? 'fadeInUp 0.6s ease-out 0.4s forwards' : 'none'
+      animation: showContent ? 'fadeInUp 0.6s ease-out 0.4s forwards' : 'none',
     },
     featuresGrid: {
       display: 'grid',
@@ -127,19 +140,19 @@ export default function Obrigado() {
       gap: '1.5rem',
       marginBottom: '2.5rem',
       opacity: 0,
-      animation: showFeatures ? 'fadeIn 0.6s ease-out forwards' : 'none'
+      animation: showFeatures ? 'fadeIn 0.6s ease-out forwards' : 'none',
     },
     featureCard: {
       background: 'linear-gradient(135deg, #f9fafb, #ffffff)',
       padding: '1.5rem',
       borderRadius: '1rem',
       border: '1px solid #e5e7eb',
-      transition: 'all 0.3s'
+      transition: 'all 0.3s',
     },
     featureCardHover: {
       transform: 'translateY(-5px)',
       boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-      borderColor: '#3b82f6'
+      borderColor: '#3b82f6',
     },
     featureIcon: {
       width: '3rem',
@@ -148,24 +161,24 @@ export default function Obrigado() {
       borderRadius: '0.75rem',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     featureTitle: {
       fontSize: '1rem',
       fontWeight: '600',
       color: '#1f2937',
-      marginBottom: '0.5rem'
+      marginBottom: '0.5rem',
     },
     featureDesc: {
       fontSize: '0.875rem',
       color: '#6b7280',
-      lineHeight: '1.5'
+      lineHeight: '1.5',
     },
     buttonGroup: {
       display: 'flex',
       gap: '1rem',
       justifyContent: 'center',
-      marginBottom: '1.5rem'
+      marginBottom: '1.5rem',
     },
     button: {
       padding: '0.875rem 2rem',
@@ -177,17 +190,17 @@ export default function Obrigado() {
       transition: 'all 0.3s',
       display: 'inline-flex',
       alignItems: 'center',
-      gap: '0.5rem'
+      gap: '0.5rem',
     },
     buttonPrimary: {
       background: 'linear-gradient(90deg, #2563eb, #9333ea)',
       color: 'white',
-      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
     },
     buttonPrimaryHover: {
       background: 'linear-gradient(90deg, #1d4ed8, #7e22ce)',
       boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
-      transform: 'translateY(-2px)'
+      transform: 'translateY(-2px)',
     },
     socialProof: {
       display: 'flex',
@@ -197,19 +210,19 @@ export default function Obrigado() {
       color: '#6b7280',
       fontSize: '0.875rem',
       paddingTop: '1.5rem',
-      borderTop: '1px solid #e5e7eb'
+      borderTop: '1px solid #e5e7eb',
     },
     stars: {
       color: '#fbbf24',
       display: 'flex',
-      gap: '0.25rem'
+      gap: '0.25rem',
     },
     footer: {
       textAlign: 'center',
       marginTop: '2rem',
       fontSize: '0.875rem',
-      color: '#6b7280'
-    }
+      color: '#6b7280',
+    },
   };
 
   const features = [
@@ -217,20 +230,20 @@ export default function Obrigado() {
       icon: Calendar,
       gradient: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
       title: 'Agenda Inteligente',
-      desc: 'Organize todos os seus compromissos em um só lugar'
+      desc: 'Organize todos os seus compromissos em um só lugar',
     },
     {
       icon: Bell,
       gradient: 'linear-gradient(135deg, #ec4899, #f43f5e)',
       title: 'Lembretes Automáticos',
-      desc: 'Nunca perca um compromisso importante'
+      desc: 'Nunca perca um compromisso importante',
     },
     {
       icon: Layout,
       gradient: 'linear-gradient(135deg, #10b981, #059669)',
       title: 'Dashboard Completo',
-      desc: 'Visualize métricas e relatórios detalhados'
-    }
+      desc: 'Visualize métricas e relatórios detalhados',
+    },
   ];
 
   const [hoveredFeature, setHoveredFeature] = useState(null);
@@ -245,7 +258,7 @@ export default function Obrigado() {
             ...styles.confetti,
             left: `${piece.left}%`,
             backgroundColor: piece.color,
-            animation: `confettiFall ${piece.duration}s ease-out ${piece.delay}s forwards`
+            animation: `confettiFall ${piece.duration}s ease-out ${piece.delay}s forwards`,
           }}
         />
       ))}
@@ -254,44 +267,44 @@ export default function Obrigado() {
         <div style={styles.card}>
           {/* Ícone de Sucesso com Sparkles */}
           <div style={styles.iconWrapper}>
-            <Sparkles 
+            <Sparkles
               style={{
                 ...styles.sparkle,
                 top: '-10px',
                 left: '-10px',
                 width: '1.5rem',
                 height: '1.5rem',
-                animationDelay: '0s'
-              }} 
+                animationDelay: '0s',
+              }}
             />
-            <Sparkles 
+            <Sparkles
               style={{
                 ...styles.sparkle,
                 top: '-5px',
                 right: '-5px',
                 width: '1.25rem',
                 height: '1.25rem',
-                animationDelay: '0.3s'
-              }} 
+                animationDelay: '0.3s',
+              }}
             />
-            <Sparkles 
+            <Sparkles
               style={{
                 ...styles.sparkle,
                 bottom: '-5px',
                 left: '10px',
                 width: '1rem',
                 height: '1rem',
-                animationDelay: '0.6s'
-              }} 
+                animationDelay: '0.6s',
+              }}
             />
-            
+
             <div style={styles.successIcon}>
-              <Check 
+              <Check
                 style={{
                   ...styles.checkIcon,
                   width: '3rem',
-                  height: '3rem'
-                }} 
+                  height: '3rem',
+                }}
               />
             </div>
           </div>
@@ -299,10 +312,13 @@ export default function Obrigado() {
           {/* Título e Mensagem */}
           <h1 style={styles.title}>Bem-vindo ao AIM Agenda! 🎉</h1>
           <p style={styles.subtitle}>
-            Obrigado por escolher a <span style={styles.highlight}>melhor solução</span> para gerenciar seus compromissos!
+            Obrigado por escolher a{' '}
+            <span style={styles.highlight}>melhor solução</span> para gerenciar
+            seus compromissos!
           </p>
           <p style={styles.message}>
-            Sua conta foi criada com sucesso. Estamos animados para fazer parte da sua jornada rumo à produtividade máxima.
+            Sua conta foi criada com sucesso. Estamos animados para fazer parte
+            da sua jornada rumo à produtividade máxima.
           </p>
 
           {/* Cards de Features */}
@@ -316,15 +332,25 @@ export default function Obrigado() {
                   onMouseLeave={() => setHoveredFeature(null)}
                   style={{
                     ...styles.featureCard,
-                    ...(hoveredFeature === index ? styles.featureCardHover : {}),
-                    animationDelay: `${index * 0.1}s`
+                    ...(hoveredFeature === index
+                      ? styles.featureCardHover
+                      : {}),
+                    animationDelay: `${index * 0.1}s`,
                   }}
                 >
-                  <div style={{
-                    ...styles.featureIcon,
-                    background: feature.gradient
-                  }}>
-                    <Icon style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} />
+                  <div
+                    style={{
+                      ...styles.featureIcon,
+                      background: feature.gradient,
+                    }}
+                  >
+                    <Icon
+                      style={{
+                        width: '1.5rem',
+                        height: '1.5rem',
+                        color: 'white',
+                      }}
+                    />
                   </div>
                   <div style={styles.featureTitle}>{feature.title}</div>
                   <div style={styles.featureDesc}>{feature.desc}</div>
@@ -342,7 +368,7 @@ export default function Obrigado() {
               style={{
                 ...styles.button,
                 ...styles.buttonPrimary,
-                ...(buttonHover ? styles.buttonPrimaryHover : {})
+                ...(buttonHover ? styles.buttonPrimaryHover : {}),
               }}
             >
               Ir para o Menu

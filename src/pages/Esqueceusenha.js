@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Mail, Lock, ArrowLeft, CheckCircle, AlertCircle, X, Eye, EyeOff } from 'lucide-react';
+import {
+  Mail,
+  Lock,
+  ArrowLeft,
+  CheckCircle,
+  AlertCircle,
+  X,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Componente de Alert Customizado
@@ -24,7 +33,7 @@ const CustomAlert = ({ type = 'error', message, onClose }) => {
       maxWidth: '400px',
       animation: isVisible ? 'slideIn 0.3s ease-out' : 'slideOut 0.3s ease-out',
       opacity: isVisible ? 1 : 0,
-      transform: isVisible ? 'translateX(0)' : 'translateX(100%)'
+      transform: isVisible ? 'translateX(0)' : 'translateX(100%)',
     },
     alert: {
       display: 'flex',
@@ -35,7 +44,7 @@ const CustomAlert = ({ type = 'error', message, onClose }) => {
       boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
       border: '1px solid',
       background: type === 'error' ? '#fef2f2' : '#f0fdf4',
-      borderColor: type === 'error' ? '#fecaca' : '#bbf7d0'
+      borderColor: type === 'error' ? '#fecaca' : '#bbf7d0',
     },
     iconWrapper: {
       flexShrink: 0,
@@ -45,22 +54,22 @@ const CustomAlert = ({ type = 'error', message, onClose }) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: type === 'error' ? '#fee2e2' : '#dcfce7'
+      background: type === 'error' ? '#fee2e2' : '#dcfce7',
     },
     content: {
       flex: 1,
-      paddingTop: '0.25rem'
+      paddingTop: '0.25rem',
     },
     title: {
       fontSize: '0.95rem',
       fontWeight: '700',
       color: type === 'error' ? '#991b1b' : '#166534',
-      marginBottom: '0.25rem'
+      marginBottom: '0.25rem',
     },
     message: {
       fontSize: '0.875rem',
       color: type === 'error' ? '#7f1d1d' : '#14532d',
-      lineHeight: '1.5'
+      lineHeight: '1.5',
     },
     closeButton: {
       flexShrink: 0,
@@ -72,8 +81,8 @@ const CustomAlert = ({ type = 'error', message, onClose }) => {
       color: type === 'error' ? '#991b1b' : '#166534',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
-    }
+      justifyContent: 'center',
+    },
   };
 
   return (
@@ -146,7 +155,10 @@ export default function Esqueceusenha() {
     // Simular requisição
     setTimeout(() => {
       setIsLoading(false);
-      showAlert('success', 'Código de verificação enviado! Agora defina sua nova senha.');
+      showAlert(
+        'success',
+        'Código de verificação enviado! Agora defina sua nova senha.',
+      );
       setStage(2);
     }, 1500);
   };
@@ -163,7 +175,10 @@ export default function Esqueceusenha() {
     }
 
     if (newPassword !== confirmPassword) {
-      showAlert('error', 'As senhas não coincidem. Verifique e tente novamente.');
+      showAlert(
+        'error',
+        'As senhas não coincidem. Verifique e tente novamente.',
+      );
       return;
     }
 
@@ -172,7 +187,10 @@ export default function Esqueceusenha() {
     // Simular requisição
     setTimeout(() => {
       setIsLoading(false);
-      showAlert('success', 'Senha alterada com sucesso! Você já pode fazer login.');
+      showAlert(
+        'success',
+        'Senha alterada com sucesso! Você já pode fazer login.',
+      );
       setTimeout(() => {
         // navigate('/login');
         console.log('Navegando para login...');
@@ -193,16 +211,18 @@ export default function Esqueceusenha() {
   const styles = {
     container: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)',
+      background:
+        'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '1rem',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     },
     wrapper: {
       width: '100%',
-      maxWidth: '28rem'
+      maxWidth: '28rem',
     },
     backButton: {
       display: 'inline-flex',
@@ -217,11 +237,11 @@ export default function Esqueceusenha() {
       fontWeight: '600',
       cursor: 'pointer',
       marginBottom: '1.5rem',
-      transition: 'all 0.2s'
+      transition: 'all 0.2s',
     },
     logoSection: {
       textAlign: 'center',
-      marginBottom: '2rem'
+      marginBottom: '2rem',
     },
     logoIcon: {
       display: 'inline-flex',
@@ -232,70 +252,70 @@ export default function Esqueceusenha() {
       background: 'linear-gradient(135deg, #2563eb, #9333ea)',
       borderRadius: '1rem',
       marginBottom: '1rem',
-      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
     },
     title: {
       fontSize: '2rem',
       fontWeight: '700',
       color: '#1f2937',
-      marginBottom: '0.5rem'
+      marginBottom: '0.5rem',
     },
     subtitle: {
       color: '#6b7280',
       fontSize: '0.95rem',
-      lineHeight: '1.6'
+      lineHeight: '1.6',
     },
     card: {
       background: 'white',
       borderRadius: '1.5rem',
       boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
       padding: '2rem',
-      border: '1px solid #f3f4f6'
+      border: '1px solid #f3f4f6',
     },
     stageIndicator: {
       display: 'flex',
       justifyContent: 'center',
       gap: '0.75rem',
-      marginBottom: '2rem'
+      marginBottom: '2rem',
     },
     stageDot: {
       width: '2.5rem',
       height: '0.375rem',
       borderRadius: '9999px',
-      transition: 'all 0.3s'
+      transition: 'all 0.3s',
     },
     stageDotActive: {
-      background: 'linear-gradient(90deg, #2563eb, #9333ea)'
+      background: 'linear-gradient(90deg, #2563eb, #9333ea)',
     },
     stageDotInactive: {
-      background: '#e5e7eb'
+      background: '#e5e7eb',
     },
     cardTitle: {
       fontSize: '1.5rem',
       fontWeight: '700',
       color: '#1f2937',
       marginBottom: '0.5rem',
-      textAlign: 'center'
+      textAlign: 'center',
     },
     cardDescription: {
       fontSize: '0.875rem',
       color: '#6b7280',
       marginBottom: '2rem',
       textAlign: 'center',
-      lineHeight: '1.6'
+      lineHeight: '1.6',
     },
     formGroup: {
-      marginBottom: '1.25rem'
+      marginBottom: '1.25rem',
     },
     label: {
       display: 'block',
       fontSize: '0.875rem',
       fontWeight: '500',
       color: '#374151',
-      marginBottom: '0.5rem'
+      marginBottom: '0.5rem',
     },
     inputWrapper: {
-      position: 'relative'
+      position: 'relative',
     },
     inputIcon: {
       position: 'absolute',
@@ -305,7 +325,7 @@ export default function Esqueceusenha() {
       pointerEvents: 'none',
       display: 'flex',
       alignItems: 'center',
-      color: '#9ca3af'
+      color: '#9ca3af',
     },
     input: {
       width: '100%',
@@ -316,14 +336,14 @@ export default function Esqueceusenha() {
       outline: 'none',
       transition: 'all 0.2s',
       background: 'white',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
     },
     inputFocus: {
       borderColor: '#3b82f6',
-      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
+      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
     },
     passwordInput: {
-      paddingRight: '3rem'
+      paddingRight: '3rem',
     },
     passwordToggle: {
       position: 'absolute',
@@ -336,12 +356,12 @@ export default function Esqueceusenha() {
       padding: '0.25rem',
       display: 'flex',
       alignItems: 'center',
-      color: '#9ca3af'
+      color: '#9ca3af',
     },
     passwordStrength: {
       fontSize: '0.75rem',
       color: '#6b7280',
-      marginTop: '0.5rem'
+      marginTop: '0.5rem',
     },
     button: {
       width: '100%',
@@ -354,28 +374,28 @@ export default function Esqueceusenha() {
       fontWeight: '600',
       cursor: 'pointer',
       boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-      transition: 'all 0.3s'
+      transition: 'all 0.3s',
     },
     buttonDisabled: {
       opacity: 0.6,
-      cursor: 'not-allowed'
+      cursor: 'not-allowed',
     },
     buttonLoading: {
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     divider: {
       position: 'relative',
       margin: '1.5rem 0',
-      textAlign: 'center'
+      textAlign: 'center',
     },
     dividerLine: {
       position: 'absolute',
       top: '50%',
       left: 0,
       right: 0,
-      borderTop: '1px solid #d1d5db'
+      borderTop: '1px solid #d1d5db',
     },
     dividerText: {
       position: 'relative',
@@ -383,14 +403,14 @@ export default function Esqueceusenha() {
       padding: '0 1rem',
       background: 'white',
       color: '#6b7280',
-      fontSize: '0.875rem'
+      fontSize: '0.875rem',
     },
     backToLogin: {
-      textAlign: 'center'
+      textAlign: 'center',
     },
     backToLoginText: {
       color: '#4b5563',
-      fontSize: '0.875rem'
+      fontSize: '0.875rem',
     },
     backToLoginLink: {
       color: '#2563eb',
@@ -398,8 +418,8 @@ export default function Esqueceusenha() {
       border: 'none',
       fontWeight: '600',
       cursor: 'pointer',
-      transition: 'color 0.2s'
-    }
+      transition: 'color 0.2s',
+    },
   };
 
   return (
@@ -414,14 +434,13 @@ export default function Esqueceusenha() {
 
       <div style={styles.container}>
         <div style={styles.wrapper}>
-          <button 
+          <button
             style={styles.backButton}
             onClick={() => {
               if (stage === 2) {
                 setStage(1);
               } else {
                 navigate('/login');
-               
               }
             }}
           >
@@ -437,24 +456,31 @@ export default function Esqueceusenha() {
               {stage === 1 ? 'Esqueceu a Senha?' : 'Nova Senha'}
             </h1>
             <p style={styles.subtitle}>
-              {stage === 1 
+              {stage === 1
                 ? 'Não se preocupe! Digite seu email e enviaremos instruções para redefinir sua senha.'
-                : 'Agora defina uma nova senha segura para sua conta.'
-              }
+                : 'Agora defina uma nova senha segura para sua conta.'}
             </p>
           </div>
 
           <div style={styles.card}>
             {/* Stage Indicator */}
             <div style={styles.stageIndicator}>
-              <div style={{
-                ...styles.stageDot,
-                ...(stage === 1 ? styles.stageDotActive : styles.stageDotInactive)
-              }}></div>
-              <div style={{
-                ...styles.stageDot,
-                ...(stage === 2 ? styles.stageDotActive : styles.stageDotInactive)
-              }}></div>
+              <div
+                style={{
+                  ...styles.stageDot,
+                  ...(stage === 1
+                    ? styles.stageDotActive
+                    : styles.stageDotInactive),
+                }}
+              ></div>
+              <div
+                style={{
+                  ...styles.stageDot,
+                  ...(stage === 2
+                    ? styles.stageDotActive
+                    : styles.stageDotInactive),
+                }}
+              ></div>
             </div>
 
             {stage === 1 ? (
@@ -481,7 +507,7 @@ export default function Esqueceusenha() {
                       placeholder="seu@email.com"
                       style={{
                         ...styles.input,
-                        ...(emailFocus ? styles.inputFocus : {})
+                        ...(emailFocus ? styles.inputFocus : {}),
                       }}
                     />
                   </div>
@@ -494,38 +520,41 @@ export default function Esqueceusenha() {
                   onMouseLeave={() => setButtonHover(false)}
                   style={{
                     ...styles.button,
-                    ...(buttonHover && !isLoading ? {
-                      background: 'linear-gradient(90deg, #1d4ed8, #7e22ce)',
-                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
-                      transform: 'translateY(-2px)'
-                    } : {}),
-                    ...(isLoading ? styles.buttonDisabled : {})
+                    ...(buttonHover && !isLoading
+                      ? {
+                          background:
+                            'linear-gradient(90deg, #1d4ed8, #7e22ce)',
+                          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
+                          transform: 'translateY(-2px)',
+                        }
+                      : {}),
+                    ...(isLoading ? styles.buttonDisabled : {}),
                   }}
                 >
                   {isLoading ? (
                     <span style={styles.buttonLoading}>
-                      <svg 
-                        style={{ 
-                          width: '1.25rem', 
-                          height: '1.25rem', 
+                      <svg
+                        style={{
+                          width: '1.25rem',
+                          height: '1.25rem',
                           marginRight: '0.75rem',
-                          animation: 'spin 0.6s linear infinite'
-                        }} 
+                          animation: 'spin 0.6s linear infinite',
+                        }}
                         viewBox="0 0 24 24"
                       >
-                        <circle 
-                          style={{ opacity: 0.25 }} 
-                          cx="12" 
-                          cy="12" 
-                          r="10" 
-                          stroke="currentColor" 
-                          strokeWidth="4" 
-                          fill="none" 
+                        <circle
+                          style={{ opacity: 0.25 }}
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
                         />
-                        <path 
-                          style={{ opacity: 0.75 }} 
-                          fill="currentColor" 
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
+                        <path
+                          style={{ opacity: 0.75 }}
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         />
                       </svg>
                       Enviando...
@@ -550,7 +579,7 @@ export default function Esqueceusenha() {
                       <Lock size={20} />
                     </div>
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       onKeyPress={handleKeyPress}
@@ -560,7 +589,7 @@ export default function Esqueceusenha() {
                       style={{
                         ...styles.input,
                         ...styles.passwordInput,
-                        ...(passwordFocus ? styles.inputFocus : {})
+                        ...(passwordFocus ? styles.inputFocus : {}),
                       }}
                     />
                     <button
@@ -573,8 +602,8 @@ export default function Esqueceusenha() {
                   </div>
                   {newPassword && (
                     <div style={styles.passwordStrength}>
-                      {newPassword.length < 6 
-                        ? '❌ Senha muito curta (mínimo 6 caracteres)' 
+                      {newPassword.length < 6
+                        ? '❌ Senha muito curta (mínimo 6 caracteres)'
                         : '✅ Senha válida'}
                     </div>
                   )}
@@ -587,7 +616,7 @@ export default function Esqueceusenha() {
                       <Lock size={20} />
                     </div>
                     <input
-                      type={showConfirmPassword ? "text" : "password"}
+                      type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       onKeyPress={handleKeyPress}
@@ -597,21 +626,27 @@ export default function Esqueceusenha() {
                       style={{
                         ...styles.input,
                         ...styles.passwordInput,
-                        ...(confirmFocus ? styles.inputFocus : {})
+                        ...(confirmFocus ? styles.inputFocus : {}),
                       }}
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       style={styles.passwordToggle}
                     >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showConfirmPassword ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
                     </button>
                   </div>
                   {confirmPassword && (
                     <div style={styles.passwordStrength}>
-                      {newPassword === confirmPassword 
-                        ? '✅ As senhas coincidem' 
+                      {newPassword === confirmPassword
+                        ? '✅ As senhas coincidem'
                         : '❌ As senhas não coincidem'}
                     </div>
                   )}
@@ -624,38 +659,41 @@ export default function Esqueceusenha() {
                   onMouseLeave={() => setButtonHover(false)}
                   style={{
                     ...styles.button,
-                    ...(buttonHover && !isLoading ? {
-                      background: 'linear-gradient(90deg, #1d4ed8, #7e22ce)',
-                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
-                      transform: 'translateY(-2px)'
-                    } : {}),
-                    ...(isLoading ? styles.buttonDisabled : {})
+                    ...(buttonHover && !isLoading
+                      ? {
+                          background:
+                            'linear-gradient(90deg, #1d4ed8, #7e22ce)',
+                          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
+                          transform: 'translateY(-2px)',
+                        }
+                      : {}),
+                    ...(isLoading ? styles.buttonDisabled : {}),
                   }}
                 >
                   {isLoading ? (
                     <span style={styles.buttonLoading}>
-                      <svg 
-                        style={{ 
-                          width: '1.25rem', 
-                          height: '1.25rem', 
+                      <svg
+                        style={{
+                          width: '1.25rem',
+                          height: '1.25rem',
                           marginRight: '0.75rem',
-                          animation: 'spin 0.6s linear infinite'
-                        }} 
+                          animation: 'spin 0.6s linear infinite',
+                        }}
                         viewBox="0 0 24 24"
                       >
-                        <circle 
-                          style={{ opacity: 0.25 }} 
-                          cx="12" 
-                          cy="12" 
-                          r="10" 
-                          stroke="currentColor" 
-                          strokeWidth="4" 
-                          fill="none" 
+                        <circle
+                          style={{ opacity: 0.25 }}
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
                         />
-                        <path 
-                          style={{ opacity: 0.75 }} 
-                          fill="currentColor" 
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" 
+                        <path
+                          style={{ opacity: 0.75 }}
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         />
                       </svg>
                       Redefinindo...
@@ -675,7 +713,7 @@ export default function Esqueceusenha() {
             <div style={styles.backToLogin}>
               <p style={styles.backToLoginText}>
                 Lembrou sua senha?{' '}
-                <button 
+                <button
                   style={styles.backToLoginLink}
                   onClick={() => {
                     navigate('/login');
