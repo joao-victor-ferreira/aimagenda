@@ -583,7 +583,10 @@ export default function Dashboard() {
         </nav>
 
         <div className="sidebar-footer">
-          <button  onClick={() => navigate("/configuracao")} className="settings-btn">
+          <button
+            onClick={() => navigate('/configuracao')}
+            className="settings-btn"
+          >
             <Settings size={20} />
             <span>Configurações</span>
           </button>
@@ -607,8 +610,6 @@ export default function Dashboard() {
           </div>
 
           <div className="header-right">
-          
-
             <button className="icon-button">
               <Bell size={20} />
               {unreadCount > 0 && (
@@ -631,7 +632,10 @@ export default function Dashboard() {
 
               {userMenuOpen && (
                 <div className="user-dropdown">
-                  <button onClick={() => navigate("/configuracao")} className="dropdown-item">
+                  <button
+                    onClick={() => navigate('/configuracao')}
+                    className="dropdown-item"
+                  >
                     <Settings size={16} /> Configurações
                   </button>
                   <button

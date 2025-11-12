@@ -241,7 +241,8 @@ export default function AgendaEquipe() {
       apt.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
       apt.memberName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || apt.status === filterStatus;
-    const matchesMember = filterMember === 'all' || apt.memberId === parseInt(filterMember);
+    const matchesMember =
+      filterMember === 'all' || apt.memberId === parseInt(filterMember);
     return matchesSearch && matchesStatus && matchesMember;
   });
 
@@ -265,7 +266,7 @@ export default function AgendaEquipe() {
 
   const navigateWeek = (direction) => {
     const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + (direction * 7));
+    newDate.setDate(newDate.getDate() + direction * 7);
     setCurrentDate(newDate);
   };
 
@@ -280,11 +281,20 @@ export default function AgendaEquipe() {
   };
 
   const formatDate = (date) => {
-    return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   };
 
   const formatDateLong = (date) => {
-    return date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return date.toLocaleDateString('pt-BR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
   };
 
   const isToday = (date) => {
@@ -294,19 +304,34 @@ export default function AgendaEquipe() {
 
   const getAppointmentsForDate = (date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return filteredAppointments.filter(apt => apt.date === dateStr);
+    return filteredAppointments.filter((apt) => apt.date === dateStr);
   };
 
   const getAppointmentsForMemberAndDate = (memberId, date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return filteredAppointments.filter(apt => apt.memberId === memberId && apt.date === dateStr);
+    return filteredAppointments.filter(
+      (apt) => apt.memberId === memberId && apt.date === dateStr,
+    );
   };
 
   const stats = [
-    { label: 'Hoje', value: getAppointmentsForDate(new Date()).length, color: '#3b82f6' },
+    {
+      label: 'Hoje',
+      value: getAppointmentsForDate(new Date()).length,
+      color: '#3b82f6',
+    },
     { label: 'Semana', value: filteredAppointments.length, color: '#8b5cf6' },
-    { label: 'Confirmados', value: filteredAppointments.filter(a => a.status === 'confirmed').length, color: '#10b981' },
-    { label: 'Pendentes', value: filteredAppointments.filter(a => a.status === 'pending').length, color: '#f59e0b' },
+    {
+      label: 'Confirmados',
+      value: filteredAppointments.filter((a) => a.status === 'confirmed')
+        .length,
+      color: '#10b981',
+    },
+    {
+      label: 'Pendentes',
+      value: filteredAppointments.filter((a) => a.status === 'pending').length,
+      color: '#f59e0b',
+    },
   ];
 
   const TimelineView = () => {
@@ -342,7 +367,7 @@ export default function AgendaEquipe() {
                   <div style={styles.timeLabel}>{hour}:00</div>
                   {weekDays.map((day, dayIdx) => {
                     const dayAppointments = getAppointmentsForDate(day);
-                    const hourAppointments = dayAppointments.filter(apt => {
+                    const hourAppointments = dayAppointments.filter((apt) => {
                       const aptHour = parseInt(apt.time.split(':')[0]);
                       return aptHour === hour;
                     });
@@ -364,8 +389,12 @@ export default function AgendaEquipe() {
                               }}
                             >
                               <div style={styles.blockTime}>{apt.time}</div>
-                              <div style={styles.blockClient}>{apt.client.name}</div>
-                              <div style={styles.blockService}>{apt.service}</div>
+                              <div style={styles.blockClient}>
+                                {apt.client.name}
+                              </div>
+                              <div style={styles.blockService}>
+                                {apt.service}
+                              </div>
                               <div style={styles.blockMember}>
                                 <div
                                   style={{
@@ -394,9 +423,11 @@ export default function AgendaEquipe() {
 
   const ListView = () => {
     // Agrupa por membro
-    const groupedByMember = teamMembers.map(member => ({
+    const groupedByMember = teamMembers.map((member) => ({
       ...member,
-      appointments: filteredAppointments.filter(apt => apt.memberId === member.id),
+      appointments: filteredAppointments.filter(
+        (apt) => apt.memberId === member.id,
+      ),
     }));
 
     return (
@@ -405,13 +436,18 @@ export default function AgendaEquipe() {
           <div key={member.id} style={styles.memberSection}>
             <div style={styles.memberHeader}>
               <div style={styles.memberInfo}>
-                <div style={{ ...styles.memberAvatar, background: member.color }}>
+                <div
+                  style={{ ...styles.memberAvatar, background: member.color }}
+                >
                   {member.avatar}
                 </div>
                 <div>
                   <h3 style={styles.memberHeaderName}>{member.name}</h3>
                   <p style={styles.memberHeaderCount}>
-                    {member.appointments.length} {member.appointments.length === 1 ? 'agendamento' : 'agendamentos'}
+                    {member.appointments.length}{' '}
+                    {member.appointments.length === 1
+                      ? 'agendamento'
+                      : 'agendamentos'}
                   </p>
                 </div>
               </div>
@@ -459,7 +495,9 @@ export default function AgendaEquipe() {
                         <div style={styles.cardDetails}>
                           <div style={styles.cardDetail}>
                             <Clock size={14} color="#6b7280" />
-                            <span>{apt.time} ({apt.duration} min)</span>
+                            <span>
+                              {apt.time} ({apt.duration} min)
+                            </span>
                           </div>
                           <div style={styles.cardDetail}>
                             <MessageSquare size={14} color="#6b7280" />
@@ -490,7 +528,9 @@ export default function AgendaEquipe() {
             <span>Agenda da Equipe</span>
           </div>
           <h1 style={styles.title}>Agenda Compartilhada</h1>
-          <p style={styles.subtitle}>Visualize os agendamentos de toda a equipe</p>
+          <p style={styles.subtitle}>
+            Visualize os agendamentos de toda a equipe
+          </p>
         </div>
         <div style={styles.headerActions}>
           {!isMobile && (
@@ -499,7 +539,10 @@ export default function AgendaEquipe() {
               Exportar
             </button>
           )}
-          <button style={styles.btnPrimary} onClick={() => setShowNewModal(true)}>
+          <button
+            style={styles.btnPrimary}
+            onClick={() => setShowNewModal(true)}
+          >
             <Plus size={18} />
             {!isMobile && 'Novo'}
           </button>
@@ -526,7 +569,11 @@ export default function AgendaEquipe() {
             <Search size={18} style={styles.searchIcon} />
             <input
               type="text"
-              placeholder={isMobile ? 'Buscar...' : 'Buscar por cliente, serviço ou membro...'}
+              placeholder={
+                isMobile
+                  ? 'Buscar...'
+                  : 'Buscar por cliente, serviço ou membro...'
+              }
               style={styles.searchInput}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -588,7 +635,9 @@ export default function AgendaEquipe() {
       <div style={styles.dateNav}>
         <button
           style={styles.navBtn}
-          onClick={() => viewMode === 'week' ? navigateWeek(-1) : navigateDay(-1)}
+          onClick={() =>
+            viewMode === 'week' ? navigateWeek(-1) : navigateDay(-1)
+          }
         >
           <ChevronLeft size={20} />
         </button>
@@ -615,7 +664,9 @@ export default function AgendaEquipe() {
 
         <button
           style={styles.navBtn}
-          onClick={() => viewMode === 'week' ? navigateWeek(1) : navigateDay(1)}
+          onClick={() =>
+            viewMode === 'week' ? navigateWeek(1) : navigateDay(1)
+          }
         >
           <ChevronRight size={20} />
         </button>
@@ -633,7 +684,10 @@ export default function AgendaEquipe() {
                 <Plus size={24} color="#3b82f6" />
                 <h2 style={styles.modalTitle}>Novo Agendamento</h2>
               </div>
-              <button style={styles.btnClose} onClick={() => setShowNewModal(false)}>
+              <button
+                style={styles.btnClose}
+                onClick={() => setShowNewModal(false)}
+              >
                 <X size={24} />
               </button>
             </div>
@@ -649,7 +703,10 @@ export default function AgendaEquipe() {
                     style={styles.select}
                     value={newAppointment.memberId}
                     onChange={(e) =>
-                      setNewAppointment({ ...newAppointment, memberId: e.target.value })
+                      setNewAppointment({
+                        ...newAppointment,
+                        memberId: e.target.value,
+                      })
                     }
                   >
                     <option value="">Selecione...</option>
@@ -672,7 +729,10 @@ export default function AgendaEquipe() {
                     placeholder="Nome do cliente"
                     value={newAppointment.client}
                     onChange={(e) =>
-                      setNewAppointment({ ...newAppointment, client: e.target.value })
+                      setNewAppointment({
+                        ...newAppointment,
+                        client: e.target.value,
+                      })
                     }
                   />
                 </div>
@@ -686,7 +746,10 @@ export default function AgendaEquipe() {
                     style={styles.select}
                     value={newAppointment.service}
                     onChange={(e) =>
-                      setNewAppointment({ ...newAppointment, service: e.target.value })
+                      setNewAppointment({
+                        ...newAppointment,
+                        service: e.target.value,
+                      })
                     }
                   >
                     <option value="">Selecione...</option>
@@ -708,7 +771,10 @@ export default function AgendaEquipe() {
                     style={styles.input}
                     value={newAppointment.date}
                     onChange={(e) =>
-                      setNewAppointment({ ...newAppointment, date: e.target.value })
+                      setNewAppointment({
+                        ...newAppointment,
+                        date: e.target.value,
+                      })
                     }
                   />
                 </div>
@@ -723,7 +789,10 @@ export default function AgendaEquipe() {
                     style={styles.input}
                     value={newAppointment.time}
                     onChange={(e) =>
-                      setNewAppointment({ ...newAppointment, time: e.target.value })
+                      setNewAppointment({
+                        ...newAppointment,
+                        time: e.target.value,
+                      })
                     }
                   />
                 </div>
@@ -737,7 +806,10 @@ export default function AgendaEquipe() {
                     style={styles.select}
                     value={newAppointment.duration}
                     onChange={(e) =>
-                      setNewAppointment({ ...newAppointment, duration: parseInt(e.target.value) })
+                      setNewAppointment({
+                        ...newAppointment,
+                        duration: parseInt(e.target.value),
+                      })
                     }
                   >
                     <option value="15">15 minutos</option>
@@ -756,7 +828,10 @@ export default function AgendaEquipe() {
                     placeholder="Adicione observações..."
                     value={newAppointment.notes}
                     onChange={(e) =>
-                      setNewAppointment({ ...newAppointment, notes: e.target.value })
+                      setNewAppointment({
+                        ...newAppointment,
+                        notes: e.target.value,
+                      })
                     }
                     rows={3}
                   />
@@ -779,7 +854,10 @@ export default function AgendaEquipe() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button style={styles.btnCancel} onClick={() => setShowNewModal(false)}>
+              <button
+                style={styles.btnCancel}
+                onClick={() => setShowNewModal(false)}
+              >
                 Cancelar
               </button>
               <button style={styles.btnSave}>
@@ -793,14 +871,20 @@ export default function AgendaEquipe() {
 
       {/* Modal de Detalhes */}
       {showDetailModal && selectedAppointment && (
-        <div style={styles.modalOverlay} onClick={() => setShowDetailModal(false)}>
+        <div
+          style={styles.modalOverlay}
+          onClick={() => setShowDetailModal(false)}
+        >
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <div style={styles.modalTitleContainer}>
                 <Eye size={24} color="#3b82f6" />
                 <h2 style={styles.modalTitle}>Detalhes do Agendamento</h2>
               </div>
-              <button style={styles.btnClose} onClick={() => setShowDetailModal(false)}>
+              <button
+                style={styles.btnClose}
+                onClick={() => setShowDetailModal(false)}
+              >
                 <X size={24} />
               </button>
             </div>
@@ -877,7 +961,9 @@ export default function AgendaEquipe() {
                       <div>
                         <div style={styles.detailLabel}>Data</div>
                         <div style={styles.detailValue}>
-                          {new Date(selectedAppointment.date).toLocaleDateString('pt-BR')}
+                          {new Date(
+                            selectedAppointment.date,
+                          ).toLocaleDateString('pt-BR')}
                         </div>
                       </div>
                     </div>
@@ -886,7 +972,8 @@ export default function AgendaEquipe() {
                       <div>
                         <div style={styles.detailLabel}>Horário</div>
                         <div style={styles.detailValue}>
-                          {selectedAppointment.time} ({selectedAppointment.duration} min)
+                          {selectedAppointment.time} (
+                          {selectedAppointment.duration} min)
                         </div>
                       </div>
                     </div>
@@ -903,7 +990,9 @@ export default function AgendaEquipe() {
 
               <div style={styles.statusSection}>
                 {(() => {
-                  const statusConfig = getStatusConfig(selectedAppointment.status);
+                  const statusConfig = getStatusConfig(
+                    selectedAppointment.status,
+                  );
                   const StatusIcon = statusConfig.icon;
                   return (
                     <div
@@ -932,7 +1021,9 @@ export default function AgendaEquipe() {
                 <Trash2 size={18} />
                 Cancelar
               </button>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <div
+                style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}
+              >
                 <button style={styles.btnSecondary}>
                   <MessageSquare size={18} />
                   {!isMobile && 'Mensagem'}
@@ -963,7 +1054,8 @@ const styles = {
     padding: '1rem',
     background: '#fafafa',
     minHeight: '100vh',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   header: {
     display: 'flex',

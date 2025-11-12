@@ -91,9 +91,7 @@ export default function AIConfiguracao() {
     }, 1000);
   };
 
-  const handleReset = () => {
-  
-  };
+  const handleReset = () => {};
 
   const handleChange = (section, field, value) => {
     setConfig((prev) => ({
@@ -109,7 +107,11 @@ export default function AIConfiguracao() {
   };
 
   const addScenario = () => {
-    if (!newScenario.situation || !newScenario.clientMessage || !newScenario.idealResponse) {
+    if (
+      !newScenario.situation ||
+      !newScenario.clientMessage ||
+      !newScenario.idealResponse
+    ) {
       alert('⚠️ Preencha todos os campos obrigatórios');
       return;
     }
@@ -119,7 +121,12 @@ export default function AIConfiguracao() {
       situation: newScenario.situation,
       clientMessage: newScenario.clientMessage,
       idealResponse: newScenario.idealResponse,
-      tags: newScenario.tags ? newScenario.tags.split(',').map(t => t.trim()).filter(t => t) : [],
+      tags: newScenario.tags
+        ? newScenario.tags
+            .split(',')
+            .map((t) => t.trim())
+            .filter((t) => t)
+        : [],
       createdAt: new Date().toISOString(),
     };
 
@@ -139,9 +146,7 @@ export default function AIConfiguracao() {
     setUnsavedChanges(true);
   };
 
-  const removeScenario = (id) => {
-  
-  };
+  const removeScenario = (id) => {};
 
   const startEditScenario = (scenario) => {
     setEditingScenario({
@@ -153,14 +158,19 @@ export default function AIConfiguracao() {
   const saveEditScenario = () => {
     const updatedScenario = {
       ...editingScenario,
-      tags: editingScenario.tags ? editingScenario.tags.split(',').map(t => t.trim()).filter(t => t) : [],
+      tags: editingScenario.tags
+        ? editingScenario.tags
+            .split(',')
+            .map((t) => t.trim())
+            .filter((t) => t)
+        : [],
     };
 
     setConfig((prev) => ({
       ...prev,
       training: {
         scenarios: prev.training.scenarios.map((s) =>
-          s.id === updatedScenario.id ? updatedScenario : s
+          s.id === updatedScenario.id ? updatedScenario : s,
         ),
       },
     }));
@@ -179,7 +189,11 @@ export default function AIConfiguracao() {
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
-        <Loader size={48} style={{ animation: 'spin 1s linear infinite' }} color="#3b82f6" />
+        <Loader
+          size={48}
+          style={{ animation: 'spin 1s linear infinite' }}
+          color="#3b82f6"
+        />
         <p style={styles.loadingText}>Carregando configurações...</p>
       </div>
     );
@@ -261,7 +275,9 @@ export default function AIConfiguracao() {
                     style={styles.input}
                     placeholder="Ex: AIM Assistant"
                   />
-                  <span style={styles.hint}>Como a IA se apresentará nas conversas</span>
+                  <span style={styles.hint}>
+                    Como a IA se apresentará nas conversas
+                  </span>
                 </div>
 
                 <div style={styles.formGroup}>
@@ -271,7 +287,9 @@ export default function AIConfiguracao() {
                   </label>
                   <select
                     value={config.language}
-                    onChange={(e) => handleSimpleChange('language', e.target.value)}
+                    onChange={(e) =>
+                      handleSimpleChange('language', e.target.value)
+                    }
                     style={styles.select}
                   >
                     <option value="pt-BR">Português (Brasil)</option>
@@ -306,10 +324,26 @@ export default function AIConfiguracao() {
                   </label>
                   <div style={styles.radioGroup}>
                     {[
-                      { value: 'helpful', label: 'Prestativo', desc: 'Foca em resolver problemas' },
-                      { value: 'creative', label: 'Criativo', desc: 'Respostas inovadoras' },
-                      { value: 'serious', label: 'Sério', desc: 'Formal e direto' },
-                      { value: 'efficient', label: 'Eficiente', desc: 'Rápido e objetivo' },
+                      {
+                        value: 'helpful',
+                        label: 'Prestativo',
+                        desc: 'Foca em resolver problemas',
+                      },
+                      {
+                        value: 'creative',
+                        label: 'Criativo',
+                        desc: 'Respostas inovadoras',
+                      },
+                      {
+                        value: 'serious',
+                        label: 'Sério',
+                        desc: 'Formal e direto',
+                      },
+                      {
+                        value: 'efficient',
+                        label: 'Eficiente',
+                        desc: 'Rápido e objetivo',
+                      },
                     ].map((option) => (
                       <label key={option.value} style={styles.radioCard}>
                         <input
@@ -317,7 +351,9 @@ export default function AIConfiguracao() {
                           name="personality"
                           value={option.value}
                           checked={config.personality === option.value}
-                          onChange={(e) => handleSimpleChange('personality', e.target.value)}
+                          onChange={(e) =>
+                            handleSimpleChange('personality', e.target.value)
+                          }
                           style={styles.radio}
                         />
                         <div>
@@ -356,7 +392,11 @@ export default function AIConfiguracao() {
                         type="checkbox"
                         checked={config.workingHours.enabled}
                         onChange={(e) =>
-                          handleChange('workingHours', 'enabled', e.target.checked)
+                          handleChange(
+                            'workingHours',
+                            'enabled',
+                            e.target.checked,
+                          )
                         }
                       />
                       <span style={styles.slider}></span>
@@ -371,7 +411,11 @@ export default function AIConfiguracao() {
                           type="time"
                           value={config.workingHours.start}
                           onChange={(e) =>
-                            handleChange('workingHours', 'start', e.target.value)
+                            handleChange(
+                              'workingHours',
+                              'start',
+                              e.target.value,
+                            )
                           }
                           style={styles.input}
                         />
@@ -431,7 +475,10 @@ export default function AIConfiguracao() {
                         type="checkbox"
                         checked={config.confirmationRequired}
                         onChange={(e) =>
-                          handleSimpleChange('confirmationRequired', e.target.checked)
+                          handleSimpleChange(
+                            'confirmationRequired',
+                            e.target.checked,
+                          )
                         }
                       />
                       <span style={styles.slider}></span>
@@ -460,7 +507,8 @@ export default function AIConfiguracao() {
                     key: 'newAppointment',
                     icon: Calendar,
                     label: 'Novo Agendamento',
-                    description: 'Notificar quando um novo agendamento for criado pela IA',
+                    description:
+                      'Notificar quando um novo agendamento for criado pela IA',
                     color: '#3b82f6',
                   },
                   {
@@ -474,21 +522,24 @@ export default function AIConfiguracao() {
                     key: 'reminder',
                     icon: Clock,
                     label: 'Lembretes',
-                    description: 'Receber lembretes automáticos de agendamentos próximos',
+                    description:
+                      'Receber lembretes automáticos de agendamentos próximos',
                     color: '#f59e0b',
                   },
                   {
                     key: 'aiResponse',
                     icon: Brain,
                     label: 'Respostas da IA',
-                    description: 'Notificar cada vez que a IA responder uma mensagem',
+                    description:
+                      'Notificar cada vez que a IA responder uma mensagem',
                     color: '#8b5cf6',
                   },
                   {
                     key: 'dailySummary',
                     icon: Mail,
                     label: 'Resumo Diário',
-                    description: 'Receber email com resumo das atividades do dia',
+                    description:
+                      'Receber email com resumo das atividades do dia',
                     color: '#10b981',
                   },
                 ].map((notification) => {
@@ -505,15 +556,23 @@ export default function AIConfiguracao() {
                         <Icon size={isMobile ? 20 : 24} />
                       </div>
                       <div style={styles.notificationContent}>
-                        <h4 style={styles.notificationLabel}>{notification.label}</h4>
-                        <p style={styles.notificationDesc}>{notification.description}</p>
+                        <h4 style={styles.notificationLabel}>
+                          {notification.label}
+                        </h4>
+                        <p style={styles.notificationDesc}>
+                          {notification.description}
+                        </p>
                       </div>
                       <label style={styles.switch}>
                         <input
                           type="checkbox"
                           checked={config.notifications[notification.key]}
                           onChange={(e) =>
-                            handleChange('notifications', notification.key, e.target.checked)
+                            handleChange(
+                              'notifications',
+                              notification.key,
+                              e.target.checked,
+                            )
                           }
                         />
                         <span style={styles.slider}></span>
@@ -560,7 +619,8 @@ export default function AIConfiguracao() {
                   {
                     key: 'unavailable',
                     label: 'Indisponível',
-                    description: 'Quando o horário solicitado não está disponível',
+                    description:
+                      'Quando o horário solicitado não está disponível',
                     icon: Clock,
                   },
                 ].map((template) => {
@@ -573,13 +633,19 @@ export default function AIConfiguracao() {
                         </div>
                         <div>
                           <h4 style={styles.templateLabel}>{template.label}</h4>
-                          <p style={styles.templateDesc}>{template.description}</p>
+                          <p style={styles.templateDesc}>
+                            {template.description}
+                          </p>
                         </div>
                       </div>
                       <textarea
                         value={config.templates[template.key]}
                         onChange={(e) =>
-                          handleChange('templates', template.key, e.target.value)
+                          handleChange(
+                            'templates',
+                            template.key,
+                            e.target.value,
+                          )
                         }
                         style={styles.textarea}
                         rows={3}
@@ -605,7 +671,8 @@ export default function AIConfiguracao() {
                 <div>
                   <h2 style={styles.sectionTitle}>Treinamento da IA</h2>
                   <p style={styles.sectionDescription}>
-                    Ensine sua IA a responder situações específicas do seu negócio
+                    Ensine sua IA a responder situações específicas do seu
+                    negócio
                   </p>
                 </div>
               </div>
@@ -614,8 +681,15 @@ export default function AIConfiguracao() {
                 <Brain size={20} color="#3b82f6" />
                 <div>
                   <strong>Como funciona?</strong>
-                  <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6b7280' }}>
-                    Crie cenários com situações reais. A IA aprenderá e responderá de forma personalizada.
+                  <p
+                    style={{
+                      margin: '0.25rem 0 0 0',
+                      fontSize: '0.875rem',
+                      color: '#6b7280',
+                    }}
+                  >
+                    Crie cenários com situações reais. A IA aprenderá e
+                    responderá de forma personalizada.
                   </p>
                 </div>
               </div>
@@ -636,7 +710,10 @@ export default function AIConfiguracao() {
                       type="text"
                       value={newScenario.situation}
                       onChange={(e) =>
-                        setNewScenario({ ...newScenario, situation: e.target.value })
+                        setNewScenario({
+                          ...newScenario,
+                          situation: e.target.value,
+                        })
                       }
                       style={styles.input}
                       placeholder="Ex: Cliente quer reagendar última hora"
@@ -667,7 +744,10 @@ export default function AIConfiguracao() {
                     <textarea
                       value={newScenario.clientMessage}
                       onChange={(e) =>
-                        setNewScenario({ ...newScenario, clientMessage: e.target.value })
+                        setNewScenario({
+                          ...newScenario,
+                          clientMessage: e.target.value,
+                        })
                       }
                       style={styles.textarea}
                       rows={3}
@@ -683,7 +763,10 @@ export default function AIConfiguracao() {
                     <textarea
                       value={newScenario.idealResponse}
                       onChange={(e) =>
-                        setNewScenario({ ...newScenario, idealResponse: e.target.value })
+                        setNewScenario({
+                          ...newScenario,
+                          idealResponse: e.target.value,
+                        })
                       }
                       style={styles.textarea}
                       rows={4}
@@ -700,13 +783,17 @@ export default function AIConfiguracao() {
 
               <div style={styles.scenariosList}>
                 <h3 style={styles.scenariosTitle}>
-                  Cenários Cadastrados ({config.training?.scenarios?.length || 0})
+                  Cenários Cadastrados (
+                  {config.training?.scenarios?.length || 0})
                 </h3>
 
-                {(!config.training?.scenarios || config.training.scenarios.length === 0) && (
+                {(!config.training?.scenarios ||
+                  config.training.scenarios.length === 0) && (
                   <div style={styles.emptyState}>
                     <Brain size={48} color="#d1d5db" />
-                    <p style={styles.emptyText}>Nenhum cenário cadastrado ainda</p>
+                    <p style={styles.emptyText}>
+                      Nenhum cenário cadastrado ainda
+                    </p>
                     <p style={styles.emptyHint}>
                       Comece adicionando situações comuns do seu negócio
                     </p>
@@ -747,7 +834,9 @@ export default function AIConfiguracao() {
                             />
                           </div>
                           <div style={styles.formGroupFull}>
-                            <label style={styles.labelSmall}>Mensagem do Cliente</label>
+                            <label style={styles.labelSmall}>
+                              Mensagem do Cliente
+                            </label>
                             <textarea
                               value={editingScenario.clientMessage}
                               onChange={(e) =>
@@ -761,7 +850,9 @@ export default function AIConfiguracao() {
                             />
                           </div>
                           <div style={styles.formGroupFull}>
-                            <label style={styles.labelSmall}>Resposta Ideal</label>
+                            <label style={styles.labelSmall}>
+                              Resposta Ideal
+                            </label>
                             <textarea
                               value={editingScenario.idealResponse}
                               onChange={(e) =>
@@ -776,7 +867,10 @@ export default function AIConfiguracao() {
                           </div>
                         </div>
                         <div style={styles.scenarioActions}>
-                          <button style={styles.btnSaveEdit} onClick={saveEditScenario}>
+                          <button
+                            style={styles.btnSaveEdit}
+                            onClick={saveEditScenario}
+                          >
                             <CheckCircle size={16} />
                             Salvar
                           </button>
@@ -813,7 +907,9 @@ export default function AIConfiguracao() {
                               <User size={14} />
                               Cliente:
                             </label>
-                            <p style={styles.scenarioText}>{scenario.clientMessage}</p>
+                            <p style={styles.scenarioText}>
+                              {scenario.clientMessage}
+                            </p>
                           </div>
 
                           <div style={styles.scenarioBlock}>
@@ -821,7 +917,9 @@ export default function AIConfiguracao() {
                               <Brain size={14} />
                               IA Responde:
                             </label>
-                            <p style={styles.scenarioText}>{scenario.idealResponse}</p>
+                            <p style={styles.scenarioText}>
+                              {scenario.idealResponse}
+                            </p>
                           </div>
                         </div>
 
@@ -868,7 +966,10 @@ export default function AIConfiguracao() {
             disabled={saving}
           >
             {saving ? (
-              <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />
+              <Loader
+                size={18}
+                style={{ animation: 'spin 1s linear infinite' }}
+              />
             ) : (
               <RotateCcw size={18} />
             )}
@@ -883,7 +984,10 @@ export default function AIConfiguracao() {
             disabled={saving}
           >
             {saving ? (
-              <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />
+              <Loader
+                size={18}
+                style={{ animation: 'spin 1s linear infinite' }}
+              />
             ) : (
               <Save size={18} />
             )}
@@ -897,7 +1001,10 @@ export default function AIConfiguracao() {
           <div style={styles.previewModal} onClick={(e) => e.stopPropagation()}>
             <div style={styles.previewHeader}>
               <h3 style={styles.previewTitle}>Pré-visualização da Conversa</h3>
-              <button style={styles.btnClose} onClick={() => setShowPreview(false)}>
+              <button
+                style={styles.btnClose}
+                onClick={() => setShowPreview(false)}
+              >
                 ×
               </button>
             </div>
@@ -907,7 +1014,9 @@ export default function AIConfiguracao() {
                   <div style={styles.chatAvatar}>
                     <Brain size={20} />
                   </div>
-                  <div style={styles.chatBubble}>{config.templates.greeting}</div>
+                  <div style={styles.chatBubble}>
+                    {config.templates.greeting}
+                  </div>
                 </div>
                 <div style={styles.chatMessageUser}>
                   <div style={styles.chatBubbleUser}>
@@ -944,7 +1053,8 @@ const styles = {
     padding: '1rem',
     background: '#fafafa',
     minHeight: '100vh',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     paddingBottom: '100px',
   },
   loadingContainer: {
