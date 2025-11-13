@@ -27,7 +27,7 @@ import {
   ArrowLeft,
   Sparkles,
 } from 'lucide-react';
-import useAuth from '../config/useAuth';
+import useAuth from '../hooks/useAuth';
 
 export default function Configuracao() {
   const { user, loading } = useAuth();

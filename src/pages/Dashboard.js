@@ -32,7 +32,6 @@ export default function Dashboard() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-
   // Simula pagamento pendente - mude para false para testar sem bloqueio
   const [paymentPending, setPaymentPending] = useState(true);
   const [paymentModalVisible, setPaymentModalVisible] = useState(true);
@@ -638,15 +637,17 @@ export default function Dashboard() {
                   >
                     <Settings size={16} /> Configurações
                   </button>
-                  <button
+                 <button
                     className="dropdown-item logout"
                     onClick={() => {
-                      setUserMenuOpen(false);
-                      setLogoutModalOpen(true);
+                      localStorage.removeItem('token');
+                      localStorage.removeItem('usuario'); // opcional, caso use isso
+                      navigate('/login');
                     }}
                   >
                     <LogOut size={16} /> Sair
                   </button>
+
                 </div>
               )}
             </div>

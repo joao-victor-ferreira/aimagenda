@@ -1,42 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Users,
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Eye,
-  X,
-  Save,
-  Phone,
-  Mail,
-  User,
-  MessageSquare,
-  Calendar,
-  Clock,
-  Tag,
-  Download,
-  Upload,
-  Star,
-  Activity,
-  TrendingUp,
-  FileText,
-  CheckCircle,
-  Sparkles,
-} from 'lucide-react';
+import {Users,Plus,Search,Edit,Trash2,Eye,X,Save,Phone,Mail,User,MessageSquare,Calendar,Clock,Tag,Download,Upload,Star,Activity,TrendingUp,FileText,CheckCircle,Sparkles,AlertCircle,XCircle,} from 'lucide-react';  
+import {config} from "../config/http"
+
 
 export default function Cliente() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
+  const [clientToDelete, setClientToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTag, setFilterTag] = useState('all');
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState([]);
+  
+  const [feedbackMessage, setFeedbackMessage] = useState({
+    title: '',
+    description: '',
+    type: '', // 'success', 'error', 'delete'
+  });
 
   const getToken = () => localStorage.getItem('token');
-  const API_URL = 'http://localhost:5000/api/clientes';
+  const API_URL = config.url.API_URL + '/api/clientes';
 
   const [newClient, setNewClient] = useState({
     nome: '',
@@ -62,7 +50,6 @@ export default function Cliente() {
       if (!res.ok) throw new Error('Erro ao buscar clientes');
       const data = await res.json();
 
-      // Mapear dados do backend para o formato do frontend
       setClients(
         data.map((c) => ({
           id: c._id,
@@ -90,7 +77,12 @@ export default function Cliente() {
       );
     } catch (err) {
       console.error('❌ Erro ao carregar clientes:', err);
-      alert('Erro ao carregar clientes: ' + err.message);
+      setFeedbackMessage({
+        title: 'Erro ao Carregar',
+        description: 'Não foi possível carregar a lista de clientes. Tente novamente.',
+        type: 'error',
+      });
+      setShowErrorModal(true);
     } finally {
       setLoading(false);
     }
@@ -103,7 +95,12 @@ export default function Cliente() {
   // 🔹 Criar cliente
   const criarCliente = async () => {
     if (!newClient.nome || !newClient.telefone) {
-      alert('Nome e telefone são obrigatórios!');
+      setFeedbackMessage({
+        title: 'Campos Obrigatórios',
+        description: 'Nome e telefone são campos obrigatórios para adicionar um cliente.',
+        type: 'error',
+      });
+      setShowErrorModal(true);
       return;
     }
 
@@ -124,7 +121,6 @@ export default function Cliente() {
 
       const novo = await res.json();
 
-      // Mapear novo cliente para o formato do frontend
       const clienteMapeado = {
         id: novo._id,
         _id: novo._id,
@@ -146,17 +142,31 @@ export default function Cliente() {
       setClients([clienteMapeado, ...clients]);
       setShowAddModal(false);
       setNewClient({ nome: '', telefone: '', email: '', observacoes: '' });
-      alert('Cliente adicionado com sucesso!');
+      
+      setFeedbackMessage({
+        title: 'Cliente Adicionado!',
+        description: `${clienteMapeado.name} foi adicionado com sucesso à sua lista de clientes.`,
+        type: 'success',
+        client: clienteMapeado,
+      });
+      setShowSuccessModal(true);
+
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 3000);
     } catch (err) {
       console.error('Erro ao adicionar cliente:', err);
-      alert('Erro ao adicionar cliente: ' + err.message);
+      setFeedbackMessage({
+        title: 'Erro ao Adicionar',
+        description: err.message || 'Não foi possível adicionar o cliente. Tente novamente.',
+        type: 'error',
+      });
+      setShowErrorModal(true);
     }
   };
 
   // 🔹 Deletar cliente
   const deletarCliente = async (id) => {
-    if (!window.confirm('Tem certeza que deseja excluir este cliente?')) return;
-
     try {
       const res = await fetch(`${API_URL}/${id}`, {
         method: 'DELETE',
@@ -169,11 +179,33 @@ export default function Cliente() {
       }
 
       setClients(clients.filter((c) => c._id !== id && c.id !== id));
-      alert('Cliente excluído com sucesso!');
+      setShowDeleteConfirmModal(false);
+      setClientToDelete(null);
+      
+      setFeedbackMessage({
+        title: 'Cliente Removido!',
+        description: 'O cliente foi removido com sucesso da sua lista.',
+        type: 'success',
+      });
+      setShowSuccessModal(true);
+
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 3000);
     } catch (err) {
       console.error('Erro ao excluir cliente:', err);
-      alert('Erro ao excluir cliente: ' + err.message);
+      setFeedbackMessage({
+        title: 'Erro ao Excluir',
+        description: err.message || 'Não foi possível excluir o cliente. Tente novamente.',
+        type: 'error',
+      });
+      setShowErrorModal(true);
     }
+  };
+
+  const openDeleteModal = (client) => {
+    setClientToDelete(client);
+    setShowDeleteConfirmModal(true);
   };
 
   const tagConfig = {
@@ -218,9 +250,6 @@ export default function Cliente() {
       filterTag === 'all' || (client.tags || []).includes(filterTag);
     return matchesSearch && matchesTag;
   });
-
-  const handleAddClient = () => criarCliente();
-  const handleDeleteClient = (id) => deletarCliente(id);
 
   const ClientCard = ({ client }) => {
     const statusConfig = getStatusConfig(client.status);
@@ -309,7 +338,7 @@ export default function Cliente() {
           </button>
           <button
             style={styles.cardActionBtn}
-            onClick={() => handleDeleteClient(client.id)}
+            onClick={() => openDeleteModal(client)}
           >
             <Trash2 size={16} color="#ef4444" />
             Excluir
@@ -332,12 +361,10 @@ export default function Cliente() {
         </div>
         <div style={styles.headerActions}>
           {!isMobile && (
-            <>
-              <button style={styles.btnSecondary}>
-                <Download size={18} />
-                Exportar
-              </button>
-            </>
+            <button style={styles.btnSecondary}>
+              <Download size={18} />
+              Exportar
+            </button>
           )}
           <button
             style={styles.btnPrimary}
@@ -531,7 +558,7 @@ export default function Cliente() {
                         </button>
                         <button
                           style={styles.actionBtn}
-                          onClick={() => handleDeleteClient(client.id)}
+                          onClick={() => openDeleteModal(client)}
                         >
                           <Trash2 size={16} color="#ef4444" />
                         </button>
@@ -555,6 +582,7 @@ export default function Cliente() {
         </div>
       )}
 
+      {/* Modal Adicionar Cliente */}
       {showAddModal && (
         <div style={styles.modalOverlay} onClick={() => setShowAddModal(false)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -665,7 +693,7 @@ export default function Cliente() {
               >
                 Cancelar
               </button>
-              <button style={styles.btnSave} onClick={handleAddClient}>
+              <button style={styles.btnSave} onClick={criarCliente}>
                 <Save size={18} />
                 Salvar
               </button>
@@ -674,6 +702,7 @@ export default function Cliente() {
         </div>
       )}
 
+      {/* Modal Histórico */}
       {showHistoryModal && selectedClient && (
         <div
           style={styles.modalOverlay}
@@ -806,6 +835,209 @@ export default function Cliente() {
               <button style={styles.btnSecondary}>
                 <Calendar size={18} />
                 Agendamento
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Sucesso */}
+      {showSuccessModal && (
+        <div
+          style={styles.modalOverlay}
+          onClick={() => setShowSuccessModal(false)}
+        >
+          <div
+            style={{ ...styles.modal, maxWidth: '450px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={styles.modalHeader}>
+              <div style={styles.modalTitleContainer}>
+                <div style={styles.successIconContainer}>
+                  <CheckCircle size={28} color="#16a34a" />
+                </div>
+              </div>
+              <button
+                style={styles.btnClose}
+                onClick={() => setShowSuccessModal(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div style={styles.modalBody}>
+              <h2 style={styles.feedbackTitle}>{feedbackMessage.title}</h2>
+              <p style={styles.feedbackDescription}>
+                {feedbackMessage.description}
+              </p>
+
+              {feedbackMessage.client && (
+                <div style={styles.clientPreview}>
+                  <div style={styles.clientCell}>
+                    <div style={styles.clientAvatar}>
+                      {feedbackMessage.client.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
+                    </div>
+                    <div>
+                      <div style={styles.clientName}>
+                        {feedbackMessage.client.name}
+                      </div>
+                      <div style={styles.clientId}>
+                        {feedbackMessage.client.phone}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div style={styles.successAlert}>
+                <CheckCircle size={18} color="#16a34a" />
+                <p style={styles.successAlertText}>
+                  Operação concluída com sucesso!
+                </p>
+              </div>
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button
+                style={styles.btnSaveFullWidth}
+                onClick={() => setShowSuccessModal(false)}
+              >
+                <CheckCircle size={18} />
+                Entendi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Erro */}
+      {showErrorModal && (
+        <div
+          style={styles.modalOverlay}
+          onClick={() => setShowErrorModal(false)}
+        >
+          <div
+            style={{ ...styles.modal, maxWidth: '450px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={styles.modalHeader}>
+              <div style={styles.modalTitleContainer}>
+                <div style={styles.errorIconContainer}>
+                  <XCircle size={28} color="#dc2626" />
+                </div>
+              </div>
+              <button
+                style={styles.btnClose}
+                onClick={() => setShowErrorModal(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div style={styles.modalBody}>
+              <h2 style={styles.feedbackTitle}>{feedbackMessage.title}</h2>
+              <p style={styles.feedbackDescription}>
+                {feedbackMessage.description}
+              </p>
+
+              <div style={styles.errorAlert}>
+                <AlertCircle size={18} color="#dc2626" />
+                <p style={styles.errorAlertText}>
+                  Por favor, tente novamente ou entre em contato com o suporte.
+                </p>
+              </div>
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button
+                style={styles.btnSaveFullWidth}
+                onClick={() => setShowErrorModal(false)}
+              >
+                <CheckCircle size={18} />
+                Entendi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      {showDeleteConfirmModal && clientToDelete && (
+        <div
+          style={styles.modalOverlay}
+          onClick={() => setShowDeleteConfirmModal(false)}
+        >
+          <div
+            style={{ ...styles.modal, maxWidth: '480px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={styles.modalHeader}>
+              <div style={styles.modalTitleContainer}>
+                <div style={styles.warningIconContainer}>
+                  <AlertCircle size={28} color="#dc2626" />
+                </div>
+              </div>
+              <button
+                style={styles.btnClose}
+                onClick={() => setShowDeleteConfirmModal(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div style={styles.modalBody}>
+              <h2 style={styles.feedbackTitle}>Remover Cliente?</h2>
+              <p style={styles.feedbackDescription}>
+                Você está prestes a remover{' '}
+                <strong>{clientToDelete.name}</strong> da lista de clientes.
+                Esta ação não pode ser desfeita.
+              </p>
+
+              <div style={styles.clientPreview}>
+                <div style={styles.clientCell}>
+                  <div style={styles.clientAvatar}>
+                    {clientToDelete.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
+                  </div>
+                  <div>
+                    <div style={styles.clientName}>{clientToDelete.name}</div>
+                    <div style={styles.clientId}>{clientToDelete.email}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.warningAlert}>
+                <AlertCircle size={20} color="#dc2626" />
+                <div>
+                  <p style={styles.warningAlertTitle}>
+                    Atenção: Esta ação é irreversível
+                  </p>
+                  <p style={styles.warningAlertText}>
+                    Todos os dados e histórico do cliente serão mantidos para
+                    auditoria, mas ele não aparecerá mais na lista.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button
+                style={styles.btnCancel}
+                onClick={() => setShowDeleteConfirmModal(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                style={styles.btnDanger}
+                onClick={() => deletarCliente(clientToDelete.id)}
+              >
+                <Trash2 size={18} />
+                Sim, Remover
               </button>
             </div>
           </div>
@@ -1247,7 +1479,6 @@ const styles = {
     background: 'transparent',
     border: 'none',
     borderRadius: '8px',
-    fontSize: '1.5rem',
     color: '#6b7280',
     cursor: 'pointer',
     display: 'flex',
@@ -1354,6 +1585,137 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
+  },
+  btnSaveFullWidth: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1.5rem',
+    background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    width: '100%',
+  },
+  btnDanger: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1.5rem',
+    background: '#dc2626',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  successIconContainer: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '50%',
+    background: '#dcfce7',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorIconContainer: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '50%',
+    background: '#fee2e2',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  warningIconContainer: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '50%',
+    background: '#fee2e2',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  feedbackTitle: {
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    color: '#1f2937',
+    marginBottom: '0.75rem',
+    textAlign: 'center',
+  },
+  feedbackDescription: {
+    fontSize: '0.95rem',
+    color: '#6b7280',
+    textAlign: 'center',
+    marginBottom: '1.5rem',
+    lineHeight: '1.6',
+  },
+  clientPreview: {
+    background: '#f9fafb',
+    padding: '1rem',
+    borderRadius: '8px',
+    border: '1px solid #e5e7eb',
+    marginBottom: '1rem',
+  },
+  successAlert: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem',
+    background: '#dcfce7',
+    borderRadius: '8px',
+    border: '1px solid #bbf7d0',
+  },
+  successAlertText: {
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    color: '#166534',
+    margin: 0,
+  },
+  errorAlert: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem',
+    background: '#fee2e2',
+    borderRadius: '8px',
+    border: '1px solid #fecaca',
+  },
+  errorAlertText: {
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    color: '#991b1b',
+    margin: 0,
+  },
+  warningAlert: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '0.75rem',
+    padding: '1rem',
+    background: '#fef2f2',
+    borderRadius: '8px',
+    border: '1px solid #fecaca',
+  },
+  warningAlertTitle: {
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    color: '#991b1b',
+    marginBottom: '0.25rem',
+  },
+  warningAlertText: {
+    fontSize: '0.8rem',
+    color: '#7f1d1d',
+    margin: 0,
+    lineHeight: '1.5',
   },
   clientSummary: {
     display: 'flex',

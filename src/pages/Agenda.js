@@ -525,9 +525,9 @@ export default function AgendaEquipe() {
         <div style={{ width: '100%' }}>
           <div style={styles.headerBadge}>
             <Users size={16} />
-            <span>Agenda da Equipe</span>
+            <span>Agenda</span>
           </div>
-          <h1 style={styles.title}>Agenda Compartilhada</h1>
+          <h1 style={styles.title}>Agenda</h1>
           <p style={styles.subtitle}>
             Visualize os agendamentos de toda a equipe
           </p>
