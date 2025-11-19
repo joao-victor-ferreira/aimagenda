@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import {
-  Lock,
+   Lock,
   User,
   Eye,
   EyeOff,
   Mail,
-  Phone,
   Building,
   ArrowRight,
   ArrowLeft,
@@ -20,6 +20,7 @@ import {
   AlertCircle,
   X,
   CheckCircle,
+  Phone,
 } from 'lucide-react';
 
 // Custom Alert Component
@@ -202,26 +203,23 @@ const CustomAlert = ({ type = 'error', title, message, onClose }) => {
   );
 };
 
+
+
 export default function Registrar() {
+  const stripe = useStripe();
+  const elements = useElements();
+
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('');
   const [hoveredPlan, setHoveredPlan] = useState('');
-  const [buttonHover, setButtonHover] = useState(false);
-  const [focusedField, setFocusedField] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('credit_card');
   const [pixGenerated, setPixGenerated] = useState(false);
-  const [verificationCode, setVerificationCode] = useState([
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-  ]);
+  const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
   const [resendTimer, setResendTimer] = useState(0);
+  const [usuarioId, setUsuarioId] = useState('');
 
   const [showAlert, setShowAlert] = useState(false);
   const [alertConfig, setAlertConfig] = useState({
@@ -240,10 +238,7 @@ export default function Registrar() {
   });
 
   const [paymentData, setPaymentData] = useState({
-    cardNumber: '',
     cardName: '',
-    cardExpiry: '',
-    cardCVV: '',
     cpf: '',
   });
 
@@ -261,11 +256,7 @@ export default function Registrar() {
 
   const handleSendVerificationCode = async () => {
     if (!formData.email) {
-      showCustomAlert(
-        'error',
-        'Email Necessário',
-        'Informe seu email para receber o código.',
-      );
+      showCustomAlert('error', 'Email Necessário', 'Informe seu email para receber o código.');
       return false;
     }
 
@@ -281,26 +272,14 @@ export default function Registrar() {
 
       if (response.ok) {
         setResendTimer(60);
-        showCustomAlert(
-          'success',
-          'Código Enviado!',
-          `Enviamos um código de 6 dígitos para ${formData.email}`,
-        );
+        showCustomAlert('success', 'Código Enviado!', `Enviamos um código de 6 dígitos para ${formData.email}`);
         return true;
       } else {
-        showCustomAlert(
-          'error',
-          'Erro ao Enviar',
-          data.mensagem || 'Não foi possível enviar o código. Tente novamente.',
-        );
+        showCustomAlert('error', 'Erro ao Enviar', data.erro || data.mensagem || 'Não foi possível enviar o código.');
         return false;
       }
     } catch (err) {
-      showCustomAlert(
-        'error',
-        'Erro de Conexão',
-        'Não foi possível conectar ao servidor.',
-      );
+      showCustomAlert('error', 'Erro de Conexão', 'Não foi possível conectar ao servidor.');
       return false;
     } finally {
       setIsLoading(false);
@@ -311,52 +290,53 @@ export default function Registrar() {
     const code = verificationCode.join('');
 
     if (code.length !== 6) {
-      showCustomAlert(
-        'error',
-        'Código Incompleto',
-        'Digite o código completo de 6 dígitos.',
-      );
+      showCustomAlert('error', 'Código Incompleto', 'Digite o código completo de 6 dígitos.');
       return false;
     }
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        'http://localhost:5000/auth/verificar-codigo',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: formData.email,
-            codigo: code,
-          }),
-        },
-      );
+      const response = await fetch('http://localhost:5000/auth/verificar-codigo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          codigo: code,
+          nomeCompleto: formData.name,
+          telefone: formData.phone,
+          empresa: formData.company || 'Sem Empresa',
+          senha: formData.password,
+        }),
+      });
 
       const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
-        showCustomAlert(
-          'success',
-          'Email Verificado!',
-          'Seu email foi confirmado com sucesso.',
-        );
+        showCustomAlert('success', 'Conta Criada!', 'Sua conta foi criada com sucesso.');
+        
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          
+          try {
+            const payload = JSON.parse(atob(data.token.split('.')[1]));
+            setUsuarioId(payload.id);
+          } catch (e) {
+            console.error('Erro ao decodificar token:', e);
+          }
+        }
+        
+        if (data.userId || data.usuario?._id) {
+          setUsuarioId(data.userId || data.usuario._id);
+        }
+        
         return true;
       } else {
-        showCustomAlert(
-          'error',
-          'Código Inválido',
-          data.mensagem || 'O código digitado está incorreto.',
-        );
+        showCustomAlert('error', 'Código Inválido', data.erro || data.mensagem || 'O código digitado está incorreto.');
         setVerificationCode(['', '', '', '', '', '']);
         return false;
       }
     } catch (err) {
-      showCustomAlert(
-        'error',
-        'Erro de Conexão',
-        'Não foi possível verificar o código.',
-      );
+      showCustomAlert('error', 'Erro de Conexão', 'Não foi possível verificar o código.');
       return false;
     } finally {
       setIsLoading(false);
@@ -389,16 +369,11 @@ export default function Registrar() {
     const pastedData = e.clipboardData.getData('text').slice(0, 6);
     if (!/^\d+$/.test(pastedData)) return;
 
-    const newCode = pastedData
-      .split('')
-      .concat(['', '', '', '', '', ''])
-      .slice(0, 6);
+    const newCode = pastedData.split('').concat(['', '', '', '', '', '']).slice(0, 6);
     setVerificationCode(newCode);
 
     const lastFilledIndex = pastedData.length - 1;
-    const nextInput = document.getElementById(
-      `code-input-${Math.min(lastFilledIndex + 1, 5)}`,
-    );
+    const nextInput = document.getElementById(`code-input-${Math.min(lastFilledIndex + 1, 5)}`);
     if (nextInput) nextInput.focus();
   };
 
@@ -413,21 +388,7 @@ export default function Registrar() {
     let value = e.target.value;
     const name = e.target.name;
 
-    if (name === 'cardNumber') {
-      value = value
-        .replace(/\s/g, '')
-        .replace(/(\d{4})/g, '$1 ')
-        .trim();
-      if (value.length > 19) value = value.substr(0, 19);
-    } else if (name === 'cardExpiry') {
-      value = value.replace(/\D/g, '');
-      if (value.length >= 2) {
-        value = value.substr(0, 2) + '/' + value.substr(2, 2);
-      }
-      if (value.length > 5) value = value.substr(0, 5);
-    } else if (name === 'cardCVV') {
-      value = value.replace(/\D/g, '').substr(0, 4);
-    } else if (name === 'cpf') {
+    if (name === 'cpf') {
       value = value.replace(/\D/g, '');
       if (value.length <= 11) {
         value = value.replace(/(\d{3})(\d)/, '$1.$2');
@@ -443,26 +404,12 @@ export default function Registrar() {
   };
 
   const validateStep1 = () => {
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.phone ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
-      showCustomAlert(
-        'error',
-        'Campos Obrigatórios',
-        'Preencha todos os campos obrigatórios.',
-      );
+    if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
+      showCustomAlert('error', 'Campos Obrigatórios', 'Preencha todos os campos obrigatórios.');
       return false;
     }
     if (formData.password.length < 6) {
-      showCustomAlert(
-        'error',
-        'Senha Inválida',
-        'A senha deve ter pelo menos 6 caracteres.',
-      );
+      showCustomAlert('error', 'Senha Inválida', 'A senha deve ter pelo menos 6 caracteres.');
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
@@ -474,36 +421,17 @@ export default function Registrar() {
 
   const validateStep4 = () => {
     if (paymentMethod === 'credit_card') {
-      if (
-        !paymentData.cardNumber ||
-        !paymentData.cardName ||
-        !paymentData.cardExpiry ||
-        !paymentData.cardCVV ||
-        !paymentData.cpf
-      ) {
-        showCustomAlert(
-          'error',
-          'Dados Incompletos',
-          'Preencha todos os dados do cartão.',
-        );
+      if (!paymentData.cardName || !paymentData.cpf) {
+        showCustomAlert('error', 'Dados Incompletos', 'Preencha todos os dados do cartão.');
         return false;
       }
-      const cardNumberClean = paymentData.cardNumber.replace(/\s/g, '');
-      if (cardNumberClean.length < 13) {
-        showCustomAlert(
-          'error',
-          'Cartão Inválido',
-          'Número do cartão inválido.',
-        );
+      if (!elements || !stripe) {
+        showCustomAlert('error', 'Erro no Stripe', 'Aguarde o carregamento do sistema de pagamento.');
         return false;
       }
     } else if (paymentMethod === 'pix') {
       if (!paymentData.cpf) {
-        showCustomAlert(
-          'error',
-          'CPF Necessário',
-          'Informe seu CPF para gerar o PIX.',
-        );
+        showCustomAlert('error', 'CPF Necessário', 'Informe seu CPF para gerar o PIX.');
         return false;
       }
     }
@@ -513,7 +441,10 @@ export default function Registrar() {
   const handleNext = async () => {
     if (step === 1) {
       if (validateStep1()) {
-        setStep(2);
+        const sent = await handleSendVerificationCode();
+        if (sent) {
+          setStep(2);
+        }
       }
     } else if (step === 2) {
       const verified = await handleVerifyCode();
@@ -522,11 +453,7 @@ export default function Registrar() {
       }
     } else if (step === 3) {
       if (!selectedPlan) {
-        showCustomAlert(
-          'warning',
-          'Selecione um Plano',
-          'Escolha um plano para continuar.',
-        );
+        showCustomAlert('warning', 'Selecione um Plano', 'Escolha um plano para continuar.');
         return;
       }
       setStep(4);
@@ -535,11 +462,7 @@ export default function Registrar() {
 
   const handleGeneratePix = () => {
     if (!paymentData.cpf) {
-      showCustomAlert(
-        'error',
-        'CPF Necessário',
-        'Informe seu CPF para gerar o PIX.',
-      );
+      showCustomAlert('error', 'CPF Necessário', 'Informe seu CPF para gerar o PIX.');
       return;
     }
     setPixGenerated(true);
@@ -552,57 +475,89 @@ export default function Registrar() {
     setIsLoading(true);
 
     try {
-      const planoFormatado =
-        selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1);
+      let userId = usuarioId;
+      
+      if (!userId) {
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            userId = payload.id;
+          } catch (e) {
+            showCustomAlert('error', 'Erro de Autenticação', 'Faça login novamente.');
+            return;
+          }
+        }
+      }
 
-      const response = await fetch('http://localhost:5000/auth/registrar', {
+      if (!userId) {
+        showCustomAlert('error', 'Erro de Autenticação', 'Usuário não identificado. Tente fazer o cadastro novamente.');
+        return;
+      }
+
+      const planoMap = {
+        'Starter': 'Starter',
+        'Pro': 'Pro',
+        'Premium': 'Premium'
+      };
+
+      const response = await fetch('http://localhost:5000/stripe/create-payment-intent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({
-          nomeCompleto: formData.name,
-          email: formData.email,
-          telefone: formData.phone,
-          empresa: formData.company || 'Sem Empresa',
-          senha: formData.password,
-          plano: planoFormatado,
-          codigoVerificacao: verificationCode.join(''),
-          metodoPagamento: paymentMethod,
-          dadosPagamento:
-            paymentMethod === 'credit_card'
-              ? {
-                  numeroCartao: paymentData.cardNumber.replace(/\s/g, ''),
-                  nomeCartao: paymentData.cardName,
-                  validade: paymentData.cardExpiry,
-                  cvv: paymentData.cardCVV,
-                  cpf: paymentData.cpf.replace(/\D/g, ''),
-                }
-              : {
-                  cpf: paymentData.cpf.replace(/\D/g, ''),
-                },
-        }),
+          usuarioId: userId,
+          plano: planoMap[selectedPlan]
+        })
       });
 
-      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao criar pagamento');
+      }
 
-      if (response.ok) {
+      const { clientSecret } = await response.json();
+
+      if (paymentMethod === 'credit_card') {
+        if (!stripe || !elements) {
+          showCustomAlert('error', 'Erro', 'Sistema de pagamento não carregado.');
+          return;
+        }
+
+        const cardElement = elements.getElement(CardElement);
+
+        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: paymentData.cardName,
+              email: formData.email,
+            }
+          }
+        });
+
+        if (error) {
+          showCustomAlert('error', 'Pagamento Recusado', error.message);
+        } else if (paymentIntent.status === 'succeeded') {
+          showCustomAlert('success', 'Pagamento Aprovado!', 'Sua assinatura está ativa!');
+          
+          setTimeout(() => {
+            window.location.href = '/obrigado';
+          }, 2000);
+        }
+      } else if (paymentMethod === 'pix') {
         showCustomAlert(
           'success',
-          'Cadastro Realizado!',
-          'Sua conta foi criada com sucesso!',
-        );
-      } else {
-        showCustomAlert(
-          'error',
-          'Erro no Cadastro',
-          data.mensagem || 'Erro ao processar. Tente novamente.',
+          'PIX Gerado!',
+          'Aguardando confirmação do pagamento. Você receberá um email assim que for aprovado.'
         );
       }
-    } catch (err) {
-      showCustomAlert(
-        'error',
-        'Erro de Conexão',
-        'Não foi possível conectar ao servidor.',
-      );
+
+    } catch (error) {
+      console.error('Erro ao processar pagamento:', error);
+      showCustomAlert('error', 'Erro no Pagamento', error.message || 'Não foi possível processar o pagamento.');
     } finally {
       setIsLoading(false);
     }
@@ -613,6 +568,7 @@ export default function Registrar() {
       id: 'starter',
       name: 'Starter',
       price: 'R$ 149',
+      priceValue: 149,
       period: '/mês',
       icon: Sparkles,
       color: '#6b7280',
@@ -629,6 +585,7 @@ export default function Registrar() {
       id: 'pro',
       name: 'Pro',
       price: 'R$ 299',
+      priceValue: 299,
       period: '/mês',
       icon: Zap,
       color: '#3b82f6',
@@ -646,6 +603,7 @@ export default function Registrar() {
       id: 'premium',
       name: 'Premium',
       price: 'R$ 499',
+      priceValue: 499,
       period: '/mês',
       icon: Crown,
       color: '#9333ea',
@@ -662,6 +620,8 @@ export default function Registrar() {
 
   const selectedPlanData = plans.find((p) => p.name === selectedPlan);
 
+
+
   return (
     <div style={styles.container}>
       <style>{`
@@ -675,10 +635,7 @@ export default function Registrar() {
       <div style={styles.wrapper}>
         <div style={styles.logoSection}>
           <div style={styles.logoIcon}>
-            <img
-              src={require('../assets/logo.png')}
-              style={{ width: 80, height: 80 }}
-            />
+            <img src={require("../assets/logo.png")} style={{width: 80}}/>
           </div>
           <h1 style={styles.title}>AIM Agenda</h1>
           <p style={styles.subtitle}>
@@ -1111,6 +1068,7 @@ export default function Registrar() {
                                 ...styles.checkIcon,
                                 color: plan.color,
                               }}
+                              size={16}
                             />
                             <span>{feature}</span>
                           </li>
@@ -1215,18 +1173,24 @@ export default function Registrar() {
               {paymentMethod === 'credit_card' && (
                 <div style={styles.formGrid} className="form-grid">
                   <div style={{ ...styles.formGroup, gridColumn: '1 / -1' }}>
-                    <label style={styles.label}>Número do Cartão</label>
-                    <div style={styles.inputWrapper}>
-                      <div style={styles.inputIcon}>
-                        <CreditCard size={20} />
-                      </div>
-                      <input
-                        type="text"
-                        name="cardNumber"
-                        value={paymentData.cardNumber}
-                        onChange={handlePaymentChange}
-                        placeholder="1234 5678 9012 3456"
-                        style={styles.input}
+                    <label style={styles.label}>Dados do Cartão</label>
+                    <div style={styles.stripeCardElement}>
+                      <CardElement
+                        options={{
+                          style: {
+                            base: {
+                              fontSize: '16px',
+                              color: '#1f2937',
+                              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                              '::placeholder': {
+                                color: '#9ca3af',
+                              },
+                            },
+                            invalid: {
+                              color: '#ef4444',
+                            },
+                          },
+                        }}
                       />
                     </div>
                   </div>
@@ -1244,40 +1208,6 @@ export default function Registrar() {
                         onChange={handlePaymentChange}
                         placeholder="JOÃO SILVA"
                         style={{ ...styles.input, textTransform: 'uppercase' }}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Validade</label>
-                    <div style={styles.inputWrapper}>
-                      <div style={styles.inputIcon}>
-                        <Calendar size={20} />
-                      </div>
-                      <input
-                        type="text"
-                        name="cardExpiry"
-                        value={paymentData.cardExpiry}
-                        onChange={handlePaymentChange}
-                        placeholder="MM/AA"
-                        style={styles.input}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>CVV</label>
-                    <div style={styles.inputWrapper}>
-                      <div style={styles.inputIcon}>
-                        <Shield size={20} />
-                      </div>
-                      <input
-                        type="text"
-                        name="cardCVV"
-                        value={paymentData.cardCVV}
-                        onChange={handlePaymentChange}
-                        placeholder="123"
-                        style={styles.input}
                       />
                     </div>
                   </div>
